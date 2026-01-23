@@ -23,7 +23,9 @@ app.post("/api/qr", async (req, res) => {
 
   try {
     await initUser(username);
-    const qr = getQR(username);
+
+    // wait until QR ready or session connected
+    const qr = await getQR(username);
     const status = await getStatus(username);
 
     res.json({ qr, connected: status });
@@ -33,8 +35,8 @@ app.post("/api/qr", async (req, res) => {
 });
 
 // Status
-app.post("/api/status", async (req, res) => {
-  const { username } = req.body;
+app.get("/api/status/:username", async (req, res) => {
+  const { username } = req.params;
   const status = await getStatus(username);
   res.json({ connected: status });
 });
@@ -44,7 +46,7 @@ app.post("/api/send", async (req, res) => {
   try {
     const { username, number, message } = req.body;
     const data = await sendMessage(username, number, message);
-    res.json({ success: true,data });
+    res.json({ success: true, data });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -64,8 +66,12 @@ app.get("/api/myinfo/:username", async (req, res) => {
 // Logout
 app.post("/api/logout", async (req, res) => {
   const { username } = req.body;
-  await logout(username);
-  res.json({ success: true });
+  try {
+    await logout(username);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.listen(PORT, () =>
