@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Express</title>
+</head>
+<body>
+<h2>WhatsApp Express Test</h2>
+
+<div>
+  <h3>QR Code (Scan to Connect)</h3>
+  <img id="qr" src="" alt="QR code" width="250"/>
+</div>
+
+<div>
+  <h3>Send Message</h3>
+  <input type="text" id="number" placeholder="8801xxxxxxxxx"/>
+  <input type="text" id="message" placeholder="Message"/>
+  <button id="sendBtn" disabled>Send</button>
+</div>
+
+<p id="status"></p>
+
+<script>
+const userId = "testuser";
+const qrImg = document.getElementById("qr");
+const sendBtn = document.getElementById("sendBtn");
+const status = document.getElementById("status");
+
+async function fetchQR() {
+  const res = await fetch(`/api/qr/${userId}`);
+  const data = await res.json();
+
+  if (data.qr) {
+    qrImg.src = data.qr;
+    sendBtn.disabled = true;
+    status.innerText = "Scan QR code to connect...";
+  } else {
+    qrImg.src = "";
+    sendBtn.disabled = false;
+    status.innerText = "WhatsApp Connected ✅";
+  }
+}
+
+// Poll QR every 2 seconds
+setInterval(fetchQR, 2000);
+
+sendBtn.addEventListener("click", async () => {
+  const number = document.getElementById("number").value;
+  const message = document.getElementById("message").value;
+
+  if (!number || !message) return alert("Enter number and message");
+
+  const res = await fetch("/api/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, number, message })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    status.innerText = `Message sent to ${number}`;
+  } else {
+    status.innerText = `Error: ${data.error}`;
+  }
+});
+</script>
+</body>
+</html>
