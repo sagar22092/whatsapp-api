@@ -1,128 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>WhatsApp Multi Session</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Multi-User Dashboard</title>
   <style>
-    body {
-      background:#0f172a;
-      color:white;
-      font-family:Arial;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-    }
-    .card {
-      background:#020617;
-      padding:20px;
-      width:360px;
-      border-radius:10px;
-    }
-    input, button {
-      width:100%;
-      padding:10px;
-      margin-top:8px;
-      border-radius:6px;
-      border:none;
-    }
-    input {
-      background:#020617;
-      color:white;
-      border:1px solid #334155;
-    }
-    button {
-      background:#22c55e;
-      font-weight:bold;
-      cursor:pointer;
-    }
-    img {
-      width:100%;
-      margin-top:10px;
-      background:white;
-      padding:6px;
-      border-radius:6px;
-    }
+    body { font-family:'Segoe UI', sans-serif; background:#f2f2f2; display:flex; flex-direction:column; align-items:center; padding:20px; }
+    h1 { color:#25D366; margin-bottom:20px; }
+    .container { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:100%; max-width:400px; }
+    input, button, textarea { width:100%; padding:10px; margin:5px 0; border-radius:6px; border:1px solid #ccc; font-size:16px; }
+    button { background:#25D366; color:white; border:none; cursor:pointer; font-weight:bold; }
+    button:hover { background:#1ebe57; }
+    .status { margin-top:10px; font-weight:bold; }
+    .qr img { width:250px; height:250px; margin-top:10px; }
+    .messages { margin-top:10px; max-height:150px; overflow-y:auto; background:#f9f9f9; padding:10px; border-radius:6px; font-size:14px; }
+    .hidden { display:none; }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h3 style="text-align:center">👤 User Session</h3>
+  <h1>WhatsApp Dashboard</h1>
 
-  <input id="username" placeholder="username">
+  <div class="container">
+    <!-- Step 1: Username -->
+    <input type="text" id="username" placeholder="Enter username">
+    <button id="checkSession">Check Session</button>
 
-  <button onclick="getQR()">Get QR</button>
-  <img id="qr" style="display:none">
+    <div class="status" id="status">Status: Not connected</div>
+    <div class="qr" id="qr"></div>
 
-  <p id="status">Status: -</p>
+    <!-- Step 2: Messaging (hidden initially) -->
+    <div id="messaging" class="hidden">
+      <textarea id="number" placeholder="Enter recipient number"></textarea>
+      <textarea id="message" placeholder="Enter message"></textarea>
+      <button id="sendMsg">Send Message</button>
+    </div>
 
-  <hr>
+    <button id="logout" style="background:#e53935;margin-top:10px;" class="hidden">Session Delete</button>
 
-  <input id="number" placeholder="8801XXXXXXXXX">
-  <input id="message" placeholder="Message">
-  <button onclick="sendMsg()">Send Message</button>
+    <div class="messages" id="messages"></div>
+  </div>
 
-  <button style="background:#ef4444" onclick="doLogout()">Logout</button>
-</div>
+  <script>
+    const usernameInput = document.getElementById("username");
+    const checkBtn = document.getElementById("checkSession");
+    const qrDiv = document.getElementById("qr");
+    const statusDiv = document.getElementById("status");
+    const messagingDiv = document.getElementById("messaging");
+    const numberInput = document.getElementById("number");
+    const messageInput = document.getElementById("message");
+    const sendBtn = document.getElementById("sendMsg");
+    const logoutBtn = document.getElementById("logout");
+    const messagesDiv = document.getElementById("messages");
 
-<script>
-  const usernameInput = document.getElementById("username");
-  const numberInput = document.getElementById("number");
-  const messageInput = document.getElementById("message");
-  const qr = document.getElementById("qr");
-  const status = document.getElementById("status");
+    // Step 1: Check if session exists
+    async function checkSession() {
+      const username = usernameInput.value.trim();
+      if (!username) return alert("Enter username");
 
-  async function getQR() {
-    if (!usernameInput.value) {
-      alert("Enter username");
-      return;
+      statusDiv.innerText = "Status: Checking...";
+      qrDiv.innerHTML = "";
+      messagingDiv.classList.add("hidden");
+      logoutBtn.classList.add("hidden");
+
+      try {
+        const res = await fetch(`/api/status/${username}`);
+        const data = await res.json();
+
+        if (data.connected) {
+          statusDiv.innerText = "Status: Connected ✅";
+          showMessaging();
+        } else {
+          statusDiv.innerText = "Status: Not connected. Scan QR below";
+          qrDiv.innerHTML = `<button id="getQR">Get QR / Connect</button>`;
+          document.getElementById("getQR").addEventListener("click", fetchQR);
+        }
+      } catch (e) {
+        console.error(e);
+        statusDiv.innerText = "Status: Error";
+      }
     }
 
-    const res = await fetch("/api/qr", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: usernameInput.value })
-    });
+    // Step 2: Get QR code
+    async function fetchQR() {
+      const username = usernameInput.value.trim();
+      if (!username) return alert("Enter a username");
 
-    const data = await res.json();
+      statusDiv.innerText = "Status: Generating QR...";
+      qrDiv.innerHTML = "";
 
-    if (data.qr) {
-      qr.src = data.qr;
-      qr.style.display = "block";
+      try {
+        const res = await fetch("/api/qr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+
+        if (data.qr) qrDiv.innerHTML = `<img src="${data.qr}" />`;
+
+        // Poll every 3s until connected
+        const interval = setInterval(async () => {
+          const statusRes = await fetch(`/api/status/${username}`);
+          const statusData = await statusRes.json();
+
+          if (statusData.connected) {
+            clearInterval(interval);
+            qrDiv.innerHTML = "";
+            statusDiv.innerText = "Status: Connected ✅";
+            messagesDiv.innerHTML += `<div>✅ ${username} is now connected</div>`;
+            showMessaging();
+          }
+        }, 10000);
+
+      } catch (e) {
+        console.error(e);
+        statusDiv.innerText = "Status: Error";
+      }
     }
 
-    status.innerText = data.connected
-      ? "🟢 Connected"
-      : "🔴 Scan QR";
-  }
+    // Step 3: Show messaging UI
+    function showMessaging() {
+      messagingDiv.classList.remove("hidden");
+      logoutBtn.classList.remove("hidden");
+    }
 
-  async function sendMsg() {
-    const res = await fetch("/api/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: usernameInput.value,
-        number: numberInput.value,
-        message: messageInput.value
-      })
-    });
+    // Step 4: Send message
+    async function sendMessage() {
+      const username = usernameInput.value.trim();
+      const number = numberInput.value.trim();
+      const message = messageInput.value.trim();
+      if (!username || !number || !message) return alert("Fill all fields");
 
-    const data = await res.json();
-    alert(data.success ? "Sent ✅" : data.error);
-  }
+      try {
+        const res = await fetch("/api/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, number, message })
+        });
+        const data = await res.json();
+        if (data.success) {
+          messagesDiv.innerHTML += `<div>✅ Sent to ${number}: ${message}</div>`;
+        } else {
+          messagesDiv.innerHTML += `<div>❌ Failed: ${data.error}</div>`;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
-  async function doLogout() {
-    await fetch("/api/logout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: usernameInput.value })
-    });
-    alert("Logged out");
-    qr.style.display = "none";
-    status.innerText = "Status: -";
-  }
-</script>
+    // Step 5: Logout
+    async function logout() {
+      const username = usernameInput.value.trim();
+      if (!username) return;
 
+      try {
+        await fetch("/api/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username })
+        });
+        qrDiv.innerHTML = "";
+        messagingDiv.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
+        statusDiv.innerText = "Status: Not connected";
+        messagesDiv.innerHTML += `<div>⚠️ ${username} logged out</div>`;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    checkBtn.addEventListener("click", checkSession);
+    sendBtn.addEventListener("click", sendMessage);
+    logoutBtn.addEventListener("click", logout);
+  </script>
 </body>
 </html>

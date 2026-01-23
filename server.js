@@ -6,6 +6,7 @@ import {
   sendMessage,
   logout,
   getMyInfo,
+  getChatList,
 } from "./lib/whatsapp.js";
 
 const app = express();
@@ -58,6 +59,16 @@ app.get("/api/myinfo/:username", async (req, res) => {
     const { username } = req.params;
     const info = await getMyInfo(username);
     res.json(info);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+app.get("/api/chats/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const chats = await getChatList(username);
+    res.json({ chats });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
