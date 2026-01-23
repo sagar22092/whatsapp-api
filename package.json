@@ -15,6 +15,7 @@
   "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "fs-extra": "^11.3.3",
     "pino": "^10.3.0",
