@@ -1,70 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WhatsApp Express</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #25D366;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #128C7E;
+        }
+        #qrCode {
+            max-width: 200px;
+            margin: 20px auto;
+            display: block;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .waiting { background: #fff3cd; color: #856404; }
+        .log {
+            background: #f8f9fa;
+            border-left: 4px solid #25D366;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #e9ecef;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: #25D366;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-<h2>WhatsApp Express Test</h2>
+    <div class="container">
+        <h1>📱 WhatsApp API Tester</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('connect')">Connect</div>
+            <div class="tab" onclick="showTab('send')">Send</div>
+            <div class="tab" onclick="showTab('status')">Status</div>
+        </div>
+        
+        <!-- Connect Tab -->
+        <div id="connect-tab" class="tab-content active card">
+            <h2>Connect WhatsApp</h2>
+            <input type="text" id="userId" placeholder="Enter User ID (e.g., user1)" value="testuser">
+            <div style="display: flex; gap: 10px;">
+                <button onclick="connect()">Connect</button>
+                <button onclick="freshConnect()" style="background: #dc3545;">Fresh Connect</button>
+            </div>
+            
+            <div id="connectStatus" class="status"></div>
+            
+            <img id="qrCode" style="display: none;">
+            
+            <button onclick="checkConnection()">Check Connection Status</button>
+            <div id="checkResult" class="log"></div>
+        </div>
+        
+        <!-- Send Tab -->
+        <div id="send-tab" class="tab-content card">
+            <h2>Send Message</h2>
+            <input type="text" id="sendUserId" placeholder="User ID" value="testuser">
+            <input type="text" id="phoneNumber" placeholder="Phone Number (with country code, e.g., 1234567890)">
+            <textarea id="message" placeholder="Message" rows="4">Hello from WhatsApp API!</textarea>
+            <button onclick="sendMessage()">Send Message</button>
+            <div id="sendResult" class="log"></div>
+        </div>
+        
+        <!-- Status Tab -->
+        <div id="status-tab" class="tab-content card">
+            <h2>System Status</h2>
+            <button onclick="getHealth()">Check Health</button>
+            <button onclick="getConnectedUsers()">Get Connected Users</button>
+            <div id="systemStatus" class="log"></div>
+        </div>
+    </div>
 
-<div>
-  <h3>QR Code (Scan to Connect)</h3>
-  <img id="qr" src="" alt="QR code" width="250"/>
-</div>
-
-<div>
-  <h3>Send Message</h3>
-  <input type="text" id="number" placeholder="8801xxxxxxxxx"/>
-  <input type="text" id="message" placeholder="Message"/>
-  <button id="sendBtn" disabled>Send</button>
-</div>
-
-<p id="status"></p>
-
-<script>
-const userId = "testuser";
-const qrImg = document.getElementById("qr");
-const sendBtn = document.getElementById("sendBtn");
-const status = document.getElementById("status");
-
-async function fetchQR() {
-  const res = await fetch(`/api/qr/${userId}`);
-  const data = await res.json();
-
-  if (data.qr) {
-    qrImg.src = data.qr;
-    sendBtn.disabled = true;
-    status.innerText = "Scan QR code to connect...";
-  } else {
-    qrImg.src = "";
-    sendBtn.disabled = false;
-    status.innerText = "WhatsApp Connected ✅";
-  }
-}
-
-// Poll QR every 2 seconds
-setInterval(fetchQR, 2000);
-
-sendBtn.addEventListener("click", async () => {
-  const number = document.getElementById("number").value;
-  const message = document.getElementById("message").value;
-
-  if (!number || !message) return alert("Enter number and message");
-
-  const res = await fetch("/api/send", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, number, message })
-  });
-
-  const data = await res.json();
-  if (data.success) {
-    status.innerText = `Message sent to ${number}`;
-  } else {
-    status.innerText = `Error: ${data.error}`;
-  }
-});
-</script>
+    <script>
+        let currentUserId = '';
+        let qrCheckInterval = null;
+        
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+        }
+        
+        function log(message, elementId) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `<div class="log-entry"><span class="log-time">${timestamp}</span>${message}</div>`;
+            const element = document.getElementById(elementId);
+            element.innerHTML = logEntry + element.innerHTML;
+        }
+        
+        async function connect() {
+            const userId = document.getElementById('userId').value;
+            if (!userId) {
+                alert('Please enter a User ID');
+                return;
+            }
+            
+            currentUserId = userId;
+            document.getElementById('connectStatus').innerHTML = 
+                '<div class="status waiting">Connecting...</div>';
+            
+            try {
+                const response = await fetch(`/api/connect/${userId}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.hasQR && data.qr) {
+                        document.getElementById('qrCode').src = data.qr;
+                        document.getElementById('qrCode').style.display = 'block';
+                        document.getElementById('connectStatus').innerHTML = 
+                            '<div class="status waiting">QR Code Generated. Scan with WhatsApp > Linked Devices</div>';
+                        
+                        // Start checking for connection
+                        startConnectionCheck(userId);
+                    } else {
+                        document.getElementById('connectStatus').innerHTML = 
+                            `<div class="status waiting">${data.message}</div>`;
+                    }
+                } else {
+                    document.getElementById('connectStatus').innerHTML = 
+                        `<div class="status disconnected">Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('connectStatus').innerHTML = 
+                    `<div class="status disconnected">Connection error: ${error.message}</div>`;
+            }
+        }
+        
+        async function freshConnect() {
+            const userId = document.getElementById('userId').value;
+            if (!userId) {
+                alert('Please enter a User ID');
+                return;
+            }
+            
+            if (!confirm('This will clear all session data and create a fresh connection. Continue?')) {
+                return;
+            }
+            
+            currentUserId = userId;
+            document.getElementById('connectStatus').innerHTML = 
+                '<div class="status waiting">Creating fresh connection...</div>';
+            
+            try {
+                const response = await fetch(`/api/fresh-connect/${userId}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.hasQR && data.qr) {
+                        document.getElementById('qrCode').src = data.qr;
+                        document.getElementById('qrCode').style.display = 'block';
+                        document.getElementById('connectStatus').innerHTML = 
+                            '<div class="status waiting">Fresh QR Code Generated. Scan with WhatsApp > Linked Devices</div>';
+                        
+                        startConnectionCheck(userId);
+                    } else {
+                        document.getElementById('connectStatus').innerHTML = 
+                            `<div class="status waiting">${data.message}</div>`;
+                    }
+                } else {
+                    document.getElementById('connectStatus').innerHTML = 
+                        `<div class="status disconnected">Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('connectStatus').innerHTML = 
+                    `<div class="status disconnected">Error: ${error.message}</div>`;
+            }
+        }
+        
+        function startConnectionCheck(userId) {
+            if (qrCheckInterval) clearInterval(qrCheckInterval);
+            
+            qrCheckInterval = setInterval(async () => {
+                const response = await fetch(`/api/status/${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.status === 'connected') {
+                        clearInterval(qrCheckInterval);
+                        document.getElementById('qrCode').style.display = 'none';
+                        document.getElementById('connectStatus').innerHTML = 
+                            '<div class="status connected">✅ Connected! You can now send messages.</div>';
+                    } else if (data.status === 'waiting_for_scan') {
+                        // Still waiting, update QR if needed
+                        const qrResponse = await fetch(`/api/qr/${userId}`);
+                        const qrData = await qrResponse.json();
+                        
+                        if (qrData.success && qrData.qr) {
+                            document.getElementById('qrCode').src = qrData.qr;
+                        }
+                    } else if (data.status === 'not_initialized') {
+                        clearInterval(qrCheckInterval);
+                        document.getElementById('connectStatus').innerHTML = 
+                            '<div class="status disconnected">Connection lost. Please reconnect.</div>';
+                    }
+                }
+            }, 3000);
+        }
+        
+        async function checkConnection() {
+            const userId = document.getElementById('userId').value || currentUserId;
+            if (!userId) {
+                alert('Please enter a User ID first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/check/${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let statusText = `User ID: ${data.userId}<br>`;
+                    statusText += `Connected: ${data.connected ? '✅' : '❌'}<br>`;
+                    statusText += `Has QR: ${data.hasQR ? '✅' : '❌'}<br>`;
+                    statusText += `State: ${data.state}<br>`;
+                    statusText += `Connecting: ${data.isConnecting ? '✅' : '❌'}<br>`;
+                    statusText += `Exists in memory: ${data.exists ? '✅' : '❌'}`;
+                    
+                    log(statusText, 'checkResult');
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`, 'checkResult');
+            }
+        }
+        
+        async function sendMessage() {
+            const userId = document.getElementById('sendUserId').value || currentUserId;
+            const number = document.getElementById('phoneNumber').value;
+            const message = document.getElementById('message').value;
+            
+            if (!userId || !number || !message) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId, number, message })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Message sent successfully to ${number}`, 'sendResult');
+                } else {
+                    log(`❌ Error: ${data.error}`, 'sendResult');
+                }
+            } catch (error) {
+                log(`❌ Network error: ${error.message}`, 'sendResult');
+            }
+        }
+        
+        async function getHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Server is running (uptime: ${Math.floor(data.uptime)}s)`, 'systemStatus');
+                }
+            } catch (error) {
+                log(`❌ Health check failed: ${error.message}`, 'systemStatus');
+            }
+        }
+        
+        async function getConnectedUsers() {
+            try {
+                const response = await fetch('/api/connected-users');
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.count > 0) {
+                        log(`✅ Connected users (${data.count}): ${data.users.join(', ')}`, 'systemStatus');
+                    } else {
+                        log('ℹ️ No users connected', 'systemStatus');
+                    }
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'systemStatus');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            getHealth();
+        });
+    </script>
 </body>
 </html>
