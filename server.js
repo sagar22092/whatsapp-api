@@ -54,7 +54,7 @@ app.get("/sessions", authenticate, (req, res) => {
   if (req.user) {
     res.sendFile(path.join(__dirname, "views", "sessions.html"));
   } else {
-    return res.redirect("/");
+    return res.redirect("/login");
   }
 });
 
