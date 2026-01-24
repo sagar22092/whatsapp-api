@@ -1,0 +1,207 @@
+import sessionModel from "../models/sessionModel.js";
+import {
+  initSession,
+  getQR as waGetQR,
+  getStatus as waGetStatus,
+  sendMessage as waSendMessage,
+  getMyInfo as waGetMyInfo,
+  logout as waLogout,
+} from "../lib/whatsapp.js";
+
+/* ───────────────── CREATE SESSION ───────────────── */
+export async function newSession(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const userId = req.user._id;
+
+    const session = await sessionModel.create({
+      user: userId,
+      status: "CREATED",
+    });
+
+    await initSession(userId.toString(), session._id.toString());
+
+    res.status(201).json({
+      success: true,
+      sessionId: session._id,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/* ───────────────── GET QR ───────────────── */
+export async function getQR(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const userId = req.user._id.toString();
+    const { sessionId } = req.params;
+
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const qr = await waGetQR(userId, sessionId);
+
+    res.json({
+      connected: !qr,
+      qr,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+/* ───────────────── STATUS ───────────────── */
+export async function getStatus(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const userId = req.user._id.toString();
+    const { sessionId } = req.params;
+
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const connected = await waGetStatus(userId, sessionId);
+
+    res.json({ connected });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+/* ───────────────── SEND MESSAGE ───────────────── */
+export async function sendMessage(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const userId = req.user._id.toString();
+    const { sessionId } = req.params;
+    const { number, message } = req.body;
+
+    if (!number || !message) {
+      return res.status(400).json({ error: "number and message required" });
+    }
+
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const result = await waSendMessage(userId, sessionId, number, {
+      text: message,
+    });
+
+    res.json({
+      success: true,
+      message: result.key,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+/* ───────────────── MY INFO ───────────────── */
+export async function getMyInfo(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const userId = req.user._id.toString();
+    const { sessionId } = req.params;
+
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const info = await waGetMyInfo(userId, sessionId);
+
+    res.json(info);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+/* ───────────────── LOGOUT ───────────────── */
+export async function logoutSession(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const userId = req.user._id.toString();
+    const { sessionId } = req.params;
+
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    await waLogout(userId, sessionId);
+
+    session.status = "LOGGED_OUT";
+    await session.save();
+
+    res.json({
+      success: true,
+      message: "Session logged out",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+//session list function
+
+export async function getSessionList(req, res) {
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    const userId = req.user._id.toString();
+    const sessions = await sessionModel
+      .find({ user: userId })
+      .select("_id status apiKey")
+      .lean();
+
+    res.json({ sessions });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}

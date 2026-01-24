@@ -1,178 +1,136 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WhatsApp Multi-User Dashboard</title>
-  <style>
-    body { font-family:'Segoe UI', sans-serif; background:#f2f2f2; display:flex; flex-direction:column; align-items:center; padding:20px; }
-    h1 { color:#25D366; margin-bottom:20px; }
-    .container { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:100%; max-width:400px; }
-    input, button, textarea { width:100%; padding:10px; margin:5px 0; border-radius:6px; border:1px solid #ccc; font-size:16px; }
-    button { background:#25D366; color:white; border:none; cursor:pointer; font-weight:bold; }
-    button:hover { background:#1ebe57; }
-    .status { margin-top:10px; font-weight:bold; }
-    .qr img { width:250px; height:250px; margin-top:10px; }
-    .messages { margin-top:10px; max-height:150px; overflow-y:auto; background:#f9f9f9; padding:10px; border-radius:6px; font-size:14px; }
-    .hidden { display:none; }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp Multi-Session Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="favicon.ico" />
+  </head>
+  <body class="bg-gray-900 text-white font-sans">
+    <!-- Hero Section -->
+    <section
+      class="bg-gradient-to-r from-green-600 to-green-400 py-32 text-center"
+    >
+      <h1 class="text-5xl font-bold mb-6">📱 WhatsApp Multi-Session Manager</h1>
+      <p class="text-lg max-w-xl mx-auto mb-8">
+        Manage multiple WhatsApp accounts simultaneously, send messages, check
+        status, and control all sessions from a single dashboard.
+      </p>
+      <a
+        href="/sessions"
+        class="bg-white text-green-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+        >Get Started</a
+      >
+    </section>
 
-  <h1>WhatsApp Dashboard</h1>
+    <!-- Features Section -->
+    <section class="py-20 px-6">
+      <div class="max-w-6xl mx-auto text-center">
+        <h2 class="text-4xl font-bold mb-12">🚀 Key Features</h2>
+        <div class="grid md:grid-cols-3 gap-10">
+          <div class="bg-gray-800 p-6 rounded-lg hover:scale-105 transition">
+            <h3 class="text-2xl font-semibold mb-3">Multi-Session Support</h3>
+            <p>
+              Connect multiple WhatsApp accounts and manage them individually or
+              simultaneously with real-time status tracking.
+            </p>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-lg hover:scale-105 transition">
+            <h3 class="text-2xl font-semibold mb-3">Real-Time QR Connect</h3>
+            <p>
+              Scan the QR code for any session to instantly connect and monitor
+              connection status from your dashboard.
+            </p>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-lg hover:scale-105 transition">
+            <h3 class="text-2xl font-semibold mb-3">
+              Send Messages throw API
+            </h3>
+            <p>
+              Send WhatsApp messages programmatically via our simple and
+              powerful API for each connected session.
+            </p>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-lg hover:scale-105 transition">
+            <h3 class="text-2xl font-semibold mb-3">View Account Info</h3>
+            <p>
+              Access user profile info, status, and more for each connected
+              session in a clean and secure interface.
+            </p>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-lg hover:scale-105 transition">
+            <h3 class="text-2xl font-semibold mb-3">Session Management</h3>
+            <p>
+              Create, logout, and track all your sessions in one place. Get
+              alerts for disconnected or logged out sessions.
+            </p>
+          </div>
+          <div class="bg-gray-800 p-6 rounded-lg hover:scale-105 transition">
+            <h3 class="text-2xl font-semibold mb-3">Secure & Reliable</h3>
+            <p>
+              All sessions are stored securely on your server. No external
+              storage or third-party access ensures privacy and reliability.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <div class="container">
-    <!-- Step 1: Username -->
-    <input type="text" id="username" placeholder="Enter username">
-    <button id="checkSession">Check Session</button>
+    <!-- How It Works Section -->
+    <section class="bg-gray-800 py-20 px-6">
+      <div class="max-w-6xl mx-auto text-center">
+        <h2 class="text-4xl font-bold mb-12">📖 How It Works</h2>
+        <div class="grid md:grid-cols-3 gap-10 text-left">
+          <div class="bg-gray-700 p-6 rounded-lg">
+            <h3 class="text-2xl font-semibold mb-3">1. Create Session</h3>
+            <p>
+              Click "New Session" to create a WhatsApp session. It will appear
+              instantly in your session list with status 'CREATED'.
+            </p>
+          </div>
+          <div class="bg-gray-700 p-6 rounded-lg">
+            <h3 class="text-2xl font-semibold mb-3">2. Connect via QR</h3>
+            <p>
+              Click "Connect" to generate a QR code. Scan it with WhatsApp
+              mobile app to link your account instantly.
+            </p>
+          </div>
+          <div class="bg-gray-700 p-6 rounded-lg">
+            <h3 class="text-2xl font-semibold mb-3">
+              3. Manage & Send Messages
+            </h3>
+            <p>
+              After connecting, send messages, view chats, check account info,
+              or logout sessions—all in real-time.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <div class="status" id="status">Status: Not connected</div>
-    <div class="qr" id="qr"></div>
 
-    <!-- Step 2: Messaging (hidden initially) -->
-    <div id="messaging" class="hidden">
-      <textarea id="number" placeholder="Enter recipient number"></textarea>
-      <textarea id="message" placeholder="Enter message"></textarea>
-      <button id="sendMsg">Send Message</button>
-    </div>
+    <!-- CTA Section -->
+    <section
+      class="bg-gradient-to-r from-green-600 to-green-400 py-20 text-center"
+    >
+      <h2 class="text-4xl font-bold mb-6">
+        Ready to Manage Your WhatsApp Accounts?
+      </h2>
+      <p class="text-lg max-w-xl mx-auto mb-8">
+        Start managing multiple WhatsApp sessions effortlessly from one
+        dashboard.
+      </p>
+      <a
+        href="/sessions"
+        class="bg-white text-green-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+        >Start Now</a
+      >
+    </section>
 
-    <button id="logout" style="background:#e53935;margin-top:10px;" class="hidden">Session Delete</button>
-
-    <div class="messages" id="messages"></div>
-  </div>
-
-  <script>
-    const usernameInput = document.getElementById("username");
-    const checkBtn = document.getElementById("checkSession");
-    const qrDiv = document.getElementById("qr");
-    const statusDiv = document.getElementById("status");
-    const messagingDiv = document.getElementById("messaging");
-    const numberInput = document.getElementById("number");
-    const messageInput = document.getElementById("message");
-    const sendBtn = document.getElementById("sendMsg");
-    const logoutBtn = document.getElementById("logout");
-    const messagesDiv = document.getElementById("messages");
-
-    // Step 1: Check if session exists
-    async function checkSession() {
-      const username = usernameInput.value.trim();
-      if (!username) return alert("Enter username");
-
-      statusDiv.innerText = "Status: Checking...";
-      qrDiv.innerHTML = "";
-      messagingDiv.classList.add("hidden");
-      logoutBtn.classList.add("hidden");
-
-      try {
-        const res = await fetch(`/api/status/${username}`);
-        const data = await res.json();
-
-        if (data.connected) {
-          statusDiv.innerText = "Status: Connected ✅";
-          showMessaging();
-        } else {
-          statusDiv.innerText = "Status: Not connected. Scan QR below";
-          qrDiv.innerHTML = `<button id="getQR">Get QR / Connect</button>`;
-          document.getElementById("getQR").addEventListener("click", fetchQR);
-        }
-      } catch (e) {
-        console.error(e);
-        statusDiv.innerText = "Status: Error";
-      }
-    }
-
-    // Step 2: Get QR code
-    async function fetchQR() {
-      const username = usernameInput.value.trim();
-      if (!username) return alert("Enter a username");
-
-      statusDiv.innerText = "Status: Generating QR...";
-      qrDiv.innerHTML = "";
-
-      try {
-        const res = await fetch("/api/qr", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username })
-        });
-        const data = await res.json();
-
-        if (data.qr) qrDiv.innerHTML = `<img src="${data.qr}" />`;
-
-        // Poll every 3s until connected
-        const interval = setInterval(async () => {
-          const statusRes = await fetch(`/api/status/${username}`);
-          const statusData = await statusRes.json();
-
-          if (statusData.connected) {
-            clearInterval(interval);
-            qrDiv.innerHTML = "";
-            statusDiv.innerText = "Status: Connected ✅";
-            messagesDiv.innerHTML += `<div>✅ ${username} is now connected</div>`;
-            showMessaging();
-          }
-        }, 10000);
-
-      } catch (e) {
-        console.error(e);
-        statusDiv.innerText = "Status: Error";
-      }
-    }
-
-    // Step 3: Show messaging UI
-    function showMessaging() {
-      messagingDiv.classList.remove("hidden");
-      logoutBtn.classList.remove("hidden");
-    }
-
-    // Step 4: Send message
-    async function sendMessage() {
-      const username = usernameInput.value.trim();
-      const number = numberInput.value.trim();
-      const message = messageInput.value.trim();
-      if (!username || !number || !message) return alert("Fill all fields");
-
-      try {
-        const res = await fetch("/api/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, number, message })
-        });
-        const data = await res.json();
-        if (data.success) {
-          messagesDiv.innerHTML += `<div>✅ Sent to ${number}: ${message}</div>`;
-        } else {
-          messagesDiv.innerHTML += `<div>❌ Failed: ${data.error}</div>`;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // Step 5: Logout
-    async function logout() {
-      const username = usernameInput.value.trim();
-      if (!username) return;
-
-      try {
-        await fetch("/api/logout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username })
-        });
-        qrDiv.innerHTML = "";
-        messagingDiv.classList.add("hidden");
-        logoutBtn.classList.add("hidden");
-        statusDiv.innerText = "Status: Not connected";
-        messagesDiv.innerHTML += `<div>⚠️ ${username} logged out</div>`;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    checkBtn.addEventListener("click", checkSession);
-    sendBtn.addEventListener("click", sendMessage);
-    logoutBtn.addEventListener("click", logout);
-  </script>
-</body>
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 text-center">
+      <p>© 2026 WhatsApp Multi-Session Manager. All rights reserved.</p>
+    </footer>
+  </body>
 </html>

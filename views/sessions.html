@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WhatsApp Session Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+      }
+      
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      
+      .session-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border: 1px solid #334155;
+      }
+      
+      .session-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        border-color: #475569;
+      }
+      
+      .modal {
+        backdrop-filter: blur(8px);
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        transition: all 0.3s ease;
+      }
+      
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
+      }
+      
+      .btn-secondary {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        transition: all 0.3s ease;
+      }
+      
+      .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.3);
+      }
+      
+      .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      }
+      
+      .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+      }
+      
+      .connected {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+      
+      .created {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+      
+      .disconnected {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+      
+      .api-key-container {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        background: rgba(148, 163, 184, 0.1);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        min-height: 40px;
+      }
+      
+      .api-key-masked {
+        color: #94a3b8;
+        letter-spacing: 1px;
+        word-break: break-all;
+      }
+      
+      .api-key-visible {
+        color: #e2e8f0;
+        letter-spacing: 0.5px;
+        word-break: break-all;
+      }
+      
+      .loading-spin {
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      .fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .pulse {
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+      }
+      
+      .btn-refresh:active {
+        transform: rotate(180deg);
+        transition: transform 0.3s ease;
+      }
+      
+      .last-updated {
+        font-size: 0.75rem;
+        color: #94a3b8;
+      }
+      
+      .copy-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        transition: all 0.3s ease;
+      }
+      
+      .copy-success:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 640px) {
+        .container-padding {
+          padding: 1rem;
+        }
+        
+        .mobile-stack {
+          flex-direction: column;
+        }
+        
+        .mobile-full {
+          width: 100%;
+        }
+        
+        .mobile-text-center {
+          text-align: center;
+        }
+        
+        .mobile-gap-2 {
+          gap: 0.5rem;
+        }
+        
+        .mobile-p-4 {
+          padding: 1rem;
+        }
+        
+        .session-id-truncate {
+          max-width: 150px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .tablet-flex-col {
+          flex-direction: column;
+        }
+        
+        .tablet-w-full {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-slate-900 to-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-7xl mx-auto p-4 md:p-6 container-padding">
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 mobile-stack">
+        <div class="mobile-full mobile-text-center md:text-left">
+          <div class="flex items-center gap-3 mb-2 mobile-stack mobile-gap-2">
+            <div class="p-3 rounded-xl gradient-bg inline-flex">
+              <i class="fab fa-whatsapp text-white text-2xl"></i>
+            </div>
+            <div class="flex-1">
+              <h1 class="text-2xl md:text-4xl font-bold">WhatsApp Session Manager</h1>
+              <p class="text-slate-400 mt-1 text-sm md:text-base">Manage multiple WhatsApp accounts in one place</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex gap-3 w-full md:w-auto mobile-full">
+          <button
+            onclick="loadSessions()"
+            id="refreshBtn"
+            class="btn-secondary px-4 md:px-5 py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all btn-refresh flex-1 md:flex-none"
+          >
+            <i class="fas fa-sync-alt"></i>
+            <span class="hidden sm:inline">Refresh</span>
+          </button>
+          
+          <button
+            onclick="createSession()"
+            class="btn-primary px-4 md:px-5 py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all flex-1 md:flex-none"
+          >
+            <i class="fas fa-plus"></i>
+            <span class="hidden sm:inline">New Session</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-400 text-sm">Total Sessions</p>
+              <p class="text-2xl font-bold" id="totalSessions">0</p>
+            </div>
+            <div class="p-3 rounded-full bg-blue-500/20">
+              <i class="fas fa-layer-group text-blue-400"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-400 text-sm">Connected</p>
+              <p class="text-2xl font-bold text-green-400" id="connectedSessions">0</p>
+            </div>
+            <div class="p-3 rounded-full bg-green-500/20">
+              <i class="fas fa-check-circle text-green-400"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-slate-400 text-sm">Disconnected</p>
+              <p class="text-2xl font-bold text-amber-400" id="disconnectedSessions">0</p>
+            </div>
+            <div class="p-3 rounded-full bg-amber-500/20">
+              <i class="fas fa-exclamation-circle text-amber-400"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sessions Header -->
+      <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mobile-stack">
+        <div class="w-full">
+          <h2 class="text-xl font-semibold flex items-center gap-2">
+            <i class="fas fa-list"></i>
+            Active Sessions
+          </h2>
+          <p id="lastUpdated" class="last-updated mt-1">Last updated: Never</p>
+        </div>
+        
+        <div class="flex mr-28 items-center gap-3 w-full sm:w-auto">
+          <div class="relative flex-1 sm:flex-none">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search sessions..."
+              class="bg-slate-800/50 border border-slate-700 px-4 py-2 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
+              onkeyup="filterSessions()"
+            />
+            <i class="fas fa-search absolute right-3 top-3 text-slate-500"></i>
+          </div>
+          
+          <button
+            onclick="loadSessions()"
+            class="p-3 rounded-xl bg-slate-800/50 border border-slate-700 hover:bg-slate-700/50 transition-colors flex-shrink-0"
+            title="Refresh sessions"
+          >
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Sessions Grid -->
+      <div id="sessions" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8"></div>
+      
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden text-center py-16 fade-in">
+        <div class="mx-auto max-w-md mobile-p-4">
+          <div class="p-6 rounded-full bg-slate-800/50 inline-block mb-4">
+            <i class="fas fa-comments text-4xl text-slate-500"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">No sessions yet</h3>
+          <p class="text-slate-400 mb-6">Create your first WhatsApp session to get started</p>
+          <button
+            onclick="createSession()"
+            class="btn-primary px-6 py-3 rounded-xl font-semibold text-white flex items-center gap-2 mx-auto"
+          >
+            <i class="fas fa-plus"></i>
+            <span>Create First Session</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Loading State -->
+      <div id="loadingState" class="text-center py-16">
+        <div class="mx-auto max-w-md mobile-p-4">
+          <div class="p-6 rounded-full bg-slate-800/50 inline-block mb-4">
+            <i class="fas fa-spinner loading-spin text-4xl text-blue-400"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">Loading Sessions</h3>
+          <p class="text-slate-400">Please wait while we fetch your WhatsApp sessions...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div
+      id="qrModal"
+      class="fixed inset-0 modal hidden items-center justify-center z-50 p-4"
+    >
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-4 md:p-6 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl fade-in mx-4">
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
+            <i class="fas fa-qrcode text-emerald-400"></i>
+            Scan QR Code
+          </h2>
+          <button
+            onclick="closeQRModal()"
+            class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-700"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+        
+        <div class="bg-slate-900/80 p-4 md:p-6 rounded-xl border border-slate-700 mb-4 md:mb-6">
+          <p class="text-center text-slate-300 mb-4 text-sm md:text-base">Scan this QR with WhatsApp mobile app</p>
+          <div id="qrBox" class="flex justify-center mb-4">
+            <div class="p-6 md:p-8 bg-white rounded-lg w-56 h-56 md:w-64 md:h-64 flex items-center justify-center">
+              <div class="text-center">
+                <i class="fas fa-spinner loading-spin text-3xl md:text-4xl text-slate-400"></i>
+                <p class="text-slate-500 mt-4 text-sm md:text-base">Loading QR code...</p>
+              </div>
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-blue-500/20 rounded-full">
+              <i class="fas fa-sync-alt text-blue-400 text-sm"></i>
+              <span class="text-xs md:text-sm text-blue-300">Auto-refreshing every 4 seconds</span>
+            </div>
+          </div>
+        </div>
+        
+        <p class="text-center text-slate-400 text-xs md:text-sm mb-4 md:mb-6">
+          Open WhatsApp on your phone → Menu → Linked Devices → Link a Device
+        </p>
+        
+        <button
+          onclick="closeQRModal()"
+          class="w-full bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-xl font-medium transition-colors text-sm md:text-base"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div
+      id="msgModal"
+      class="fixed inset-0 modal hidden items-center justify-center z-50 p-4"
+    >
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-4 md:p-6 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl fade-in mx-4">
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
+            <i class="fas fa-paper-plane text-blue-400"></i>
+            Send Message
+          </h2>
+          <button
+            onclick="closeMsgModal()"
+            class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-700"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-slate-300 mb-2 text-sm font-medium">Recipient Number</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-phone text-slate-500"></i>
+              </div>
+              <input
+                id="msgNumber"
+                placeholder="+1234567890"
+                class="bg-slate-900 border border-slate-700 p-3 rounded-xl w-full pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-slate-300 mb-2 text-sm font-medium">Message</label>
+            <div class="relative">
+              <div class="absolute top-3 left-3 pointer-events-none">
+                <i class="fas fa-comment text-slate-500"></i>
+              </div>
+              <textarea
+                id="msgText"
+                placeholder="Type your message here..."
+                class="bg-slate-900 border border-slate-700 p-3 rounded-xl w-full h-24 md:h-32 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-6 md:mt-8">
+          <button
+            onclick="closeMsgModal()"
+            class="bg-slate-700 hover:bg-slate-600 px-4 md:px-5 py-3 rounded-xl font-medium transition-colors text-sm md:text-base order-2 sm:order-1"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="sendMsg()"
+            class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-4 md:px-5 py-3 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all text-sm md:text-base order-1 sm:order-2"
+          >
+            <i class="fas fa-paper-plane"></i>
+            Send Message
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div
+      id="infoModal"
+      class="fixed inset-0 modal hidden items-center justify-center z-50 p-4"
+    >
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-4 md:p-6 rounded-2xl w-full max-w-2xl border border-slate-700 shadow-2xl fade-in mx-4">
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
+            <i class="fas fa-info-circle text-purple-400"></i>
+            Session Information
+          </h2>
+          <button
+            onclick="closeInfoModal()"
+            class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-700"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+        
+        <div class="bg-slate-900/50 rounded-xl border border-slate-700 p-3 md:p-4 mb-4 md:mb-6">
+          <pre
+            id="infoContent"
+            class="text-xs md:text-sm text-slate-200 overflow-auto max-h-64 md:max-h-96 p-3 md:p-4 rounded-lg bg-slate-950/50"
+          >Loading session information...</pre>
+        </div>
+        
+        <button
+          onclick="closeInfoModal()"
+          class="w-full bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-xl font-medium transition-colors text-sm md:text-base"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white p-3 md:p-4 rounded-xl shadow-2xl border border-slate-700 max-w-xs md:max-w-sm transform translate-y-full transition-transform duration-300 z-50 mx-4">
+      <div class="flex items-start gap-2 md:gap-3">
+        <div id="toastIcon" class="text-lg md:text-xl mt-1"></div>
+        <div class="flex-1">
+          <p id="toastTitle" class="font-semibold text-sm md:text-base"></p>
+          <p id="toastMessage" class="text-slate-300 text-xs md:text-sm mt-1 break-words"></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API = "/api/session";
+      let activeQRSession = null;
+      let qrTimer = null;
+      let activeMsgSession = null;
+      let sessionsData = [];
+      let apiKeyVisibility = {}; // Store visibility state per session
+
+      /* ───────── TOAST NOTIFICATION ───────── */
+      function showToast(type, title, message, duration = 3000) {
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // Set icon and colors based on type
+        if (type === 'success') {
+          toastIcon.innerHTML = '<i class="fas fa-check-circle text-emerald-400"></i>';
+          toast.style.borderLeft = '4px solid #10b981';
+        } else if (type === 'error') {
+          toastIcon.innerHTML = '<i class="fas fa-exclamation-circle text-red-400"></i>';
+          toast.style.borderLeft = '4px solid #ef4444';
+        } else if (type === 'info') {
+          toastIcon.innerHTML = '<i class="fas fa-info-circle text-blue-400"></i>';
+          toast.style.borderLeft = '4px solid #3b82f6';
+        } else if (type === 'warning') {
+          toastIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-amber-400"></i>';
+          toast.style.borderLeft = '4px solid #f59e0b';
+        }
+        
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        
+        // Show toast
+        toast.classList.remove('translate-y-full');
+        
+        // Auto hide after duration
+        setTimeout(() => {
+          toast.classList.add('translate-y-full');
+        }, duration);
+      }
+
+      /* ───────── API HELPER ───────── */
+      async function api(url, options = {}) {
+        try {
+          const res = await fetch(url, {
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            ...options,
+          });
+          return res.json();
+        } catch (error) {
+          showToast('error', 'API Error', 'Failed to connect to server');
+          throw error;
+        }
+      }
+
+      /* ───────── CREATE SESSION ───────── */
+      async function createSession() {
+        try {
+          await api(`${API}/new`, { method: "POST" });
+          showToast('success', 'Session Created', 'New WhatsApp session created successfully');
+          loadSessions();
+        } catch (error) {
+          showToast('error', 'Creation Failed', 'Failed to create new session');
+        }
+      }
+
+      /* ───────── UPDATE STATS ───────── */
+      function updateStats(sessions) {
+        const total = sessions.length;
+        const connected = sessions.filter(s => s.status === "CONNECTED").length;
+        const disconnected = total - connected;
+        
+        document.getElementById('totalSessions').textContent = total;
+        document.getElementById('connectedSessions').textContent = connected;
+        document.getElementById('disconnectedSessions').textContent = disconnected;
+        
+        // Update last updated time
+        const now = new Date();
+        document.getElementById('lastUpdated').textContent = 
+          `Last updated: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'})}`;
+        
+        // Show/hide empty state
+        const emptyState = document.getElementById('emptyState');
+        const loadingState = document.getElementById('loadingState');
+        if (total === 0) {
+          emptyState.classList.remove('hidden');
+          loadingState.classList.add('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+          loadingState.classList.add('hidden');
+        }
+      }
+
+      /* ───────── FORMAT API KEY (Show first 8 and last 4 chars) ───────── */
+      function formatApiKey(apiKey, showFull = false) {
+        if (!apiKey) return '';
+        
+        if (showFull) {
+          return apiKey;
+        }
+        
+        // Show first 8 characters and last 4 characters, mask the rest
+        if (apiKey.length <= 12) {
+          return apiKey;
+        }
+        
+        const firstPart = apiKey.substring(0, 8);
+        const lastPart = apiKey.substring(apiKey.length - 4);
+        const maskedLength = Math.max(apiKey.length - 12, 4);
+        const maskedPart = '•'.repeat(Math.min(maskedLength, 12)); // Limit masked chars
+        
+        return `${firstPart}${maskedPart}${lastPart}`;
+      }
+
+      /* ───────── COPY API KEY TO CLIPBOARD ───────── */
+      function copyApiKey(sessionId, apiKey) {
+        navigator.clipboard.writeText(apiKey)
+          .then(() => {
+            showToast('success', 'Copied!', 'API key copied to clipboard');
+            
+            // Visual feedback on the copy button
+            const copyBtn = document.getElementById(`copy-btn-${sessionId}`);
+            if (copyBtn) {
+              const originalHtml = copyBtn.innerHTML;
+              copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+              copyBtn.classList.remove('bg-blue-500/20', 'hover:bg-blue-500/30', 'text-blue-300');
+              copyBtn.classList.add('copy-success', 'text-white');
+              
+              setTimeout(() => {
+                copyBtn.innerHTML = originalHtml;
+                copyBtn.classList.remove('copy-success', 'text-white');
+                copyBtn.classList.add('bg-blue-500/20', 'hover:bg-blue-500/30', 'text-blue-300');
+              }, 2000);
+            }
+          })
+          .catch(err => {
+            console.error('Failed to copy: ', err);
+            showToast('error', 'Copy Failed', 'Failed to copy API key');
+          });
+      }
+
+      /* ───────── TOGGLE API KEY VISIBILITY ───────── */
+      function toggleApiKeyVisibility(sessionId, apiKey) {
+        // Toggle visibility state
+        apiKeyVisibility[sessionId] = !apiKeyVisibility[sessionId];
+        
+        // Update the API key display
+        const apiKeyElement = document.getElementById(`api-key-${sessionId}`);
+        const eyeBtn = document.getElementById(`eye-btn-${sessionId}`);
+        
+        if (apiKeyElement && eyeBtn) {
+          const isVisible = apiKeyVisibility[sessionId];
+          apiKeyElement.textContent = formatApiKey(apiKey, isVisible);
+          apiKeyElement.className = isVisible ? 'api-key-visible' : 'api-key-masked';
+          
+          // Update eye button icon
+          eyeBtn.innerHTML = isVisible 
+            ? '<i class="fas fa-eye-slash"></i>' 
+            : '<i class="fas fa-eye"></i>';
+          eyeBtn.title = isVisible ? 'Hide API key' : 'Show API key';
+          eyeBtn.setAttribute('aria-label', isVisible ? 'Hide API key' : 'Show API key');
+        }
+        
+        // Save visibility preference to localStorage
+        localStorage.setItem(`apiKeyVisible_${sessionId}`, apiKeyVisibility[sessionId]);
+      }
+
+      /* ───────── LOAD SESSIONS ───────── */
+      async function loadSessions() {
+        try {
+          // Show loading state
+          document.getElementById('loadingState').classList.remove('hidden');
+          document.getElementById('emptyState').classList.add('hidden');
+          
+          // Add loading animation to refresh button
+          const refreshBtn = document.getElementById('refreshBtn');
+          const originalContent = refreshBtn.innerHTML;
+          refreshBtn.innerHTML = '<i class="fas fa-spinner loading-spin"></i>';
+          refreshBtn.disabled = true;
+          
+          const data = await api(`${API}/list`);
+          sessionsData = data.sessions;
+          const container = document.getElementById("sessions");
+          container.innerHTML = "";
+
+          updateStats(data.sessions);
+
+          data.sessions.forEach((s) => {
+            const statusClass = 
+              s.status === "CONNECTED" ? "connected" : 
+              s.status === "CREATED" ? "created" : "disconnected";
+            
+            const statusIcon = 
+              s.status === "CONNECTED" ? "fa-check-circle" : 
+              s.status === "CREATED" ? "fa-qrcode" : "fa-exclamation-circle";
+
+            // Initialize visibility state from localStorage or default to false
+            if (apiKeyVisibility[s._id] === undefined) {
+              apiKeyVisibility[s._id] = localStorage.getItem(`apiKeyVisible_${s._id}`) === 'true';
+            }
+
+            const isApiKeyVisible = apiKeyVisibility[s._id];
+            const displayedApiKey = formatApiKey(s.apiKey, isApiKeyVisible);
+
+            const card = document.createElement("div");
+            card.className = "session-card rounded-xl p-4 md:p-5 fade-in";
+            card.dataset.sessionId = s._id;
+            card.dataset.apiKey = s.apiKey;
+
+            card.innerHTML = `
+              <div class="flex justify-between items-start mb-4 flex-col md:flex-row gap-3">
+                <div class="flex-1 w-full">
+                  <div class="flex items-start gap-2 md:gap-3 mb-3">
+                    <div class="p-2 rounded-lg bg-blue-500/20 flex-shrink-0">
+                      <i class="fas fa-user-circle text-blue-400"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-semibold text-slate-200 text-sm md:text-base">Session ID</h3>
+                      <p class="text-xs md:text-sm text-slate-400 break-all session-id-truncate" title="${s._id}">${s._id}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="mt-4">
+                    <h4 class="text-xs md:text-sm font-medium text-slate-300 mb-2 flex items-center gap-1">
+                      <i class="fas fa-key text-xs"></i>
+                      API Key
+                    </h4>
+                    <div class="api-key-container">
+                      <div class="flex-1 min-w-0">
+                        <span id="api-key-${s._id}" class="${isApiKeyVisible ? 'api-key-visible' : 'api-key-masked'} break-all text-xs md:text-sm" title="${s.apiKey}">
+                          ${displayedApiKey}
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-1 ml-2 flex-shrink-0">
+                        <button
+                          id="copy-btn-${s._id}"
+                          onclick="copyApiKey('${s._id}', '${s.apiKey}')"
+                          class="bg-blue-500/20 hover:bg-blue-500/30 px-2 md:px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors text-blue-300"
+                          title="Copy API key"
+                          aria-label="Copy API key"
+                        >
+                          <i class="fas fa-copy"></i>
+                          <span class="hidden xs:inline">Copy</span>
+                        </button>
+                        <button
+                          id="eye-btn-${s._id}"
+                          onclick="toggleApiKeyVisibility('${s._id}', '${s.apiKey}')"
+                          class="bg-slate-700/50 hover:bg-slate-600/50 px-2 md:px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors text-slate-300"
+                          title="${isApiKeyVisible ? 'Hide API key' : 'Show API key'}"
+                          aria-label="${isApiKeyVisible ? 'Hide API key' : 'Show API key'}"
+                        >
+                          ${isApiKeyVisible ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="flex flex-col items-start md:items-end w-full md:w-auto">
+                  <span class="status-badge ${statusClass} flex items-center gap-1 mb-2 self-start md:self-end">
+                    <i class="fas ${statusIcon}"></i>
+                    ${s.status}
+                  </span>
+                  <span class="text-xs text-slate-500">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-800">
+                ${
+                  s.status !== "CONNECTED"
+                    ? `<button onclick="openQR('${s._id}')"
+                        class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                        <i class="fas fa-qrcode"></i>
+                        <span>Connect</span>
+                      </button>`
+                    : ""
+                }
+                
+                ${
+                  s.status === "CONNECTED"
+                    ? `<button onclick="openMsgModal('${s._id}')"
+                        class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Send</span>
+                      </button>`
+                    : ""
+                }
+
+                ${
+                  s.status === "CONNECTED"
+                    ? `<button onclick="showInfo('${s._id}')"
+                        class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Info</span>
+                      </button>`
+                    : ""
+                }
+
+                <button onclick="logout('${s._id}')"
+                  class="flex-1 min-w-[140px] xs:min-w-[120px] btn-danger px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>Logout</span>
+                </button>
+              </div>
+            `;
+
+            container.appendChild(card);
+          });
+          
+          // Reset refresh button
+          setTimeout(() => {
+            refreshBtn.innerHTML = originalContent;
+            refreshBtn.disabled = false;
+          }, 500);
+          
+        } catch (error) {
+          showToast('error', 'Load Failed', 'Failed to load sessions');
+          document.getElementById('loadingState').classList.add('hidden');
+          
+          // Reset refresh button
+          const refreshBtn = document.getElementById('refreshBtn');
+          refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+          refreshBtn.disabled = false;
+        }
+      }
+
+      /* ───────── SEARCH/FILTER SESSIONS ───────── */
+      function filterSessions() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.session-card');
+        
+        cards.forEach(card => {
+          const sessionId = card.dataset.sessionId.toLowerCase();
+          const apiKey = card.dataset.apiKey.toLowerCase();
+          const status = card.querySelector('.status-badge').textContent.toLowerCase();
+          
+          const matches = sessionId.includes(searchTerm) || 
+                         apiKey.includes(searchTerm) || 
+                         status.includes(searchTerm);
+          
+          card.style.display = matches ? 'block' : 'none';
+        });
+      }
+
+      /* ───────── OPEN QR MODAL ───────── */
+      async function openQR(sessionId) {
+        activeQRSession = sessionId;
+        const modal = document.getElementById("qrModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        loadQR();
+      }
+
+      /* ───────── LOAD QR (AUTO) ───────── */
+      async function loadQR() {
+        if (!activeQRSession) return;
+
+        try {
+          const res = await api(`${API}/${activeQRSession}/qr`);
+          const qrBox = document.getElementById("qrBox");
+
+          if (res.qr) {
+            qrBox.innerHTML = `<img src="${res.qr}" class="bg-white p-2 rounded-lg w-56 h-56 md:w-64 md:h-64 shadow-lg" />`;
+            qrTimer = setTimeout(loadQR, 4000);
+          } else {
+            // CONNECTED
+            showToast('success', 'Connected!', 'WhatsApp session is now connected');
+            closeQRModal();
+            loadSessions();
+          }
+        } catch (error) {
+          showToast('error', 'QR Error', 'Failed to load QR code');
+        }
+      }
+
+      /* ───────── CLOSE QR MODAL ───────── */
+      function closeQRModal() {
+        activeQRSession = null;
+        clearTimeout(qrTimer);
+        document.getElementById("qrModal").classList.add("hidden");
+        document.getElementById("qrBox").innerHTML = `
+          <div class="p-6 md:p-8 bg-white rounded-lg w-56 h-56 md:w-64 md:h-64 flex items-center justify-center">
+            <div class="text-center">
+              <i class="fas fa-spinner loading-spin text-3xl md:text-4xl text-slate-400"></i>
+              <p class="text-slate-500 mt-4 text-sm md:text-base">Loading QR code...</p>
+            </div>
+          </div>`;
+      }
+
+      /* ───────── OPEN MESSAGE MODAL ───────── */
+      function openMsgModal(sessionId) {
+        activeMsgSession = sessionId;
+        document.getElementById("msgNumber").value = "";
+        document.getElementById("msgText").value = "";
+        const modal = document.getElementById("msgModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.getElementById("msgNumber").focus();
+      }
+
+      /* ───────── CLOSE MESSAGE MODAL ───────── */
+      function closeMsgModal() {
+        activeMsgSession = null;
+        document.getElementById("msgModal").classList.add("hidden");
+      }
+
+      /* ───────── SEND MESSAGE ───────── */
+      async function sendMsg() {
+        const number = document.getElementById("msgNumber").value;
+        const message = document.getElementById("msgText").value;
+
+        if (!number || !message) {
+          showToast('warning', 'Validation Error', 'Number & message are required');
+          return;
+        }
+
+        try {
+          await api(`${API}/${activeMsgSession}/send`, {
+            method: "POST",
+            body: JSON.stringify({ number, message }),
+          });
+
+          showToast('success', 'Message Sent', 'WhatsApp message sent successfully');
+          closeMsgModal();
+        } catch (error) {
+          showToast('error', 'Send Failed', 'Failed to send message');
+        }
+      }
+
+      /* ───────── INFO MODAL ───────── */
+      async function showInfo(sessionId) {
+        try {
+          const info = await api(`${API}/${sessionId}/info`);
+          document.getElementById("infoContent").textContent = JSON.stringify(
+            info,
+            null,
+            2,
+          );
+          const modal = document.getElementById("infoModal");
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+        } catch (error) {
+          showToast('error', 'Info Failed', 'Failed to load session information');
+        }
+      }
+
+      function closeInfoModal() {
+        document.getElementById("infoModal").classList.add("hidden");
+      }
+
+      /* ───────── LOGOUT ───────── */
+      async function logout(sessionId) {
+        if (!confirm("Are you sure you want to logout this session? This will disconnect WhatsApp.")) return;
+        
+        try {
+          await api(`${API}/${sessionId}/logout`, { method: "POST" });
+          showToast('info', 'Logged Out', 'Session has been logged out');
+          loadSessions();
+        } catch (error) {
+          showToast('error', 'Logout Failed', 'Failed to logout session');
+        }
+      }
+
+      /* ───────── INITIAL LOAD ───────── */
+      loadSessions();
+
+      // Close modals with Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeQRModal();
+          closeMsgModal();
+          closeInfoModal();
+        }
+      });
+
+      // Initial fade-in animation
+      document.body.style.opacity = 0;
+      window.addEventListener('load', () => {
+        document.body.style.transition = 'opacity 0.5s ease';
+        document.body.style.opacity = 1;
+      });
+
+      // Add search clear button functionality
+      document.getElementById('searchInput').addEventListener('input', function() {
+        filterSessions();
+      });
+
+      // Make the toast responsive to window resize
+      window.addEventListener('resize', function() {
+        const toast = document.getElementById('toast');
+        if (window.innerWidth < 768) {
+          toast.classList.remove('max-w-sm');
+          toast.classList.add('max-w-xs');
+        } else {
+          toast.classList.remove('max-w-xs');
+          toast.classList.add('max-w-sm');
+        }
+      });
+    </script>
+  </body>
+</html>
