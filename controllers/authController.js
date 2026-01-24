@@ -11,11 +11,23 @@ export async function register(req, res) {
       return res.status(400).send("All fields are required");
     }
 
+    // Validate username
+    const usernameRegex = /^[a-z][a-z0-9_-]*$/;
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({
+        error:
+          "Username must start with a letter, contain only letters, numbers, underscores and hyphens",
+      });
+    }
+    username = username.toLowerCase();
+
     const isUsenameExist = await User.findOne({ username });
-    const isEmailExist = await User.findOne({ email });
+
     if (isUsenameExist) {
       return res.status(400).json({ error: "Username already exists" });
     }
+
+    const isEmailExist = await User.findOne({ email });
     if (isEmailExist) {
       return res.status(400).json({ error: "Email already exists" });
     }
