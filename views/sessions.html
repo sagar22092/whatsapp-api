@@ -57,6 +57,16 @@
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       }
       
+      .btn-pair {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        transition: all 0.3s ease;
+      }
+      
+      .btn-pair:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.3);
+      }
+      
       .status-badge {
         padding: 4px 12px;
         border-radius: 20px;
@@ -107,6 +117,20 @@
         color: #e2e8f0;
         letter-spacing: 0.5px;
         word-break: break-all;
+      }
+      
+      .pair-code-box {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        background: rgba(139, 92, 246, 0.1);
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-align: center;
+        color: #c4b5fd;
+        margin: 20px 0;
       }
       
       .loading-spin {
@@ -286,7 +310,7 @@
           <p id="lastUpdated" class="last-updated mt-1">Last updated: Never</p>
         </div>
         
-        <div class="flex mr-28 items-center gap-3 w-full sm:w-auto">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
           <div class="relative flex-1 sm:flex-none">
             <input
               type="text"
@@ -382,6 +406,80 @@
         >
           Cancel
         </button>
+      </div>
+    </div>
+
+    <!-- Pair Code Modal -->
+    <div
+      id="pairModal"
+      class="fixed inset-0 modal hidden items-center justify-center z-50 p-4"
+    >
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-4 md:p-6 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl fade-in mx-4">
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
+            <i class="fas fa-link text-purple-400"></i>
+            Connect with Pair Code
+          </h2>
+          <button
+            onclick="closePairModal()"
+            class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-700"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+        
+        <div class="bg-slate-900/80 p-4 md:p-6 rounded-xl border border-slate-700 mb-4 md:mb-6">
+          <div id="pairStep1">
+            <p class="text-center text-slate-300 mb-4 text-sm md:text-base">Enter your phone number to get pair code</p>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-slate-300 mb-2 text-sm font-medium">Phone Number</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-phone text-slate-500"></i>
+                  </div>
+                  <input
+                    id="pairPhone"
+                    placeholder="+1234567890"
+                    class="bg-slate-900 border border-slate-700 p-3 rounded-xl w-full pl-10 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base"
+                  />
+                </div>
+                <p class="text-xs text-slate-500 mt-2">Include country code (e.g., +1 for US)</p>
+              </div>
+            </div>
+          </div>
+          
+          <div id="pairStep2" class="hidden">
+            <p class="text-center text-slate-300 mb-4 text-sm md:text-base">Enter this code in WhatsApp</p>
+            <div class="pair-code-box">
+              <div id="pairCodeDisplay" class="text-2xl md:text-3xl font-bold tracking-wider pulse">••••••</div>
+            </div>
+            <p class="text-center text-slate-400 text-sm mt-4">
+              Open WhatsApp → Settings → Linked Devices → Link a Device → Link with phone number
+            </p>
+            <div class="flex items-center justify-center gap-2 mt-4">
+              <i class="fas fa-sync-alt loading-spin text-purple-400" id="pairCodeSpinner"></i>
+              <span class="text-xs text-slate-400">Waiting for connection...</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+          <button
+            onclick="closePairModal()"
+            class="bg-slate-700 hover:bg-slate-600 px-4 md:px-5 py-3 rounded-xl font-medium transition-colors text-sm md:text-base order-2 sm:order-1"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="getPairCode()"
+            id="getPairBtn"
+            class="btn-pair px-4 md:px-5 py-3 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all text-sm md:text-base order-1 sm:order-2"
+          >
+            <i class="fas fa-link"></i>
+            Get Pair Code
+          </button>
+        </div>
       </div>
     </div>
 
@@ -501,9 +599,12 @@
     <script>
       const API = "/api/session";
       let activeQRSession = null;
+      let activePairSession = null;
       let activeMsgSession = null;
       let sessionsData = [];
-      let apiKeyVisibility = {}; // Store visibility state per session
+      let apiKeyVisibility = {};
+      let pairCodeInterval = null;
+      let isPairModalClosing = false;
 
       /* ───────── TOAST NOTIFICATION ───────── */
       function showToast(type, title, message, duration = 3000) {
@@ -512,7 +613,6 @@
         const toastTitle = document.getElementById('toastTitle');
         const toastMessage = document.getElementById('toastMessage');
         
-        // Set icon and colors based on type
         if (type === 'success') {
           toastIcon.innerHTML = '<i class="fas fa-check-circle text-emerald-400"></i>';
           toast.style.borderLeft = '4px solid #10b981';
@@ -530,10 +630,8 @@
         toastTitle.textContent = title;
         toastMessage.textContent = message;
         
-        // Show toast
         toast.classList.remove('translate-y-full');
         
-        // Auto hide after duration
         setTimeout(() => {
           toast.classList.add('translate-y-full');
         }, duration);
@@ -575,12 +673,10 @@
         document.getElementById('connectedSessions').textContent = connected;
         document.getElementById('disconnectedSessions').textContent = disconnected;
         
-        // Update last updated time
         const now = new Date();
         document.getElementById('lastUpdated').textContent = 
           `Last updated: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'})}`;
         
-        // Show/hide empty state
         const emptyState = document.getElementById('emptyState');
         const loadingState = document.getElementById('loadingState');
         if (total === 0) {
@@ -592,7 +688,7 @@
         }
       }
 
-      /* ───────── FORMAT API KEY (Show first 8 and last 4 chars) ───────── */
+      /* ───────── FORMAT API KEY ───────── */
       function formatApiKey(apiKey, showFull = false) {
         if (!apiKey) return '';
         
@@ -600,7 +696,6 @@
           return apiKey;
         }
         
-        // Show first 8 characters and last 4 characters, mask the rest
         if (apiKey.length <= 12) {
           return apiKey;
         }
@@ -608,7 +703,7 @@
         const firstPart = apiKey.substring(0, 8);
         const lastPart = apiKey.substring(apiKey.length - 4);
         const maskedLength = Math.max(apiKey.length - 12, 4);
-        const maskedPart = '•'.repeat(Math.min(maskedLength, 12)); // Limit masked chars
+        const maskedPart = '•'.repeat(Math.min(maskedLength, 12));
         
         return `${firstPart}${maskedPart}${lastPart}`;
       }
@@ -619,7 +714,6 @@
           .then(() => {
             showToast('success', 'Copied!', 'API key copied to clipboard');
             
-            // Visual feedback on the copy button
             const copyBtn = document.getElementById(`copy-btn-${sessionId}`);
             if (copyBtn) {
               const originalHtml = copyBtn.innerHTML;
@@ -642,10 +736,8 @@
 
       /* ───────── TOGGLE API KEY VISIBILITY ───────── */
       function toggleApiKeyVisibility(sessionId, apiKey) {
-        // Toggle visibility state
         apiKeyVisibility[sessionId] = !apiKeyVisibility[sessionId];
         
-        // Update the API key display
         const apiKeyElement = document.getElementById(`api-key-${sessionId}`);
         const eyeBtn = document.getElementById(`eye-btn-${sessionId}`);
         
@@ -654,7 +746,6 @@
           apiKeyElement.textContent = formatApiKey(apiKey, isVisible);
           apiKeyElement.className = isVisible ? 'api-key-visible' : 'api-key-masked';
           
-          // Update eye button icon
           eyeBtn.innerHTML = isVisible 
             ? '<i class="fas fa-eye-slash"></i>' 
             : '<i class="fas fa-eye"></i>';
@@ -662,18 +753,15 @@
           eyeBtn.setAttribute('aria-label', isVisible ? 'Hide API key' : 'Show API key');
         }
         
-        // Save visibility preference to localStorage
         localStorage.setItem(`apiKeyVisible_${sessionId}`, apiKeyVisibility[sessionId]);
       }
 
       /* ───────── LOAD SESSIONS ───────── */
       async function loadSessions() {
         try {
-          // Show loading state
           document.getElementById('loadingState').classList.remove('hidden');
           document.getElementById('emptyState').classList.add('hidden');
           
-          // Add loading animation to refresh button
           const refreshBtn = document.getElementById('refreshBtn');
           const originalContent = refreshBtn.innerHTML;
           refreshBtn.innerHTML = '<i class="fas fa-spinner loading-spin"></i>';
@@ -695,7 +783,6 @@
               s.status === "CONNECTED" ? "fa-check-circle" : 
               s.status === "CREATED" ? "fa-qrcode" : "fa-exclamation-circle";
 
-            // Initialize visibility state from localStorage or default to false
             if (apiKeyVisibility[s._id] === undefined) {
               apiKeyVisibility[s._id] = localStorage.getItem(`apiKeyVisible_${s._id}`) === 'true';
             }
@@ -769,11 +856,18 @@
               <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-800">
                 ${
                   s.status !== "CONNECTED"
-                    ? `<button onclick="openQR('${s._id}')"
+                    ? `
+                      <button onclick="openQR('${s._id}')"
                         class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
                         <i class="fas fa-qrcode"></i>
-                        <span>Connect</span>
-                      </button>`
+                        <span>QR Code</span>
+                      </button>
+                      <button onclick="openPairModal('${s._id}')"
+                        class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                        <i class="fas fa-link"></i>
+                        <span>Pair Code</span>
+                      </button>
+                    `
                     : ""
                 }
                 
@@ -800,7 +894,7 @@
                 <button onclick="logout('${s._id}')"
                   class="flex-1 min-w-[140px] xs:min-w-[120px] btn-danger px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
                   <i class="fas fa-sign-out-alt"></i>
-                  <span>Logout</span>
+                  <span>Delete</span>
                 </button>
               </div>
             `;
@@ -808,7 +902,6 @@
             container.appendChild(card);
           });
           
-          // Reset refresh button
           setTimeout(() => {
             refreshBtn.innerHTML = originalContent;
             refreshBtn.disabled = false;
@@ -818,7 +911,6 @@
           showToast('error', 'Load Failed', 'Failed to load sessions');
           document.getElementById('loadingState').classList.add('hidden');
           
-          // Reset refresh button
           const refreshBtn = document.getElementById('refreshBtn');
           refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
           refreshBtn.disabled = false;
@@ -864,7 +956,6 @@
             qrBox.innerHTML = `<img src="${res.qr}" class="bg-white p-2 rounded-lg w-56 h-56 md:w-64 md:h-64 shadow-lg" />`;
           
           } else {
-            // CONNECTED
             showToast('success', 'Connected!', 'WhatsApp session is now connected');
             closeQRModal();
             loadSessions();
@@ -885,6 +976,174 @@
               <p class="text-slate-500 mt-4 text-sm md:text-base">Loading QR code...</p>
             </div>
           </div>`;
+      }
+
+      /* ───────── OPEN PAIR MODAL ───────── */
+      function openPairModal(sessionId) {
+        activePairSession = sessionId;
+        document.getElementById("pairPhone").value = "";
+        const modal = document.getElementById("pairModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        
+        // Reset to step 1
+        document.getElementById("pairStep1").classList.remove("hidden");
+        document.getElementById("pairStep2").classList.add("hidden");
+        document.getElementById("getPairBtn").innerHTML = '<i class="fas fa-link"></i> Get Pair Code';
+        document.getElementById("getPairBtn").disabled = false;
+        document.getElementById("getPairBtn").onclick = getPairCode;
+        
+        // Clear any existing interval
+        if (pairCodeInterval) {
+          clearInterval(pairCodeInterval);
+          pairCodeInterval = null;
+        }
+        
+        // Reset closing flag
+        isPairModalClosing = false;
+        
+        document.getElementById("pairPhone").focus();
+      }
+
+      /* ───────── CLOSE PAIR MODAL ───────── */
+      function closePairModal() {
+        // Set closing flag
+        isPairModalClosing = true;
+        
+        // Clear interval
+        if (pairCodeInterval) {
+          clearInterval(pairCodeInterval);
+          pairCodeInterval = null;
+        }
+        
+        activePairSession = null;
+        document.getElementById("pairModal").classList.add("hidden");
+      }
+
+      /* ───────── GET PAIR CODE ───────── */
+      async function getPairCode() {
+        const phone = document.getElementById("pairPhone").value;
+        
+        if (!phone) {
+          showToast('warning', 'Validation Error', 'Phone number is required');
+          document.getElementById("pairPhone").focus();
+          return;
+        }
+        
+        if (!phone.startsWith('+')) {
+          showToast('warning', 'Format Error', 'Phone number must start with country code (e.g., +1)');
+          document.getElementById("pairPhone").focus();
+          return;
+        }
+
+        try {
+          // Disable button and show loading
+          const getPairBtn = document.getElementById("getPairBtn");
+          getPairBtn.innerHTML = '<i class="fas fa-spinner loading-spin"></i> Generating...';
+          getPairBtn.disabled = true;
+          
+          const res = await api(`${API}/${activePairSession}/pairCode`, {
+            method: "POST",
+            body: JSON.stringify({ number: phone }),
+          });
+          
+          if (res.connected) {
+            showToast('success', 'Already Connected', 'This session is already connected');
+            closePairModal();
+            loadSessions();
+            return;
+          }
+          
+          if (!res.pairCode) {
+            throw new Error('No pair code received');
+          }
+          
+          // Show step 2 with pair code
+          document.getElementById("pairStep1").classList.add("hidden");
+          document.getElementById("pairStep2").classList.remove("hidden");
+          document.getElementById("pairCodeDisplay").textContent = res.pairCode;
+          
+          // Change button to show "Close"
+          getPairBtn.innerHTML = '<i class="fas fa-times"></i> Close';
+          getPairBtn.disabled = false;
+          getPairBtn.onclick = closePairModal;
+          
+          // Start checking connection status
+          startCheckingConnection();
+          
+        } catch (error) {
+          showToast('error', 'Pair Code Failed', error.message || 'Failed to get pair code');
+          
+          // Reset button
+          const getPairBtn = document.getElementById("getPairBtn");
+          getPairBtn.innerHTML = '<i class="fas fa-link"></i> Get Pair Code';
+          getPairBtn.disabled = false;
+        }
+      }
+
+      /* ───────── CHECK CONNECTION STATUS ───────── */
+      async function startCheckingConnection() {
+        if (pairCodeInterval) {
+          clearInterval(pairCodeInterval);
+        }
+        
+        pairCodeInterval = setInterval(async () => {
+          // If modal is closing, stop checking
+          if (isPairModalClosing) {
+            clearInterval(pairCodeInterval);
+            return;
+          }
+          
+          try {
+            // Check if session is connected
+            const sessions = await api(`${API}/list`);
+            const currentSession = sessions.sessions.find(s => s._id === activePairSession);
+            
+            if (currentSession && currentSession.status === "CONNECTED") {
+              clearInterval(pairCodeInterval);
+              
+              // Update button to show success
+              const getPairBtn = document.getElementById("getPairBtn");
+              getPairBtn.innerHTML = '<i class="fas fa-check"></i> Connected!';
+              getPairBtn.classList.remove('btn-pair');
+              getPairBtn.classList.add('bg-gradient-to-r', 'from-emerald-500', 'to-emerald-600');
+              getPairBtn.onclick = function() {
+                closePairModal();
+                loadSessions();
+              };
+              
+              // Update waiting message
+              const waitingElement = document.querySelector('#pairStep2 .text-xs.text-slate-400');
+              if (waitingElement) {
+                waitingElement.innerHTML = '<i class="fas fa-check text-emerald-400"></i> Connected successfully!';
+                waitingElement.classList.remove('text-slate-400');
+                waitingElement.classList.add('text-emerald-400');
+              }
+              
+              // Remove spinner
+              const spinner = document.getElementById('pairCodeSpinner');
+              if (spinner) {
+                spinner.classList.remove('fa-sync-alt', 'loading-spin', 'text-purple-400');
+                spinner.classList.add('fa-check', 'text-emerald-400');
+              }
+              
+              // Show success toast after a short delay
+              setTimeout(() => {
+                showToast('success', 'Connected!', 'WhatsApp session is now connected');
+              }, 500);
+              
+              // Auto close modal after 2 seconds
+              setTimeout(() => {
+                if (!isPairModalClosing) {
+                  closePairModal();
+                  loadSessions();
+                }
+              }, 2000);
+            }
+          } catch (error) {
+            console.error('Error checking connection:', error);
+          }
+        }, 2000); // Check every 2 seconds
       }
 
       /* ───────── OPEN MESSAGE MODAL ───────── */
@@ -967,9 +1226,12 @@
       // Close modals with Escape key
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-          closeQRModal();
-          closeMsgModal();
-          closeInfoModal();
+          if (!isPairModalClosing) {
+            closeQRModal();
+            closePairModal();
+            closeMsgModal();
+            closeInfoModal();
+          }
         }
       });
 

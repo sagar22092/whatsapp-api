@@ -2,6 +2,7 @@ import sessionModel from "../models/sessionModel.js";
 import {
   initSession,
   getQR as waGetQR,
+  getPairCode as waGetPairCode,
   getStatus as waGetStatus,
   sendMessage as waSendMessage,
   getMyInfo as waGetMyInfo,
@@ -58,6 +59,37 @@ export async function getQR(req, res) {
     res.json({
       connected: !qr,
       qr,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function getPairCode(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const userId = req.user._id.toString();
+    const { sessionId } = req.params;
+    const { number } = req.body;
+
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const pairCode = await waGetPairCode(userId, sessionId, number);
+
+
+    res.json({
+      connected: !pairCode,
+      pairCode,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -188,7 +220,7 @@ export async function logoutSession(req, res) {
   }
 }
 
-//session list function
+/* ───────────────── SESSION LIST ───────────────── */
 
 export async function getSessionList(req, res) {
   if (!req.user) return res.status(401).json({ error: "Unauthorized" });
