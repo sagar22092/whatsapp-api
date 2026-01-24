@@ -10,15 +10,48 @@ import {
 } from "./lib/whatsapp.js";
 
 //env config
-import 'dotenv/config'
+import "dotenv/config";
+import authRouter from "./routers/authRouters.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import connectDB from "./lib/mongodb.js";
+import { authenticate } from "./middlewares/authMiddlewares.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static("public"));
 
 /* ───────── API ───────── */
+app.use("/api/auth", authRouter);
+
+app.get("/", authenticate, (req, res) => {
+  if (!req.user) {
+    return res.redirect("/login");
+  }
+  res.sendFile(path.join(__dirname, "views", "index.html"));
+});
+
+app.get("/login", authenticate, (req, res) => {
+  if (req.user) {
+    return res.redirect("/");
+  } else {
+    res.sendFile(path.join(__dirname, "views", "login.html"));
+  }
+});
+
+app.get("/register", authenticate, (req, res) => {
+  if (req.user) {
+    return res.redirect("/");
+  } else {
+    res.sendFile(path.join(__dirname, "views", "register.html"));
+  }
+});
 
 // Init / get QR
 app.post("/api/qr", async (req, res) => {
@@ -66,6 +99,7 @@ app.get("/api/myinfo/:username", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 app.get("/api/chats/:username", async (req, res) => {
   const { username } = req.params;
 
@@ -88,6 +122,7 @@ app.post("/api/logout", async (req, res) => {
   }
 });
 
-app.listen(PORT, () =>
-  console.log(`🚀 Server running → http://localhost:${PORT}`),
-);
+app.listen(PORT, async () => {
+  await connectDB();
+  console.log(`🚀 Server running → http://localhost:${PORT}`);
+});
