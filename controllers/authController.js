@@ -6,7 +6,7 @@ export async function register(req, res) {
     return res.status(400).json({ error: "Already logged in" });
   }
   try {
-    const { name, username, email, password } = req.body;
+    let { name, username, email, password } = req.body;
     if (!username || !password || !name || !email) {
       return res.status(400).send("All fields are required");
     }
