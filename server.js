@@ -27,13 +27,13 @@ app.use(express.static("public"));
 /* ───────── API ───────── */
 app.use("/api/auth", authenticate, authRouter);
 app.use("/api/session", authenticate, sessionRouter);
-app.use("/api/whatsapp", authenticate, whatsappRouter);
+app.use("/api/whatsapp", whatsappRouter);
 
 
 app.get("/", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));
 });
-
+app.get('/doc', (req, res) => res.sendFile(path.join(__dirname, 'views', 'api-doc.html')))
 app.get("/login", authenticate, (req, res) => {
   if (req.user) {
     return res.redirect("/");

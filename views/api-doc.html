@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp API Documentation</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      :root {
+        --primary-color: #25d366;
+        --secondary-color: #128c7e;
+        --dark-color: #075e54;
+        --light-color: #dcf8c6;
+        --text-color: #333;
+        --light-gray: #f5f5f5;
+        --border-color: #e0e0e0;
+        --code-bg: #2d2d2d;
+      }
+
+      body {
+        background-color: #f9f9f9;
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      .container {
+        display: flex;
+        max-width: 1400px;
+        margin: 0 auto;
+        min-height: 100vh;
+      }
+
+      /* Sidebar Navigation */
+      .sidebar {
+        width: 300px;
+        background-color: white;
+        border-right: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 20px 0;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .logo {
+        padding: 0 20px 20px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .logo i {
+        color: var(--primary-color);
+        font-size: 28px;
+      }
+
+      .logo h1 {
+        font-size: 22px;
+        color: var(--dark-color);
+      }
+
+      .nav-list {
+        list-style: none;
+      }
+
+      .nav-item {
+        margin-bottom: 5px;
+      }
+
+      .nav-link {
+        display: block;
+        padding: 12px 20px;
+        text-decoration: none;
+        color: var(--text-color);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+      }
+
+      .nav-link:hover {
+        background-color: var(--light-gray);
+        color: var(--secondary-color);
+      }
+
+      .nav-link.active {
+        background-color: var(--light-color);
+        color: var(--secondary-color);
+        border-left-color: var(--primary-color);
+      }
+
+      /* Main Content */
+      .content {
+        flex: 1;
+        padding: 30px;
+        overflow-y: auto;
+      }
+
+      header {
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      header h1 {
+        color: var(--dark-color);
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      header p {
+        color: #666;
+        font-size: 18px;
+        max-width: 800px;
+      }
+
+      .section {
+        background-color: white;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid var(--primary-color);
+      }
+
+      .section h2 {
+        color: var(--secondary-color);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section h2 i {
+        color: var(--primary-color);
+      }
+
+      .endpoint-info {
+        margin-bottom: 25px;
+      }
+
+      .endpoint-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .method {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .method.post {
+        background-color: #49cc90;
+        color: white;
+      }
+
+      .method.get {
+        background-color: #61affe;
+        color: white;
+      }
+
+      .endpoint-path {
+        font-family: monospace;
+        font-size: 18px;
+        background-color: var(--light-gray);
+        padding: 6px 12px;
+        border-radius: 4px;
+        color: var(--dark-color);
+      }
+
+      .description {
+        margin-bottom: 15px;
+        color: #555;
+      }
+
+      /* Table Styling */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+      }
+
+      table th {
+        background-color: var(--dark-color);
+        color: white;
+        text-align: left;
+        padding: 15px;
+        font-weight: 600;
+      }
+
+      table td {
+        padding: 15px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      table tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      table tr:hover {
+        background-color: var(--light-color);
+      }
+
+      .required {
+        color: #e74c3c;
+        font-weight: bold;
+      }
+
+      .optional {
+        color: #3498db;
+        font-weight: bold;
+      }
+
+      /* Code Styling */
+      .code-block {
+        background-color: var(--code-bg);
+        color: #f8f8f2;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        overflow-x: auto;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .code-block .comment {
+        color: #6a9955;
+      }
+
+      .code-block .key {
+        color: #9cdcfe;
+      }
+
+      .code-block .string {
+        color: #ce9178;
+      }
+
+      .code-block .number {
+        color: #b5cea8;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1024px) {
+        .container {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+          border-right: none;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-list {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .nav-item {
+          margin: 5px;
+        }
+
+        .nav-link {
+          padding: 10px 15px;
+          border-radius: 4px;
+          border-left: none;
+        }
+
+        .nav-link.active {
+          border-left: none;
+          background-color: var(--light-color);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .content {
+          padding: 20px 15px;
+        }
+
+        .section {
+          padding: 20px 15px;
+        }
+
+        table {
+          display: block;
+          overflow-x: auto;
+        }
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 30px 0 20px;
+        color: #777;
+        font-size: 14px;
+        border-top: 1px solid var(--border-color);
+        margin-top: 40px;
+      }
+
+      footer a {
+        color: var(--secondary-color);
+        text-decoration: none;
+      }
+
+      /* Quick Jump List */
+      .quick-jump {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 30px;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .quick-jump a {
+        background-color: var(--light-color);
+        color: var(--dark-color);
+        padding: 8px 15px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+
+      .quick-jump a:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Sidebar Navigation -->
+      <nav class="sidebar">
+        <div class="logo">
+          <i class="fab fa-whatsapp"></i>
+          <h1>WhatsApp API</h1>
+        </div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="#introduction" class="nav-link active">Introduction</a>
+          </li>
+          <li class="nav-item">
+            <a href="#authentication" class="nav-link">Authentication</a>
+          </li>
+          <li class="nav-item">
+            <a href="#send-text" class="nav-link">Send Text</a>
+          </li>
+          <li class="nav-item">
+            <a href="#send-photo" class="nav-link">Send Photo</a>
+          </li>
+          <li class="nav-item">
+            <a href="#send-video" class="nav-link">Send Video</a>
+          </li>
+          <li class="nav-item">
+            <a href="#send-audio" class="nav-link">Send Audio</a>
+          </li>
+          <li class="nav-item">
+            <a href="#send-file" class="nav-link">Send File</a>
+          </li>
+          <li class="nav-item">
+            <a href="#send-poll" class="nav-link">Send Poll</a>
+          </li>
+          <li class="nav-item">
+            <a href="#reaction" class="nav-link">Message Reaction</a>
+          </li>
+          <li class="nav-item">
+            <a href="#delete" class="nav-link">Delete Message</a>
+          </li>
+          <li class="nav-item">
+            <a href="#get-groups" class="nav-link">Get Groups</a>
+          </li>
+          <li class="nav-item">
+            <a href="#examples" class="nav-link">Examples</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="content">
+        <header>
+          <h1>WhatsApp API Documentation</h1>
+          <p>
+            A comprehensive API for sending messages, media, polls, and managing
+            WhatsApp interactions programmatically.
+          </p>
+        </header>
+
+        <!-- Quick Jump List -->
+        <div class="quick-jump">
+          <a href="#send-text">Text</a>
+          <a href="#send-photo">Photo</a>
+          <a href="#send-video">Video</a>
+          <a href="#send-audio">Audio</a>
+          <a href="#send-file">File</a>
+          <a href="#send-poll">Poll</a>
+          <a href="#reaction">Reaction</a>
+          <a href="#delete">Delete</a>
+          <a href="#get-groups">Groups</a>
+        </div>
+
+        <!-- Introduction -->
+        <section id="introduction" class="section">
+          <h2><i class="fas fa-info-circle"></i> Introduction</h2>
+          <p>
+            This API allows you to interact with WhatsApp programmatically to
+            send messages, media files, polls, reactions, and perform other
+            messaging operations.
+          </p>
+          <p>
+            All endpoints require authentication via an API key passed in the
+            request headers. The base URL for all endpoints is
+            <code>/api/whatsapp</code>.
+          </p>
+        </section>
+
+        <!-- Authentication -->
+        <section id="authentication" class="section">
+          <h2><i class="fas fa-key"></i> Authentication</h2>
+          <p>
+            All API requests must include an <code>X-API-Key</code> header with
+            a valid API key associated with an active WhatsApp session.
+          </p>
+
+          <div class="code-block">
+            <span class="comment">// Example Header</span>
+            <span class="key">X-API-Key</span>:
+            <span class="string">"your-api-key-here"</span>
+          </div>
+
+          <p>
+            Without a valid API key, requests will return a <code>400</code> or
+            <code>404</code> error.
+          </p>
+        </section>
+
+        <!-- Send Text -->
+        <section id="send-text" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">/api/whatsapp/send/text</span>
+            </div>
+            <p class="description">
+              Send a text message to a phone number or WhatsApp group.
+            </p>
+
+            <h3>Request Headers</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Header</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>X-API-Key</td>
+                  <td>String</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Your API key for authentication</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Request Body (JSON)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>
+                    Recipient phone number (with country code, without '+' or
+                    spaces)
+                  </td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a WhatsApp group</td>
+                </tr>
+                <tr>
+                  <td>message</td>
+                  <td>String</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Text message content</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              <small
+                >* Either <code>number</code> or <code>group</code> must be
+                provided</small
+              >
+            </p>
+          </div>
+        </section>
+
+        <!-- Send Photo -->
+        <section id="send-photo" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">/api/whatsapp/send/photo</span>
+            </div>
+            <p class="description">
+              Send one or multiple images (up to 10) to a phone number or
+              WhatsApp group.
+            </p>
+
+            <h3>Request Format</h3>
+            <p>
+              This endpoint uses <code>multipart/form-data</code> for file
+              uploads.
+            </p>
+
+            <h3>Parameters</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>photos</td>
+                  <td>File[]</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Image files (max 10)</td>
+                </tr>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Recipient phone number</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a group</td>
+                </tr>
+                <tr>
+                  <td>caption</td>
+                  <td>String</td>
+                  <td><span class="optional">No</span></td>
+                  <td>Caption for the image(s)</td>
+                </tr>
+                <tr>
+                  <td>viewOnce</td>
+                  <td>Boolean</td>
+                  <td><span class="optional">No</span></td>
+                  <td>If true, sends as view-once media</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Send Video -->
+        <section id="send-video" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">/api/whatsapp/send/video</span>
+            </div>
+            <p class="description">
+              Send one or multiple videos (up to 5) to a phone number or
+              WhatsApp group.
+            </p>
+
+            <h3>Parameters</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>videos</td>
+                  <td>File[]</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Video files (max 5)</td>
+                </tr>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Recipient phone number</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a group</td>
+                </tr>
+                <tr>
+                  <td>caption</td>
+                  <td>String</td>
+                  <td><span class="optional">No</span></td>
+                  <td>Caption for the video(s)</td>
+                </tr>
+                <tr>
+                  <td>gif</td>
+                  <td>Boolean</td>
+                  <td><span class="optional">No</span></td>
+                  <td>If true, sends as GIF</td>
+                </tr>
+                <tr>
+                  <td>viewOnce</td>
+                  <td>Boolean</td>
+                  <td><span class="optional">No</span></td>
+                  <td>If true, sends as view-once media</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Send Audio -->
+        <section id="send-audio" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">/api/whatsapp/send/audio</span>
+            </div>
+            <p class="description">
+              Send audio files or voice notes to a phone number or WhatsApp
+              group.
+            </p>
+
+            <h3>Parameters</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>audios</td>
+                  <td>File[]</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Audio files (max 5)</td>
+                </tr>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Recipient phone number</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a group</td>
+                </tr>
+                <tr>
+                  <td>voice</td>
+                  <td>Boolean</td>
+                  <td><span class="optional">No</span></td>
+                  <td>If true, sends as WhatsApp voice note (PTT)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Send File -->
+        <section id="send-file" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">/api/whatsapp/send/file</span>
+            </div>
+            <p class="description">
+              Send any type of file (document) to a phone number or WhatsApp
+              group.
+            </p>
+
+            <h3>Parameters</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>files</td>
+                  <td>File[]</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Document files (max 5)</td>
+                </tr>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Recipient phone number</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a group</td>
+                </tr>
+                <tr>
+                  <td>caption</td>
+                  <td>String</td>
+                  <td><span class="optional">No</span></td>
+                  <td>Caption for the file(s)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Send Poll -->
+        <section id="send-poll" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">/api/whatsapp/send/poll</span>
+            </div>
+            <p class="description">
+              Create and send a poll to a phone number or WhatsApp group.
+            </p>
+
+            <h3>Parameters</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Recipient phone number</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a group</td>
+                </tr>
+                <tr>
+                  <td>name</td>
+                  <td>String</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Poll question/title</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>String[]</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Array of poll options (minimum 2)</td>
+                </tr>
+                <tr>
+                  <td>selectableCount</td>
+                  <td>Number</td>
+                  <td><span class="optional">No</span></td>
+                  <td>Number of options users can select (default: 1)</td>
+                </tr>
+                <tr>
+                  <td>toAnnouncementGroup</td>
+                  <td>Boolean</td>
+                  <td><span class="optional">No</span></td>
+                  <td>If sending to an announcement group</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Message Reaction -->
+        <section id="reaction" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">/message/react</span>
+            </div>
+            <p class="description">React to a message with an emoji.</p>
+
+            <h3>Parameters</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Recipient phone number</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a group</td>
+                </tr>
+                <tr>
+                  <td>messageKey</td>
+                  <td>Object</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Message key object containing message details</td>
+                </tr>
+                <tr>
+                  <td>emoji</td>
+                  <td>String</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Emoji character for the reaction</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Delete Message -->
+        <section id="delete" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">/message/delete</span>
+            </div>
+            <p class="description">
+              Delete a message for everyone in the chat.
+            </p>
+
+            <h3>Parameters</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Recipient phone number</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a group</td>
+                </tr>
+                <tr>
+                  <td>messageKey</td>
+                  <td>Object</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Message key object containing message details</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Get Groups -->
+        <section id="get-groups" class="section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method get">GET</span>
+              <span class="endpoint-path">/get/groups</span>
+            </div>
+            <p class="description">
+              Retrieve a list of all WhatsApp groups for the authenticated
+              session.
+            </p>
+
+            <h3>Request Headers</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Header</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>X-API-Key</td>
+                  <td>String</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Your API key for authentication</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Examples -->
+        <section id="examples" class="section">
+          <h2><i class="fas fa-code"></i> Examples</h2>
+
+          <h3>Example 1: Sending a Text Message</h3>
+          <div class="code-block">
+            <span class="comment">// Using curl</span>
+            curl -X POST \ -H
+            <span class="string">"X-API-Key: your-api-key-here"</span> \ -H
+            <span class="string">"Content-Type: application/json"</span> \ -d
+            '<span class="key">{</span> <span class="key">"number"</span>:
+            <span class="string">"1234567890"</span>,
+            <span class="key">"message"</span>:
+            <span class="string">"Hello from WhatsApp API!"</span>
+            <span class="key">}</span>' \
+            <span class="string">/api/whatsapp/send/text</span>
+          </div>
+
+          <h3>Example 2: Sending a Photo with Caption</h3>
+          <div class="code-block">
+            <span class="comment">// Using JavaScript fetch</span>
+            <span class="key">const</span> formData =
+            <span class="key">new</span> FormData(); formData.append(<span
+              class="string"
+              >'photos'</span
+            >, photoFile); formData.append(<span class="string">'number'</span>,
+            <span class="string">'1234567890'</span>); formData.append(<span
+              class="string"
+              >'caption'</span
+            >, <span class="string">'Check out this image!'</span>);
+
+            <span class="key">const</span> response =
+            <span class="key">await</span> fetch(<span class="string"
+              >'/api/whatsapp/send/photo'</span
+            >, { method: <span class="string">'POST'</span>, headers: {
+            <span class="key">'X-API-Key'</span>:
+            <span class="string">'your-api-key-here'</span>
+            }, body: formData });
+          </div>
+
+          <h3>Example 3: Reacting to a Message</h3>
+          <div class="code-block">
+            <span class="comment">// React with 👍 to a message</span>
+            <span class="key">const</span> response =
+            <span class="key">await</span> fetch(<span class="string"
+              >'/api/whatsapp/message/react'</span
+            >, { method: <span class="string">'POST'</span>, headers: {
+            <span class="key">'Content-Type'</span>:
+            <span class="string">'application/json'</span>,
+            <span class="key">'X-API-Key'</span>:
+            <span class="string">'your-api-key-here'</span>
+            }, body: JSON.stringify({
+            <span class="key">number</span>:
+            <span class="string">'1234567890'</span>,
+            <span class="key">messageKey</span>: {
+            <span class="key">remoteJid</span>:
+            <span class="string">'1234567890@s.whatsapp.net'</span>,
+            <span class="key">fromMe</span>: <span class="key">true</span>,
+            <span class="key">id</span>:
+            <span class="string">'3EB0A5EF77EAFADBEFF2D6'</span>
+            },
+            <span class="key">emoji</span>: <span class="string">'👍'</span>
+            }) });
+          </div>
+        </section>
+
+        <footer>
+          <p>
+            WhatsApp API Documentation &copy; 2023 | Built with
+            <i class="fas fa-heart" style="color: #e74c3c"></i>
+          </p>
+          <p>
+            Note: This API requires an active WhatsApp session and proper API
+            key authentication.
+          </p>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const targetId = this.getAttribute("href");
+          if (targetId === "#") return;
+
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            // Update active nav link
+            document.querySelectorAll(".nav-link").forEach((link) => {
+              link.classList.remove("active");
+            });
+            this.classList.add("active");
+
+            // Scroll to target
+            window.scrollTo({
+              top: targetElement.offsetTop - 20,
+              behavior: "smooth",
+            });
+          }
+        });
+      });
+
+      // Highlight active section based on scroll position
+      window.addEventListener("scroll", () => {
+        const sections = document.querySelectorAll(".section");
+        const navLinks = document.querySelectorAll(".nav-link");
+
+        let currentSection = "";
+
+        sections.forEach((section) => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+
+          if (scrollY >= sectionTop - 100) {
+            currentSection = section.getAttribute("id");
+          }
+        });
+
+        navLinks.forEach((link) => {
+          link.classList.remove("active");
+          if (link.getAttribute("href") === `#${currentSection}`) {
+            link.classList.add("active");
+          }
+        });
+      });
+
+      // Add copy functionality to code blocks
+      document.querySelectorAll(".code-block").forEach((block) => {
+        block.addEventListener("click", () => {
+          const text = block.textContent;
+          navigator.clipboard.writeText(text).then(() => {
+            const originalColor = block.style.backgroundColor;
+            block.style.backgroundColor = "#27ae60";
+            setTimeout(() => {
+              block.style.backgroundColor = originalColor;
+            }, 300);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
