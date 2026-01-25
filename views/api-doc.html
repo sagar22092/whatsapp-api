@@ -25,6 +25,7 @@
         --light-gray: #f5f5f5;
         --border-color: #e0e0e0;
         --code-bg: #2d2d2d;
+        --location-color: #3498db;
       }
 
       body {
@@ -135,6 +136,10 @@
         border-left: 4px solid var(--primary-color);
       }
 
+      .section.location-section {
+        border-left-color: var(--location-color);
+      }
+
       .section h2 {
         color: var(--secondary-color);
         margin-bottom: 20px;
@@ -148,6 +153,10 @@
 
       .section h2 i {
         color: var(--primary-color);
+      }
+
+      .section h2 .location-icon {
+        color: var(--location-color);
       }
 
       .endpoint-info {
@@ -355,6 +364,59 @@
         background-color: var(--primary-color);
         color: white;
       }
+
+      .quick-jump a.location-link {
+        background-color: #e3f2fd;
+      }
+
+      .quick-jump a.location-link:hover {
+        background-color: var(--location-color);
+      }
+
+      /* Base URL Info */
+      .base-url {
+        background-color: var(--light-color);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        border-left: 4px solid var(--primary-color);
+      }
+
+      .base-url h3 {
+        color: var(--dark-color);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .base-url code {
+        font-family: monospace;
+        background-color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 5px;
+        font-size: 16px;
+        color: var(--dark-color);
+      }
+
+      /* Copy button */
+      .copy-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        margin-left: 10px;
+        transition: background-color 0.3s;
+      }
+
+      .copy-btn:hover {
+        background-color: var(--secondary-color);
+      }
     </style>
   </head>
   <body>
@@ -388,6 +450,9 @@
             <a href="#send-file" class="nav-link">Send File</a>
           </li>
           <li class="nav-item">
+            <a href="#send-location" class="nav-link">Send Location</a>
+          </li>
+          <li class="nav-item">
             <a href="#send-poll" class="nav-link">Send Poll</a>
           </li>
           <li class="nav-item">
@@ -410,10 +475,23 @@
         <header>
           <h1>WhatsApp API Documentation</h1>
           <p>
-            A comprehensive API for sending messages, media, polls, and managing
-            WhatsApp interactions programmatically.
+            A comprehensive API for sending messages, media, locations, polls,
+            and managing WhatsApp interactions programmatically.
           </p>
         </header>
+
+        <!-- Base URL Information -->
+        <div class="base-url">
+          <h3><i class="fas fa-link"></i> Base URL</h3>
+          <p>All API endpoints start with the following base URL:</p>
+          <code id="baseUrlDisplay">http://localhost:3002</code>
+          <button class="copy-btn" onclick="copyBaseUrl()">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+          <p style="margin-top: 10px; font-size: 14px; color: #666">
+            All API endpoints are prefixed with <code>/api/whatsapp</code> after this base URL.
+          </p>
+        </div>
 
         <!-- Quick Jump List -->
         <div class="quick-jump">
@@ -422,6 +500,7 @@
           <a href="#send-video">Video</a>
           <a href="#send-audio">Audio</a>
           <a href="#send-file">File</a>
+          <a href="#send-location" class="location-link">Location</a>
           <a href="#send-poll">Poll</a>
           <a href="#reaction">Reaction</a>
           <a href="#delete">Delete</a>
@@ -433,13 +512,13 @@
           <h2><i class="fas fa-info-circle"></i> Introduction</h2>
           <p>
             This API allows you to interact with WhatsApp programmatically to
-            send messages, media files, polls, reactions, and perform other
-            messaging operations.
+            send messages, media files, locations, polls, reactions, and perform
+            other messaging operations.
           </p>
           <p>
             All endpoints require authentication via an API key passed in the
             request headers. The base URL for all endpoints is
-            <code>/api/whatsapp</code>.
+            <code id="baseUrlCode">http://localhost:3002</code> with the API prefix <code>/api/whatsapp</code>.
           </p>
         </section>
 
@@ -451,7 +530,7 @@
             a valid API key associated with an active WhatsApp session.
           </p>
 
-          <div class="code-block">
+          <div class="code-block" id="authExample">
             <span class="comment">// Example Header</span>
             <span class="key">X-API-Key</span>:
             <span class="string">"your-api-key-here"</span>
@@ -468,7 +547,9 @@
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">/api/whatsapp/send/text</span>
+              <span class="endpoint-path" id="textEndpoint"
+                >http://localhost:3002/api/whatsapp/send/text</span
+              >
             </div>
             <p class="description">
               Send a text message to a phone number or WhatsApp group.
@@ -534,6 +615,20 @@
                 provided</small
               >
             </p>
+
+            <h3>Example Request</h3>
+            <div class="code-block" id="textExample">
+              <span class="comment">// Using curl</span>
+              curl -X POST \ -H
+              <span class="string">"X-API-Key: your-api-key-here"</span> \ -H
+              <span class="string">"Content-Type: application/json"</span> \ -d
+              '<span class="key">{</span> <span class="key">"number"</span>:
+              <span class="string">"1234567890"</span>,
+              <span class="key">"message"</span>:
+              <span class="string">"Hello from WhatsApp API!"</span>
+              <span class="key">}</span>' \
+              <span class="string">http://localhost:3002/api/whatsapp/send/text</span>
+            </div>
           </div>
         </section>
 
@@ -542,7 +637,7 @@
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">/api/whatsapp/send/photo</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/photo</span>
             </div>
             <p class="description">
               Send one or multiple images (up to 10) to a phone number or
@@ -598,6 +693,27 @@
                 </tr>
               </tbody>
             </table>
+
+            <h3>Example Request</h3>
+            <div class="code-block" id="photoExample">
+              <span class="comment">// Using JavaScript fetch</span>
+              <span class="key">const</span> formData =
+              <span class="key">new</span> FormData(); formData.append(<span
+                class="string"
+                >'photos'</span
+              >, photoFile); formData.append(<span class="string">'number'</span
+              >, <span class="string">'1234567890'</span>);
+              formData.append(<span class="string">'caption'</span>,
+              <span class="string">'Check out this image!'</span>);
+
+              <span class="key">const</span> response =
+              <span class="key">await</span> fetch(<span class="string"
+                >'http://localhost:3002/api/whatsapp/send/photo'</span
+              >, { method: <span class="string">'POST'</span>, headers: {
+              <span class="key">'X-API-Key'</span>:
+              <span class="string">'your-api-key-here'</span>
+              }, body: formData });
+            </div>
           </div>
         </section>
 
@@ -606,7 +722,7 @@
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">/api/whatsapp/send/video</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/video</span>
             </div>
             <p class="description">
               Send one or multiple videos (up to 5) to a phone number or
@@ -670,7 +786,7 @@
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">/api/whatsapp/send/audio</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/audio</span>
             </div>
             <p class="description">
               Send audio files or voice notes to a phone number or WhatsApp
@@ -722,7 +838,7 @@
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">/api/whatsapp/send/file</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/file</span>
             </div>
             <p class="description">
               Send any type of file (document) to a phone number or WhatsApp
@@ -769,12 +885,94 @@
           </div>
         </section>
 
+        <!-- Send Location -->
+        <section id="send-location" class="section location-section">
+          <div class="endpoint-info">
+            <div class="endpoint-header">
+              <span class="method post">POST</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/location</span>
+            </div>
+            <p class="description">
+              Send a location with latitude and longitude coordinates to a phone
+              number or WhatsApp group.
+            </p>
+
+            <h3>Request Body (JSON)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>number</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Recipient phone number</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>String</td>
+                  <td><span class="optional">Optional*</span></td>
+                  <td>Group ID for sending to a group</td>
+                </tr>
+                <tr>
+                  <td>location.degreesLatitude</td>
+                  <td>Number</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Latitude coordinate (e.g., 40.7128)</td>
+                </tr>
+                <tr>
+                  <td>location.degreesLongitude</td>
+                  <td>Number</td>
+                  <td><span class="required">Yes</span></td>
+                  <td>Longitude coordinate (e.g., -74.0060)</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              <small
+                >* Either <code>number</code> or <code>group</code> must be
+                provided</small
+              >
+            </p>
+
+            <h3>Example Request</h3>
+            <div class="code-block" id="locationExample">
+              <span class="comment"
+                >// Sending location coordinates for New York City</span
+              >
+              <span class="key">const</span> response =
+              <span class="key">await</span> fetch(<span class="string"
+                >'http://localhost:3002/api/whatsapp/send/location'</span
+              >, { method: <span class="string">'POST'</span>, headers: {
+              <span class="key">'Content-Type'</span>:
+              <span class="string">'application/json'</span>,
+              <span class="key">'X-API-Key'</span>:
+              <span class="string">'your-api-key-here'</span>
+              }, body: JSON.stringify({
+              <span class="key">number</span>:
+              <span class="string">'1234567890'</span>,
+              <span class="key">location</span>: {
+              <span class="key">degreesLatitude</span>:
+              <span class="number">40.7128</span>,
+              <span class="key">degreesLongitude</span>:
+              <span class="number">-74.0060</span>
+              } }) });
+            </div>
+          </div>
+        </section>
+
         <!-- Send Poll -->
         <section id="send-poll" class="section">
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">/api/whatsapp/send/poll</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/poll</span>
             </div>
             <p class="description">
               Create and send a poll to a phone number or WhatsApp group.
@@ -837,7 +1035,7 @@
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">/api/whatsapp/message/react</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/message/react</span>
             </div>
             <p class="description">React to a message with an emoji.</p>
 
@@ -878,6 +1076,31 @@
                 </tr>
               </tbody>
             </table>
+
+            <h3>Example Request</h3>
+            <div class="code-block" id="reactionExample">
+              <span class="comment">// React with 👍 to a message</span>
+              <span class="key">const</span> response =
+              <span class="key">await</span> fetch(<span class="string"
+                >'http://localhost:3002/api/whatsapp/message/react'</span
+              >, { method: <span class="string">'POST'</span>, headers: {
+              <span class="key">'Content-Type'</span>:
+              <span class="string">'application/json'</span>,
+              <span class="key">'X-API-Key'</span>:
+              <span class="string">'your-api-key-here'</span>
+              }, body: JSON.stringify({
+              <span class="key">number</span>:
+              <span class="string">'1234567890'</span>,
+              <span class="key">messageKey</span>: {
+              <span class="key">remoteJid</span>:
+              <span class="string">'1234567890@s.whatsapp.net'</span>,
+              <span class="key">fromMe</span>: <span class="key">true</span>,
+              <span class="key">id</span>:
+              <span class="string">'3EB0A5EF77EAFADBEFF2D6'</span>
+              },
+              <span class="key">emoji</span>: <span class="string">'👍'</span>
+              }) });
+            </div>
           </div>
         </section>
 
@@ -886,7 +1109,7 @@
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">/api/whatsapp/message/delete</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/message/delete</span>
             </div>
             <p class="description">
               Delete a message for everyone in the chat.
@@ -931,7 +1154,7 @@
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method get">GET</span>
-              <span class="endpoint-path">/api/whatsapp/get/groups</span>
+              <span class="endpoint-path">http://localhost:3002/api/whatsapp/get/groups</span>
             </div>
             <p class="description">
               Retrieve a list of all WhatsApp groups for the authenticated
@@ -957,72 +1180,21 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-        </section>
 
-        <!-- Examples -->
-        <section id="examples" class="section">
-          <h2><i class="fas fa-code"></i> Examples</h2>
-
-          <h3>Example 1: Sending a Text Message</h3>
-          <div class="code-block">
-            <span class="comment">// Using curl</span>
-            curl -X POST \ -H
-            <span class="string">"X-API-Key: your-api-key-here"</span> \ -H
-            <span class="string">"Content-Type: application/json"</span> \ -d
-            '<span class="key">{</span> <span class="key">"number"</span>:
-            <span class="string">"1234567890"</span>,
-            <span class="key">"message"</span>:
-            <span class="string">"Hello from WhatsApp API!"</span>
-            <span class="key">}</span>' \
-            <span class="string">/api/whatsapp/send/text</span>
-          </div>
-
-          <h3>Example 2: Sending a Photo with Caption</h3>
-          <div class="code-block">
-            <span class="comment">// Using JavaScript fetch</span>
-            <span class="key">const</span> formData =
-            <span class="key">new</span> FormData(); formData.append(<span
-              class="string"
-              >'photos'</span
-            >, photoFile); formData.append(<span class="string">'number'</span>,
-            <span class="string">'1234567890'</span>); formData.append(<span
-              class="string"
-              >'caption'</span
-            >, <span class="string">'Check out this image!'</span>);
-
-            <span class="key">const</span> response =
-            <span class="key">await</span> fetch(<span class="string"
-              >'/api/whatsapp/send/photo'</span
-            >, { method: <span class="string">'POST'</span>, headers: {
-            <span class="key">'X-API-Key'</span>:
-            <span class="string">'your-api-key-here'</span>
-            }, body: formData });
-          </div>
-
-          <h3>Example 3: Reacting to a Message</h3>
-          <div class="code-block">
-            <span class="comment">// React with 👍 to a message</span>
-            <span class="key">const</span> response =
-            <span class="key">await</span> fetch(<span class="string"
-              >'/api/whatsapp/message/react'</span
-            >, { method: <span class="string">'POST'</span>, headers: {
-            <span class="key">'Content-Type'</span>:
-            <span class="string">'application/json'</span>,
-            <span class="key">'X-API-Key'</span>:
-            <span class="string">'your-api-key-here'</span>
-            }, body: JSON.stringify({
-            <span class="key">number</span>:
-            <span class="string">'1234567890'</span>,
-            <span class="key">messageKey</span>: {
-            <span class="key">remoteJid</span>:
-            <span class="string">'1234567890@s.whatsapp.net'</span>,
-            <span class="key">fromMe</span>: <span class="key">true</span>,
-            <span class="key">id</span>:
-            <span class="string">'3EB0A5EF77EAFADBEFF2D6'</span>
-            },
-            <span class="key">emoji</span>: <span class="string">'👍'</span>
-            }) });
+            <h3>Example Request</h3>
+            <div class="code-block" id="groupsExample">
+              <span class="comment">// Get all WhatsApp groups</span>
+              <span class="key">const</span> response =
+              <span class="key">await</span> fetch(<span class="string"
+                >'http://localhost:3002/api/whatsapp/get/groups'</span
+              >, { method: <span class="string">'GET'</span>, headers: {
+              <span class="key">'X-API-Key'</span>:
+              <span class="string">'your-api-key-here'</span>
+              } });
+              <span class="key">const</span> data =
+              <span class="key">await</span> response.json();
+              console.log(data.groups);
+            </div>
           </div>
         </section>
 
@@ -1040,6 +1212,19 @@
     </div>
 
     <script>
+      // Copy base URL to clipboard
+      function copyBaseUrl() {
+        const baseUrl = "http://localhost:3002";
+        navigator.clipboard.writeText(baseUrl).then(() => {
+          const btn = event.target.closest(".copy-btn");
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+          }, 2000);
+        });
+      }
+
       // Smooth scrolling for anchor links
       document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.addEventListener("click", function (e) {
@@ -1067,7 +1252,7 @@
 
       // Highlight active section based on scroll position
       window.addEventListener("scroll", () => {
-        const sections = document.querySelectorAll(".section");
+        const sections = document.querySelectorAll(".section, .base-url");
         const navLinks = document.querySelectorAll(".nav-link");
 
         let currentSection = "";
@@ -1101,6 +1286,11 @@
             }, 300);
           });
         });
+      });
+
+      // Initialize when page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        // No need for dynamic URL updates since we're using fixed localhost URLs
       });
     </script>
   </body>

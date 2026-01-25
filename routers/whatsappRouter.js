@@ -5,6 +5,7 @@ import {
   giveReaction,
   sendAudio,
   sendFile,
+  sendLocation,
   sendPhoto,
   sendPoll,
   sendText,
@@ -15,6 +16,7 @@ import upload from "../lib/multer.js";
 const whatsappRouter = Router();
 //  /api/whatsapp
 whatsappRouter.post("/send/text", sendText);
+whatsappRouter.post("/send/location", sendLocation);
 whatsappRouter.post("/send/photo", upload.array("photos", 10), sendPhoto);
 whatsappRouter.post("/send/video", upload.array("videos", 5), sendVideo);
 whatsappRouter.post("/send/audio", upload.array("audios", 5), sendAudio);

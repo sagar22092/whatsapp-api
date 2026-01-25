@@ -43,6 +43,49 @@ export async function sendText(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
+export async function sendLocation(req, res) {
+  try {
+    const apiKey = req.headers["x-api-key"];
+
+    if (!apiKey) {
+      return res.status(400).json({ error: "x-api-key header required" });
+    }
+
+    const session = await sessionModel.findOne({ apiKey });
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const { number, group, location } = req.body;
+    if (
+      (!number && !group) ||
+      !location.degreesLatitude ||
+      !location.degreesLongitude
+    ) {
+      return res.status(400).json({ error: "number and message are required" });
+    }
+
+    const isGroup = group ? true : false;
+
+    const result = await sendMessage(
+      session.user,
+      session._id,
+      number || group,
+      {
+        location,
+      },
+      isGroup,
+    );
+
+    return res.json({
+      success: true,
+      message: result || null,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+}
 export async function sendPhoto(req, res) {
   try {
     const apiKey = req.headers["x-api-key"];

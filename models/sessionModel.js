@@ -15,6 +15,9 @@ const sessionModel = new mongoose.Schema(
       default: `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       unique: true,
     },
+    webhookUrl: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
