@@ -410,15 +410,6 @@ export async function sendPoll(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
-
-// {
-//     "group":"120363403108780726",
-//      "messageKey":{
-//                 "remoteJid": "120363403108780726@g.us",
-//                 "fromMe": true,
-//                 "id": "3EB0A5EF77EAFADBEFF2D6"
-//             }
-// }
 export async function deleteMessage(req, res) {
   try {
     const apiKey = req.headers["x-api-key"];
@@ -452,7 +443,6 @@ export async function deleteMessage(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
-
 export async function getGroups(req, res) {
   try {
     const apiKey = req.headers["x-api-key"];

@@ -230,6 +230,7 @@ export async function getSessionList(req, res) {
     const sessions = await sessionModel
       .find({ user: userId })
       .select("_id status apiKey")
+      .sort({ createdAt: -1 })
       .lean();
 
     res.json({ sessions });

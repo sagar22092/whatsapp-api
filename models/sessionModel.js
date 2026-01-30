@@ -12,7 +12,6 @@ const sessionModel = new mongoose.Schema(
     },
     apiKey: {
       type: String,
-      default: `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       unique: true,
     },
     webhookUrl: {
@@ -21,5 +20,9 @@ const sessionModel = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
+sessionModel.pre("save", function () {
+  if (!this.apiKey) {
+    this.apiKey = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  }
+});
 export default mongoose.model("Session", sessionModel);

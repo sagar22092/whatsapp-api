@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        /* Header Styles - Mobile First */
+        .header {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (min-width: 768px) {
+            .header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+        }
+        
+        @media (min-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+                text-align: left;
+            }
+        }
+        
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        @media (min-width: 768px) {
+            .nav-links {
+                justify-content: flex-end;
+            }
+        }
+        
+        .nav-link {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        @media (min-width: 768px) {
+            .nav-link {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+        
+        .nav-link:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        /* Profile Grid - Mobile First */
+        .profile-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .profile-grid {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 30px;
+            }
+        }
+        
+        .profile-card, .edit-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .profile-card, .edit-card {
+                padding: 30px;
+            }
+        }
+        
+        /* Profile Header */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        @media (min-width: 480px) {
+            .profile-header {
+                flex-direction: row;
+                text-align: left;
+            }
+        }
+        
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+        
+        @media (min-width: 480px) {
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+                margin-right: 20px;
+                margin-bottom: 0;
+            }
+        }
+        
+        .profile-info h2 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .profile-info h2 {
+                font-size: 24px;
+            }
+        }
+        
+        .profile-info p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Info Groups */
+        .info-group {
+            margin-bottom: 20px;
+        }
+        
+        .info-group label {
+            display: block;
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        @media (min-width: 768px) {
+            .info-group label {
+                font-size: 14px;
+            }
+        }
+        
+        .info-group .value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        
+        @media (min-width: 768px) {
+            .info-group .value {
+                font-size: 18px;
+            }
+        }
+        
+        /* Balance Info */
+        .balance-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .balance-info {
+                padding: 20px;
+                margin-top: 20px;
+            }
+        }
+        
+        .balance-info h3 {
+            margin-bottom: 8px;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .balance-amount {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        @media (min-width: 768px) {
+            .balance-amount {
+                font-size: 36px;
+            }
+        }
+        
+        /* Subscription Info */
+        .subscription-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #28a745;
+        }
+        
+        @media (min-width: 768px) {
+            .subscription-info {
+                padding: 20px;
+                margin-top: 20px;
+            }
+        }
+        
+        .subscription-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        @media (min-width: 768px) {
+            .subscription-status {
+                padding: 5px 15px;
+                font-size: 12px;
+                margin-bottom: 10px;
+            }
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-expired {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Edit Card Styles */
+        .edit-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        @media (min-width: 768px) {
+            .edit-card h3 {
+                font-size: 22px;
+                margin-bottom: 25px;
+            }
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .form-group {
+                margin-bottom: 20px;
+            }
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e1e5ee;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        @media (min-width: 768px) {
+            .form-control {
+                padding: 12px 15px;
+                font-size: 16px;
+            }
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+        }
+        
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .btn-group {
+                flex-direction: row;
+                gap: 15px;
+                margin-top: 30px;
+            }
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            flex: 1;
+        }
+        
+        @media (min-width: 768px) {
+            .btn {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        @media (max-width: 767px) {
+            .btn-primary:active {
+                transform: translateY(-1px);
+            }
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
+        }
+        
+        @media (min-width: 768px) {
+            .alert {
+                padding: 15px;
+                margin-bottom: 20px;
+                font-size: 15px;
+            }
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            margin-bottom: 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        @media (min-width: 768px) {
+            .tab-container {
+                margin-bottom: 30px;
+            }
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+            min-width: 300px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+        
+        @media (min-width: 768px) {
+            .tab {
+                padding: 15px 30px;
+                font-size: 16px;
+            }
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Transaction Styles for Mobile */
+        #transactionsList {
+            max-height: 400px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .transaction-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        @media (min-width: 480px) {
+            .transaction-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 0;
+            }
+        }
+        
+        /* Mobile Menu Toggle for Smaller Screens */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #667eea;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-menu-toggle {
+                display: block;
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+                width: 100%;
+            }
+            
+            .nav-links.active {
+                max-height: 300px;
+                margin-top: 15px;
+            }
+            
+            .nav-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .nav-link, .tab {
+                min-height: 44px; /* Minimum touch target size */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Prevents iOS zoom on focus */
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .btn-primary, .nav-link {
+                border: 2px solid black;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Account</h1>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="/sessions" class="nav-link">Dashboard</a>
+                <a href="/recharge" class="nav-link">Recharge</a>
+                <a href="/api/auth/logout" class="nav-link">Logout</a>
+            </div>
+        </div>
+        
+        <div id="alertMessage" class="alert"></div>
+        
+        <div class="profile-grid">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="userAvatar">
+                        <!-- Initial will be inserted by JS -->
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="userName">Loading...</h2>
+                        <p id="userEmail">Loading...</p>
+                    </div>
+                </div>
+                
+                <div class="info-group">
+                    <label>Username</label>
+                    <div class="value" id="userUsername">Loading...</div>
+                </div>
+                
+                <div class="info-group">
+                    <label>Account Created</label>
+                    <div class="value" id="userCreatedAt">Loading...</div>
+                </div>
+                
+                <div class="balance-info">
+                    <h3>Current Balance</h3>
+                    <div class="balance-amount">৳ <span id="userBalance">0.00</span></div>
+                </div>
+                
+                <div class="subscription-info" id="subscriptionInfo" style="display: none;">
+                    <div class="subscription-status status-active" id="subscriptionStatus">
+                        Active
+                    </div>
+                    <h4>Premium Subscription</h4>
+                    <p>Start Date: <span id="subscriptionStart">--</span></p>
+                    <p>End Date: <span id="subscriptionEnd">--</span></p>
+                    <p>Auto Renew: <span id="subscriptionAutoRenew">--</span></p>
+                </div>
+            </div>
+            
+            <div class="edit-card">
+                <div class="tab-container">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="edit-profile">Edit Profile</div>
+                        <div class="tab" data-tab="change-password">Change Password</div>
+                        <div class="tab" data-tab="transaction-history">Transactions</div>
+                    </div>
+                </div>
+                
+                <!-- Edit Profile Tab -->
+                <div class="tab-content active" id="edit-profile">
+                    <h3>Edit Profile Information</h3>
+                    <form id="editProfileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editName">Full Name</label>
+                                <input type="text" id="editName" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editUsername">Username</label>
+                                <input type="text" id="editUsername" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editEmail">Email Address</label>
+                            <input type="email" id="editEmail" class="form-control" required>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                                <span id="saveProfileText">Save Changes</span>
+                                <div id="saveProfileLoading" class="loading" style="display: none;"></div>
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetProfileForm()">
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Change Password Tab -->
+                <div class="tab-content" id="change-password">
+                    <h3>Change Password</h3>
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" class="form-control" required minlength="6">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" class="form-control" required minlength="6">
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                                <span id="changePasswordText">Change Password</span>
+                                <div id="changePasswordLoading" class="loading" style="display: none;"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Transaction History Tab -->
+                <div class="tab-content" id="transaction-history">
+                    <h3>Recent Transactions</h3>
+                    <div id="transactionsList">
+                        <p style="text-align: center; color: #666; padding: 40px;">
+                            Loading transactions...
+                        </p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadMoreTransactions()" id="loadMoreBtn" style="display: none; margin-top: 15px;">
+                        Load More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentPage = 1;
+        let hasMoreTransactions = true;
+        
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navLinks = document.getElementById('navLinks');
+        
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                mobileMenuToggle.innerHTML = navLinks.classList.contains('active') 
+                    ? '<i class="fas fa-times"></i>' 
+                    : '<i class="fas fa-bars"></i>';
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.header') && navLinks.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                }
+            });
+        }
+        
+        // Load user profile
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/auth/profile');
+                
+                if (response.ok) {
+                    const {user} = await response.json();
+                    
+                    // Update profile display
+                    document.getElementById('userName').textContent = user.name;
+                    document.getElementById('userEmail').textContent = user.email;
+                    document.getElementById('userUsername').textContent = user.username;
+                    document.getElementById('userBalance').textContent = user.balance.toFixed(2);
+                    
+                    // Set avatar initial
+                    const initial = user.name.charAt(0).toUpperCase();
+                    document.getElementById('userAvatar').textContent = initial;
+                    
+                    // Format date
+                    const createdAt = new Date(user.createdAt);
+                    document.getElementById('userCreatedAt').textContent = 
+                        createdAt.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                    
+                    // Fill edit form
+                    document.getElementById('editName').value = user.name;
+                    document.getElementById('editUsername').value = user.username;
+                    document.getElementById('editEmail').value = user.email;
+                    
+                    // Update subscription info
+                    if (user.subscription) {
+                        const sub = user.subscription;
+                        document.getElementById('subscriptionInfo').style.display = 'block';
+                        document.getElementById('subscriptionStatus').textContent = sub.status;
+                        document.getElementById('subscriptionStatus').className = 
+                            `subscription-status status-${sub.status}`;
+                        
+                        document.getElementById('subscriptionStart').textContent = 
+                            new Date(sub.startDate).toLocaleDateString();
+                        document.getElementById('subscriptionEnd').textContent = 
+                            new Date(sub.endDate).toLocaleDateString();
+                        document.getElementById('subscriptionAutoRenew').textContent = 
+                            sub.autoRenew ? 'Yes' : 'No';
+                    }
+                } else {
+                    showAlert('Failed to load profile', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+                showAlert('Network error. Please try again.', 'error');
+            }
+        }
+        
+        // Load transaction history with mobile-friendly layout
+        async function loadTransactions(page = 1) {
+            try {
+                const response = await fetch(`/api/recharge/history?page=${page}&limit=10`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    let transactionsHtml = '';
+                    
+                    if (data.recharges.length === 0) {
+                        if (page === 1) {
+                            transactionsHtml = `
+                                <div style="text-align: center; color: #666; padding: 40px;">
+                                    No transactions found
+                                </div>
+                            `;
+                        }
+                    } else {
+                        data.recharges.forEach(transaction => {
+                            const date = new Date(transaction.createdAt);
+                            const statusClass = transaction.status === 'approved' ? 'status-active' : 
+                                               transaction.status === 'rejected' ? 'status-expired' : '';
+                            
+                            transactionsHtml += `
+                                <div class="transaction-item">
+                                    <div>
+                                        <div style="font-weight: 600; color: #333; font-size: 18px;">
+                                            ৳ ${transaction.amount.toFixed(2)}
+                                        </div>
+                                        <div style="color: #666; font-size: 14px; margin-top: 5px;">
+                                            ${date.toLocaleDateString()}
+                                        </div>
+                                        <div style="color: #888; font-size: 12px; margin-top: 3px;">
+                                            ID: ${transaction.transactionId.substring(0, 8)}...
+                                        </div>
+                                    </div>
+                                    <div style="text-align: left; margin-top: 10px;">
+                                        <div class="subscription-status ${statusClass}" style="display: inline-block;">
+                                            ${transaction.status}
+                                        </div>
+                                        <div style="color: #666; font-size: 14px; margin-top: 8px;">
+                                            ${transaction.bKashNumber}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    if (page === 1) {
+                        document.getElementById('transactionsList').innerHTML = transactionsHtml;
+                    } else {
+                        document.getElementById('transactionsList').innerHTML += transactionsHtml;
+                    }
+                    
+                    hasMoreTransactions = data.pagination.pages > page;
+                    document.getElementById('loadMoreBtn').style.display = hasMoreTransactions ? 'block' : 'none';
+                }
+            } catch (error) {
+                console.error('Failed to load transactions:', error);
+                document.getElementById('transactionsList').innerHTML = `
+                    <div style="text-align: center; color: #666; padding: 40px;">
+                        Failed to load transactions
+                    </div>
+                `;
+            }
+        }
+        
+        function loadMoreTransactions() {
+            currentPage++;
+            loadTransactions(currentPage);
+        }
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+                
+                // Update active tab
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Show active content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+                
+                // Load transactions when tab is opened
+                if (tabId === 'transaction-history') {
+                    currentPage = 1;
+                    loadTransactions(1);
+                }
+                
+                // Close mobile menu if open
+                if (navLinks.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                }
+            });
+        });
+        
+        // Edit profile form
+        document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('editName').value.trim();
+            const username = document.getElementById('editUsername').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            
+            if (!name || !username || !email) {
+                showAlert('All fields are required', 'error');
+                return;
+            }
+            
+            if (!/^[a-z][a-z0-9_-]*$/.test(username)) {
+                showAlert('Username can only contain lowercase letters, numbers, underscore and hyphen', 'error');
+                return;
+            }
+            
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showAlert('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('saveProfileBtn');
+            const btnText = document.getElementById('saveProfileText');
+            const btnLoading = document.getElementById('saveProfileLoading');
+            
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+            
+            try {
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ name, username, email })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Profile updated successfully!', 'success');
+                    loadProfile(); // Reload profile data
+                } else {
+                    showAlert(result.message || 'Update failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+                console.error('Update error:', error);
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        });
+        
+        // Change password form
+        document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showAlert('All fields are required', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showAlert('New password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showAlert('New passwords do not match', 'error');
+                return;
+            }
+            
+            if (newPassword === currentPassword) {
+                showAlert('New password must be different from current password', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('changePasswordBtn');
+            const btnText = document.getElementById('changePasswordText');
+            const btnLoading = document.getElementById('changePasswordLoading');
+            
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+            
+            try {
+                const response = await fetch('/api/user/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Password changed successfully!', 'success');
+                    document.getElementById('changePasswordForm').reset();
+                } else {
+                    showAlert(result.message || 'Password change failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+                console.error('Password change error:', error);
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        });
+        
+        function resetProfileForm() {
+            loadProfile();
+        }
+        
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'block';
+            
+            // Scroll to alert on mobile
+            if (window.innerWidth < 768) {
+                alertDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Handle touch gestures for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const swipeDistance = touchEndX - touchStartX;
+            
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                const tabs = document.querySelectorAll('.tab');
+                const activeTab = document.querySelector('.tab.active');
+                const activeIndex = Array.from(tabs).indexOf(activeTab);
+                
+                if (swipeDistance < 0 && activeIndex < tabs.length - 1) {
+                    // Swipe left - go to next tab
+                    tabs[activeIndex + 1].click();
+                } else if (swipeDistance > 0 && activeIndex > 0) {
+                    // Swipe right - go to previous tab
+                    tabs[activeIndex - 1].click();
+                }
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfile();
+            
+            // Add touch-friendly improvements
+            document.querySelectorAll('input, button, a').forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                
+                element.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+            });
+        });
+        
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            // Add a small delay to allow orientation to complete
+            setTimeout(() => {
+                // Recalculate any layout if needed
+                if (window.innerWidth < 768 && navLinks.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>

@@ -243,14 +243,12 @@
         
         <div class="flex gap-3 w-full md:w-auto mobile-full">
           <button
-            onclick="loadSessions()"
-            id="refreshBtn"
-            class="btn-secondary px-4 md:px-5 py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all btn-refresh flex-1 md:flex-none"
+            onclick="window.location.href='/profile'"
+            class="btn-primary px-4 md:px-5 py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all flex-1 md:flex-none"
           >
-            <i class="fas fa-sync-alt"></i>
-            <span class="hidden sm:inline">Refresh</span>
+             <i class="fas fa-user text-slate-100"></i>
+            <span class="hidden sm:inline">Profile</span>
           </button>
-          
           <button
             onclick="createSession()"
             class="btn-primary px-4 md:px-5 py-3 rounded-xl font-semibold text-white flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all flex-1 md:flex-none"
@@ -392,6 +390,12 @@
                 <i class="fas fa-spinner loading-spin text-3xl md:text-4xl text-slate-400"></i>
                 <p class="text-slate-500 mt-4 text-sm md:text-base">Loading QR code...</p>
               </div>
+            </div>
+          </div>
+          <div id="qrStatus" class="hidden text-center">
+            <div class="flex items-center justify-center gap-2">
+              <i class="fas fa-sync-alt loading-spin text-emerald-400"></i>
+              <span class="text-sm text-slate-300">Waiting for connection...</span>
             </div>
           </div>
         </div>
@@ -604,7 +608,9 @@
       let sessionsData = [];
       let apiKeyVisibility = {};
       let pairCodeInterval = null;
+      let qrCheckInterval = null;
       let isPairModalClosing = false;
+      let isQRModalClosing = false;
 
       /* ───────── TOAST NOTIFICATION ───────── */
       function showToast(type, title, message, duration = 3000) {
@@ -762,11 +768,6 @@
           document.getElementById('loadingState').classList.remove('hidden');
           document.getElementById('emptyState').classList.add('hidden');
           
-          const refreshBtn = document.getElementById('refreshBtn');
-          const originalContent = refreshBtn.innerHTML;
-          refreshBtn.innerHTML = '<i class="fas fa-spinner loading-spin"></i>';
-          refreshBtn.disabled = true;
-          
           const data = await api(`${API}/list`);
           sessionsData = data.sessions;
           const container = document.getElementById("sessions");
@@ -902,18 +903,9 @@
             container.appendChild(card);
           });
           
-          setTimeout(() => {
-            refreshBtn.innerHTML = originalContent;
-            refreshBtn.disabled = false;
-          }, 500);
-          
         } catch (error) {
           showToast('error', 'Load Failed', 'Failed to load sessions');
           document.getElementById('loadingState').classList.add('hidden');
-          
-          const refreshBtn = document.getElementById('refreshBtn');
-          refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
-          refreshBtn.disabled = false;
         }
       }
 
@@ -938,13 +930,22 @@
       /* ───────── OPEN QR MODAL ───────── */
       async function openQR(sessionId) {
         activeQRSession = sessionId;
+        isQRModalClosing = false;
         const modal = document.getElementById("qrModal");
         modal.classList.remove("hidden");
         modal.classList.add("flex");
-        loadQR();
+        
+        // Show status indicator
+        document.getElementById("qrStatus").classList.remove("hidden");
+        
+        // Load initial QR
+        await loadQR();
+        
+        // Start checking connection status
+        startQRConnectionCheck();
       }
 
-      /* ───────── LOAD QR (AUTO) ───────── */
+      /* ───────── LOAD QR ───────── */
       async function loadQR() {
         if (!activeQRSession) return;
 
@@ -954,21 +955,66 @@
 
           if (res.qr) {
             qrBox.innerHTML = `<img src="${res.qr}" class="bg-white p-2 rounded-lg w-56 h-56 md:w-64 md:h-64 shadow-lg" />`;
-          
           } else {
-            showToast('success', 'Connected!', 'WhatsApp session is now connected');
-            closeQRModal();
-            loadSessions();
+            // If no QR returned, session might already be connected
+            checkQRConnectionStatus();
           }
         } catch (error) {
           showToast('error', 'QR Error', 'Failed to load QR code');
         }
       }
 
+      /* ───────── CHECK QR CONNECTION STATUS ───────── */
+      async function checkQRConnectionStatus() {
+        if (!activeQRSession || isQRModalClosing) return;
+        
+        try {
+          // Check session status
+          const sessions = await api(`${API}/list`);
+          const currentSession = sessions.sessions.find(s => s._id === activeQRSession);
+          
+          if (currentSession && currentSession.status === "CONNECTED") {
+            // Session is connected, close modal
+            showToast('success', 'Connected!', 'WhatsApp session is now connected');
+            closeQRModal();
+            loadSessions();
+          }
+        } catch (error) {
+          console.error('Error checking connection status:', error);
+        }
+      }
+
+      /* ───────── START QR CONNECTION CHECK INTERVAL ───────── */
+      function startQRConnectionCheck() {
+        // Clear any existing interval
+        if (qrCheckInterval) {
+          clearInterval(qrCheckInterval);
+        }
+        
+        // Check connection status every 2 seconds
+        qrCheckInterval = setInterval(() => {
+          if (!activeQRSession || isQRModalClosing) {
+            clearInterval(qrCheckInterval);
+            return;
+          }
+          checkQRConnectionStatus();
+        }, 2000);
+      }
+
       /* ───────── CLOSE QR MODAL ───────── */
       function closeQRModal() {
+        isQRModalClosing = true;
+        
+        // Clear interval
+        if (qrCheckInterval) {
+          clearInterval(qrCheckInterval);
+          qrCheckInterval = null;
+        }
+        
         activeQRSession = null;
         document.getElementById("qrModal").classList.add("hidden");
+        
+        // Reset QR box
         document.getElementById("qrBox").innerHTML = `
           <div class="p-6 md:p-8 bg-white rounded-lg w-56 h-56 md:w-64 md:h-64 flex items-center justify-center">
             <div class="text-center">
@@ -976,6 +1022,9 @@
               <p class="text-slate-500 mt-4 text-sm md:text-base">Loading QR code...</p>
             </div>
           </div>`;
+        
+        // Hide status indicator
+        document.getElementById("qrStatus").classList.add("hidden");
       }
 
       /* ───────── OPEN PAIR MODAL ───────── */
