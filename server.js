@@ -12,8 +12,14 @@ import { authenticate } from "./middlewares/authMiddlewares.js";
 import sessionRouter from "./routers/sessionRouter.js";
 import whatsappRouter from "./routers/whatsappRouter.js";
 import subscriptionRouter from "./routers/subscriptionRouter.js";
+import startCrons from "./crons/index.js";
 
 const app = express();
+await connectDB();
+
+// 🔥 Start all cron jobs
+startCrons();
+
 const PORT = process.env.PORT || 3000;
 
 const __filename = fileURLToPath(import.meta.url);
@@ -82,6 +88,5 @@ app.get("/subscriptions", authenticate, (req, res) => {
 });
 
 app.listen(PORT, async () => {
-  await connectDB();
   console.log(`🚀 Express Server running → http://localhost:${PORT}`);
 });

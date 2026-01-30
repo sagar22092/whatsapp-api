@@ -328,8 +328,8 @@ export async function giveReaction(req, res) {
     const { number, group, messageKey, emoji } = req.body;
 
     if (!apiKey) return res.status(400).json({ error: "x-api-key required" });
-    if (!messageKey || !emoji)
-      return res.status(400).json({ error: "messageKey and emoji required" });
+    if (!messageKey)
+      return res.status(400).json({ error: "messageKey required" });
     if (!number && !group)
       return res.status(400).json({ error: "number or group required" });
 
@@ -344,8 +344,8 @@ export async function giveReaction(req, res) {
       session._id,
       jid,
       {
-        reaction: {
-          text: emoji,
+        react: {
+          text: emoji || "",
           key: messageKey,
         },
       },
