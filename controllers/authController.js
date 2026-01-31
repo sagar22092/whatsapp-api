@@ -1,4 +1,5 @@
 import { generateToken } from "../lib/jwtToken.js";
+import sessionModel from "../models/sessionModel.js";
 import User from "../models/userModel.js";
 
 export async function register(req, res) {
@@ -95,7 +96,9 @@ export async function me(req, res) {
   if (!req.user) {
     return res.status(400).json({ error: "Not logged in" });
   }
-  return res.status(200).json({ user: req.user });
+
+  const sessions = await sessionModel.find({ user: req.user._id }).lean();
+  return res.status(200).json({ user: req.user, activeSessions: sessions.length });
 }
 
 export async function logout(req, res) {

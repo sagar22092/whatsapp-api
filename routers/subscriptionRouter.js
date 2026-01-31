@@ -9,8 +9,10 @@ const subscriptionRouter = Router();
 
 subscriptionRouter.get("/list", getSubscriptionList);
 
-subscriptionRouter.post("/current", getCurrentSubscription);
+subscriptionRouter.get("/current", getCurrentSubscription);
 
-subscriptionRouter.get("/purchase", purchaseSubscription);
+subscriptionRouter.post("/purchase", purchaseSubscription);
+
+subscriptionRouter.post("/update", purchaseSubscription);
 
 export default subscriptionRouter;

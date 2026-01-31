@@ -12,7 +12,8 @@
             --primary-green: #10b981;
             --dark-bg: #111827;
             --darker-bg: #0f172a;
-            --bkash-pink: #e2136e;
+            --primary-blue: #3b82f6;
+            --primary-yellow: #f59e0b;
         }
         
         body {
@@ -58,8 +59,12 @@
             background: linear-gradient(135deg, var(--primary-green), #059669);
         }
         
-        .bkash-bg {
-            background: linear-gradient(135deg, var(--bkash-pink), #c1126f);
+        .blue-bg {
+            background: linear-gradient(135deg, var(--primary-blue), #2563eb);
+        }
+        
+        .yellow-bg {
+            background: linear-gradient(135deg, var(--primary-yellow), #d97706);
         }
         
         .plan-card {
@@ -78,6 +83,16 @@
         .current-plan {
             border-color: var(--primary-green);
             background: linear-gradient(145deg, rgba(16, 185, 129, 0.05), transparent);
+        }
+        
+        .upgrade-plan {
+            border-color: var(--primary-blue);
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.05), transparent);
+        }
+        
+        .downgrade-plan {
+            border-color: var(--primary-yellow);
+            background: linear-gradient(145deg, rgba(245, 158, 11, 0.05), transparent);
         }
         
         .modal {
@@ -150,43 +165,107 @@
             display: block;
         }
         
-        /* bKash payment box */
-        .bkash-payment-box {
-            border: 2px solid rgba(226, 19, 110, 0.3);
-            background: rgba(226, 19, 110, 0.05);
-            border-radius: 0.75rem;
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #374151;
+            border-radius: 4px;
+            overflow: hidden;
         }
         
-        .bkash-steps {
-            counter-reset: step;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), #34d399);
+            transition: width 0.3s ease;
         }
         
-        .bkash-step {
+        /* Toggle switch */
+        .toggle-switch {
             position: relative;
-            padding-left: 3rem;
-            margin-bottom: 1.5rem;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
         }
         
-        .bkash-step:before {
-            counter-increment: step;
-            content: counter(step);
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
             position: absolute;
-            left: 0;
+            cursor: pointer;
             top: 0;
-            width: 2rem;
-            height: 2rem;
-            background: var(--bkash-pink);
-            color: white;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #374151;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
             border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary-green);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
+            gap: 10px;
         }
         
-        .trx-id-input {
-            font-family: monospace;
-            letter-spacing: 1px;
+        .toast-success {
+            background-color: var(--primary-green);
+            border-left: 4px solid #059669;
+        }
+        
+        .toast-error {
+            background-color: #ef4444;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .toast-info {
+            background-color: var(--primary-blue);
+            border-left: 4px solid #2563eb;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
         
         /* Responsive adjustments */
@@ -219,8 +298,8 @@
                     <a href="/subscriptions.html" class="text-green-500 font-medium"><i class="fas fa-crown mr-2"></i>Subscriptions</a>
                     <div class="relative group">
                         <button class="flex items-center text-gray-300 hover:text-white">
-                            <img src="https://ui-avatars.com/api/?name=User&background=10b981&color=fff" alt="User" class="w-8 h-8 rounded-full mr-2">
-                            <span>User Account</span>
+                            <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=10b981&color=fff" alt="User" class="w-8 h-8 rounded-full mr-2">
+                            <span id="user-name">Loading...</span>
                             <i class="fas fa-chevron-down ml-2 text-sm"></i>
                         </button>
                         <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2 hidden group-hover:block">
@@ -257,13 +336,14 @@
             <!-- Header -->
             <div class="mb-10">
                 <h1 class="text-3xl md:text-4xl font-bold mb-3">Subscription Management</h1>
-                <p class="text-gray-400">View, upgrade, and manage your WhatsApp Manager subscription plans</p>
+                <p class="text-gray-400">View, upgrade, downgrade, and manage your WhatsApp Manager subscription plans</p>
             </div>
             
             <!-- Tabs -->
             <div class="flex border-b border-gray-800 mb-8 overflow-x-auto">
                 <div class="tab active" data-tab="current">Current Plan</div>
-                <div class="tab" data-tab="plans">Available Plans</div>
+                <div class="tab" data-tab="plans">All Plans</div>
+                <div class="tab" data-tab="change">Change Plan</div>
                 <div class="tab" data-tab="billing">Payment History</div>
             </div>
             
@@ -279,15 +359,15 @@
                             </div>
                             <div id="current-plan-info" class="hidden">
                                 <div class="flex items-center">
-                                    <span class="text-3xl font-bold mr-3" id="current-plan-name">Basic</span>
-                                    <span class="status-badge status-active" id="current-plan-status">Active</span>
+                                    <span class="text-3xl font-bold mr-3" id="current-plan-name">Pro</span>
+                                    <span class="status-badge" id="current-plan-status">Active</span>
                                 </div>
                                 <p class="text-gray-400 mt-2" id="current-plan-description"></p>
                             </div>
                         </div>
                         <div id="current-plan-actions" class="mt-4 md:mt-0 hidden">
-                            <button class="px-5 py-2.5 gradient-bg hover:opacity-90 rounded-lg font-medium transition" id="upgrade-plan-btn">
-                                <i class="fas fa-arrow-up mr-2"></i>Upgrade Plan
+                            <button class="px-5 py-2.5 blue-bg hover:opacity-90 rounded-lg font-medium transition" id="change-plan-btn">
+                                <i class="fas fa-exchange-alt mr-2"></i>Change Plan
                             </button>
                         </div>
                     </div>
@@ -299,7 +379,10 @@
                         </div>
                         <div class="bg-gray-800 p-5 rounded-lg">
                             <div class="text-gray-400 mb-2"><i class="fas fa-phone-alt mr-2"></i>WhatsApp Numbers</div>
-                            <div class="text-xl font-bold"><span id="current-sessions">1</span> / <span id="max-sessions">1</span> Used</div>
+                            <div class="text-xl font-bold"><span id="current-sessions">1</span> / <span id="max-sessions">3</span> Used</div>
+                            <div class="progress-bar mt-2">
+                                <div class="progress-fill" id="sessions-progress"></div>
+                            </div>
                         </div>
                         <div class="bg-gray-800 p-5 rounded-lg">
                             <div class="text-gray-400 mb-2"><i class="fas fa-clock mr-2"></i>Renewal Date</div>
@@ -311,6 +394,52 @@
                         <h3 class="text-lg font-semibold mb-4">Plan Features</h3>
                         <div id="current-plan-features" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <!-- Features will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Subscription Details -->
+                    <div class="mt-8 pt-8 border-t border-gray-800">
+                        <h3 class="text-lg font-semibold mb-4">Subscription Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-gray-400 mb-1">Subscription ID</div>
+                                <div class="font-mono text-sm" id="subscription-id">pro</div>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-gray-400 mb-1">Auto Renew</div>
+                                <div class="flex items-center justify-between">
+                                    <span id="auto-renew-status-text">Enabled</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="auto-renew-toggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-gray-400 mb-1">Started On</div>
+                                <div id="subscription-start">Jan 31, 2026</div>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-gray-400 mb-1">Expires On</div>
+                                <div id="subscription-end">Mar 3, 2026</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Account Balance -->
+                    <div class="mt-8 pt-8 border-t border-gray-800">
+                        <h3 class="text-lg font-semibold mb-4">Account Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-gray-400 mb-1">Account Balance</div>
+                                <div class="text-2xl font-bold text-green-400" id="account-balance">৳100,000</div>
+                                <div class="text-sm text-gray-400 mt-1">Available for subscription payments</div>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-gray-400 mb-1">Member Since</div>
+                                <div id="member-since">Jan 24, 2026</div>
+                                <div class="text-sm text-gray-400 mt-1">Active user for 7 days</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -355,11 +484,11 @@
                 </div>
             </div>
             
-            <!-- Available Plans Tab -->
+            <!-- All Plans Tab -->
             <div id="plans-tab" class="tab-content">
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold mb-2">Choose Your Plan</h2>
-                    <p class="text-gray-400">Upgrade your plan to get more WhatsApp numbers and features</p>
+                    <h2 class="text-2xl font-bold mb-2">All Subscription Plans</h2>
+                    <p class="text-gray-400">Browse all available subscription plans</p>
                     
                     <div class="flex items-center mt-6 bg-gray-800 rounded-lg p-1 w-fit">
                         <span id="billing-toggle-monthly" class="px-4 py-2 rounded-lg bg-green-600 cursor-pointer font-medium">Monthly</span>
@@ -391,6 +520,97 @@
                 </div>
             </div>
             
+            <!-- Change Plan Tab -->
+            <div id="change-tab" class="tab-content">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-2">Change Your Current Plan</h2>
+                    <p class="text-gray-400">Upgrade to higher plans at any time or downgrade to lower plans</p>
+                </div>
+                
+                <!-- Change Plans Loading -->
+                <div id="change-plans-loading" class="text-center py-12">
+                    <div class="inline-block loading mr-3"></div>
+                    <span class="text-gray-300">Loading plan options...</span>
+                </div>
+                
+                <!-- Change Plans Container -->
+                <div id="change-plans-container" class="hidden">
+                    <!-- Current plan info -->
+                    <div class="mb-8 p-6 bg-gray-900 rounded-xl border border-gray-800">
+                        <h3 class="text-xl font-bold mb-4">Your Current Plan</h3>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-2xl font-bold" id="change-current-plan-name">Pro</h4>
+                                <p class="text-gray-400" id="change-current-plan-description"></p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-gray-400">Current Price</div>
+                                <div class="text-2xl font-bold" id="change-current-plan-price">৳1,500</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-gray-400 text-sm">Active Sessions</div>
+                                <div class="font-bold" id="change-active-sessions">1</div>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-gray-400 text-sm">Remaining Days</div>
+                                <div class="font-bold" id="remaining-days">32</div>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="text-gray-400 text-sm">Account Balance</div>
+                                <div class="font-bold text-green-400" id="change-balance">৳100,000</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-900/20 border border-blue-800 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+                                <span class="text-sm text-gray-300">You can upgrade to any higher plan at any time. Downgrades will be effective at the end of your current billing cycle.</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Plan options -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-6">Available Plan Options</h3>
+                        <div id="change-options-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Plan options will be dynamically loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Renew expired subscription -->
+                    <div id="renew-expired-section" class="hidden mb-8">
+                        <div class="bg-yellow-900/20 border border-yellow-800 rounded-xl p-6">
+                            <h3 class="text-xl font-bold mb-4 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-3 text-yellow-400"></i>Renew Expired Subscription
+                            </h3>
+                            <p class="text-gray-300 mb-4">Your subscription has expired. Renew it to continue using the service.</p>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Renew Current Plan</h4>
+                                    <p class="text-gray-400 text-sm">Renew your <span id="renew-plan-name" class="font-medium">Pro</span> plan</p>
+                                </div>
+                                <button id="renew-plan-btn" class="yellow-bg hover:opacity-90 text-white px-6 py-2.5 rounded-lg font-medium transition">
+                                    <i class="fas fa-redo mr-2"></i>Renew Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- No Subscription -->
+                <div id="no-subscription" class="text-center py-12 hidden">
+                    <div class="bg-gray-800 rounded-xl p-8 max-w-md mx-auto">
+                        <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">No Active Subscription</h3>
+                        <p class="text-gray-300 mb-4">You don't have an active subscription to change.</p>
+                        <button onclick="document.querySelector('[data-tab=plans]').click()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg transition font-medium">
+                            <i class="fas fa-play mr-2"></i>Get Started
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Payment History Tab -->
             <div id="billing-tab" class="tab-content">
                 <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
@@ -409,8 +629,8 @@
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Plan</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Transaction ID</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
                                     </tr>
                                 </thead>
                                 <tbody id="billing-table-body" class="divide-y divide-gray-800">
@@ -430,139 +650,268 @@
         </div>
     </div>
     
-    <!-- bKash Payment Modal -->
-    <div id="bkash-modal" class="modal">
+    <!-- Purchase Confirmation Modal -->
+    <div id="purchase-modal" class="modal">
         <div class="modal-content">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-bold">Complete Payment with bKash</h3>
-                    <button class="text-gray-400 hover:text-white text-2xl" id="close-bkash-modal">&times;</button>
+                    <h3 class="text-2xl font-bold" id="purchase-modal-title">Confirm Subscription</h3>
+                    <button class="text-gray-400 hover:text-white text-2xl" id="close-purchase-modal">&times;</button>
                 </div>
                 
                 <!-- Selected Plan Info -->
                 <div class="mb-6 p-4 bg-gray-800 rounded-lg">
                     <div class="flex justify-between items-center mb-2">
-                        <span class="font-medium" id="selected-plan-name">Pro Plan</span>
-                        <span class="text-xl font-bold" id="selected-plan-price">৳1500</span>
+                        <span class="font-medium" id="purchase-plan-name">Plus Plan</span>
+                        <span class="text-xl font-bold" id="purchase-plan-price">৳3,000</span>
                     </div>
-                    <p class="text-gray-400 text-sm" id="selected-plan-description">3 WhatsApp numbers, unlimited messages</p>
+                    <p class="text-gray-400 text-sm" id="purchase-plan-description">6 WhatsApp numbers, unlimited messages</p>
+                    <div class="mt-2 flex items-center text-sm text-gray-400">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        Billing Cycle: <span id="purchase-billing-cycle" class="ml-1 font-medium">Monthly</span>
+                    </div>
                 </div>
                 
-                <!-- bKash Payment Instructions -->
-                <div class="bkash-payment-box p-5 mb-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
-                            <span class="text-2xl font-bold text-pink-600">b</span>
-                        </div>
+                <!-- Auto-renew toggle -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
                         <div>
-                            <h4 class="font-bold text-lg">Pay with bKash</h4>
-                            <p class="text-gray-400 text-sm">Send money to our bKash number and enter the transaction ID</p>
+                            <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
+                            <p class="text-gray-400 text-sm">Automatically renew this plan before it expires</p>
                         </div>
-                    </div>
-                    
-                    <div class="bkash-steps mb-6">
-                        <div class="bkash-step">
-                            <h5 class="font-medium mb-1">Send Payment to bKash</h5>
-                            <p class="text-gray-400 text-sm">Go to your bKash app and send <span class="font-bold text-white" id="bkash-amount">৳1500</span> to:</p>
-                            <div class="mt-2 p-3 bg-gray-900 rounded-lg">
-                                <div class="text-center">
-                                    <div class="text-gray-400 text-sm mb-1">bKash Personal Number</div>
-                                    <div class="text-2xl font-bold font-mono text-green-400" id="bkash-number">+8801XXX-XXXXXX</div>
-                                    <button class="mt-2 text-sm text-blue-400 hover:text-blue-300" id="copy-bkash-number">
-                                        <i class="far fa-copy mr-1"></i>Copy Number
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bkash-step">
-                            <h5 class="font-medium mb-1">Enter Transaction Details</h5>
-                            <p class="text-gray-400 text-sm">After payment, enter the transaction ID from bKash</p>
-                            <div class="mt-3 space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Transaction ID (TrxID)</label>
-                                    <input type="text" id="trx-id-input" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500 trx-id-input" placeholder="Ex: 8A7B6C5D4E3F2G1H" maxlength="16">
-                                    <p class="text-gray-500 text-xs mt-1">Enter the 10-16 digit bKash transaction ID</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Payment Amount</label>
-                                    <input type="text" id="paid-amount" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" placeholder="Enter exact amount sent" value="1500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">bKash Sender Number (Optional)</label>
-                                    <input type="text" id="sender-number" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-green-500" placeholder="+8801XXXXXXXXX">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bkash-step">
-                            <h5 class="font-medium mb-1">Complete Verification</h5>
-                            <p class="text-gray-400 text-sm">Click submit to verify your payment. We'll activate your plan within 5-10 minutes.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-yellow-900/20 border border-yellow-800 rounded-lg p-4 mb-4">
-                        <div class="flex items-start">
-                            <i class="fas fa-exclamation-triangle text-yellow-500 mt-0.5 mr-3"></i>
-                            <div>
-                                <h6 class="font-medium mb-1">Important Notes</h6>
-                                <ul class="text-sm text-gray-300 space-y-1">
-                                    <li>• Make sure to send the <strong>exact amount</strong> shown above</li>
-                                    <li>• Keep the transaction ID safe for future reference</li>
-                                    <li>• Payment verification may take 5-10 minutes</li>
-                                    <li>• For any issue, contact support with transaction ID</li>
-                                </ul>
-                            </div>
-                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="modal-auto-renew-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
                 </div>
                 
-                <div class="mt-6 pt-6 border-t border-gray-800">
-                    <div class="flex justify-between mb-4">
-                        <span>Plan Price</span>
-                        <span class="font-medium" id="modal-plan-price">৳1500</span>
+                <!-- Balance Information -->
+                <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="font-medium">Your Account Balance</div>
+                        <div class="text-xl font-bold text-green-400" id="user-balance">৳100,000</div>
                     </div>
-                    <div class="flex justify-between mb-4">
-                        <span>VAT (15%)</span>
-                        <span class="font-medium" id="modal-vat">৳225</span>
+                    <div class="text-sm text-gray-400" id="balance-info">
+                        <!-- Balance info will be shown here -->
                     </div>
-                    <div class="flex justify-between text-lg font-bold pt-4 border-t border-gray-800">
-                        <span>Total to Pay</span>
-                        <span id="modal-total">৳1725</span>
+                </div>
+                
+                <!-- Payment Summary -->
+                <div class="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
+                    <h4 class="font-medium mb-3 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-blue-400"></i>Payment Information
+                    </h4>
+                    <div id="payment-summary">
+                        <!-- Payment summary will be shown here -->
                     </div>
-                    
-                    <div class="mt-8">
-                        <button id="submit-payment-btn" class="w-full bkash-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition duration-300 text-lg">
-                            <i class="fas fa-check-circle mr-2"></i>Submit Payment Details
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-800">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button id="cancel-purchase" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
+                            Cancel
                         </button>
-                        <p class="text-center text-gray-400 text-sm mt-3">
-                            By proceeding, you agree to our <a href="#" class="text-green-400 hover:underline">Terms of Service</a>
-                        </p>
+                        <button id="confirm-purchase-btn" class="flex-1 gradient-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition duration-300">
+                            <i class="fas fa-check-circle mr-2"></i>Confirm with Balance
+                        </button>
                     </div>
+                    <p class="text-center text-gray-400 text-sm mt-3">
+                        Payment will be deducted from your account balance
+                    </p>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Payment Success Modal -->
+    <!-- Change Plan Confirmation Modal -->
+    <div id="change-confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold" id="change-modal-title">Confirm Plan Change</h3>
+                    <button class="text-gray-400 hover:text-white text-2xl" id="close-change-modal">&times;</button>
+                </div>
+                
+                <!-- Plan Comparison -->
+                <div class="mb-6">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <!-- Current Plan -->
+                        <div class="p-4 bg-gray-800 rounded-lg">
+                            <div class="text-center mb-3">
+                                <div class="text-sm text-gray-400 mb-1">Current Plan</div>
+                                <h4 class="text-xl font-bold" id="change-current-plan-name">Pro</h4>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold mb-1" id="change-current-price">৳1,500</div>
+                                <div class="text-sm text-gray-400">per month</div>
+                            </div>
+                            <div class="mt-3 text-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-phone text-green-400 mr-2"></i>
+                                    <span id="change-current-sessions">3 Sessions</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- New Plan -->
+                        <div class="p-4" id="new-plan-container">
+                            <!-- Will be updated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <!-- Change Details -->
+                    <div class="p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
+                        <h4 class="font-medium mb-3 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-blue-400"></i>Change Details
+                        </h4>
+                        <div id="change-details">
+                            <!-- Change details will be shown here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Prorated Payment -->
+                <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <h4 class="font-medium" id="change-amount-title">Change Amount</h4>
+                            <p class="text-gray-400 text-sm" id="change-amount-description"></p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-gray-400 text-sm">Amount to Pay</div>
+                            <div class="text-2xl font-bold" id="change-amount">৳0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Auto-renew toggle -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
+                        <div>
+                            <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
+                            <p class="text-gray-400 text-sm">Automatically renew this plan before it expires</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="change-auto-renew-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-800">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button id="cancel-change" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
+                            Cancel
+                        </button>
+                        <button id="confirm-change-btn" class="flex-1 blue-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition duration-300">
+                            <i class="fas fa-check-circle mr-2"></i>Confirm Change
+                        </button>
+                    </div>
+                    <p class="text-center text-gray-400 text-sm mt-3">
+                        Payment will be deducted from your account balance
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Renew Confirmation Modal -->
+    <div id="renew-confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Confirm Renewal</h3>
+                    <button class="text-gray-400 hover:text-white text-2xl" id="close-renew-modal">&times;</button>
+                </div>
+                
+                <!-- Plan Info -->
+                <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium" id="renew-plan-name">Pro Plan</span>
+                        <span class="text-xl font-bold" id="renew-plan-price">৳1,500</span>
+                    </div>
+                    <p class="text-gray-400 text-sm" id="renew-plan-description">3 WhatsApp numbers, unlimited messages</p>
+                    <div class="mt-2 flex items-center text-sm text-gray-400">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        Billing Cycle: <span class="ml-1 font-medium">Monthly</span>
+                    </div>
+                </div>
+                
+                <!-- Balance Information -->
+                <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="font-medium">Your Account Balance</div>
+                        <div class="text-xl font-bold text-green-400" id="renew-user-balance">৳100,000</div>
+                    </div>
+                    <div class="text-sm text-gray-400" id="renew-balance-info">
+                        <!-- Balance info will be shown here -->
+                    </div>
+                </div>
+                
+                <!-- Payment Summary -->
+                <div class="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
+                    <h4 class="font-medium mb-3 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-blue-400"></i>Renewal Information
+                    </h4>
+                    <div id="renew-summary">
+                        <!-- Renew summary will be shown here -->
+                    </div>
+                </div>
+                
+                <!-- Auto-renew toggle -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
+                        <div>
+                            <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
+                            <p class="text-gray-400 text-sm">Automatically renew this plan before it expires</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="renew-auto-renew-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-800">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button id="cancel-renew" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
+                            Cancel
+                        </button>
+                        <button id="confirm-renew-btn" class="flex-1 yellow-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition duration-300">
+                            <i class="fas fa-redo mr-2"></i>Confirm Renewal
+                        </button>
+                    </div>
+                    <p class="text-center text-gray-400 text-sm mt-3">
+                        Payment will be deducted from your account balance
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
     <div id="success-modal" class="modal">
         <div class="modal-content">
             <div class="p-8 text-center">
                 <div class="w-20 h-20 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fas fa-check text-4xl text-green-500"></i>
                 </div>
-                <h3 class="text-2xl font-bold mb-3">Payment Submitted Successfully!</h3>
-                <p class="text-gray-400 mb-6">
-                    Your payment details have been submitted for verification. Your <span id="success-plan-name" class="font-medium">Pro Plan</span> will be activated within 5-10 minutes.
+                <h3 class="text-2xl font-bold mb-3" id="success-title">Success!</h3>
+                <p class="text-gray-400 mb-6" id="success-message">
+                    Your subscription has been processed successfully.
                 </p>
                 <div class="bg-gray-800 rounded-lg p-4 mb-6 text-left">
                     <div class="flex justify-between mb-2">
-                        <span class="text-gray-400">Transaction ID:</span>
-                        <span class="font-mono font-bold" id="success-trx-id">8A7B6C5D4E3F2G1H</span>
+                        <span class="text-gray-400">Reference:</span>
+                        <span class="font-mono font-bold" id="success-reference">SUB-2026-001</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-400">Reference:</span>
-                        <span class="font-mono" id="success-reference">SUB-2024-001</span>
+                        <span class="text-gray-400">Amount:</span>
+                        <span class="font-mono" id="success-amount">৳1,500</span>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-4">
@@ -583,16 +932,24 @@
         const SUBSCRIPTION_API = `${API_BASE_URL}/subscription/list`;
         const CURRENT_SUBSCRIPTION_API = `${API_BASE_URL}/subscription/current`;
         const PURCHASE_API = `${API_BASE_URL}/subscription/purchase`;
+        const UPDATE_SUBSCRIPTION_API = `${API_BASE_URL}/subscription/update`;
+        const PROFILE_API = `${API_BASE_URL}/auth/profile`;
+        const UPDATE_AUTO_RENEW_API = `${API_BASE_URL}/subscription/auto-renew`;
         const PAYMENT_HISTORY_API = `${API_BASE_URL}/subscription/payments`;
-        
-        // bKash Configuration
-        const BKASH_NUMBER = "+8801712345678"; // Replace with your actual bKash number
         
         // Global variables
         let currentSubscription = null;
         let availablePlans = [];
         let billingCycle = 'monthly';
         let selectedPlan = null;
+        let userProfile = null;
+        let autoRenew = true;
+        let isUpgradeFlow = false;
+        let isDowngradeFlow = false;
+        let currentPlanForChange = null;
+        let newPlanForChange = null;
+        let currentSessions = 0;
+        let activeSessionsCount = 0;
         
         // DOM Elements
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -603,8 +960,15 @@
         const billingToggleYearly = document.getElementById('billing-toggle-yearly');
         
         // Modal elements
-        const bkashModal = document.getElementById('bkash-modal');
-        const closeBkashModal = document.getElementById('close-bkash-modal');
+        const purchaseModal = document.getElementById('purchase-modal');
+        const closePurchaseModal = document.getElementById('close-purchase-modal');
+        const cancelPurchase = document.getElementById('cancel-purchase');
+        const changeConfirmModal = document.getElementById('change-confirm-modal');
+        const closeChangeModal = document.getElementById('close-change-modal');
+        const cancelChange = document.getElementById('cancel-change');
+        const renewConfirmModal = document.getElementById('renew-confirm-modal');
+        const closeRenewModal = document.getElementById('close-renew-modal');
+        const cancelRenew = document.getElementById('cancel-renew');
         const successModal = document.getElementById('success-modal');
         const closeSuccessModal = document.getElementById('close-success-modal');
         
@@ -640,6 +1004,8 @@
                 // Load data for the tab if needed
                 if (tabId === 'plans' && availablePlans.length === 0) {
                     loadAvailablePlans();
+                } else if (tabId === 'change') {
+                    loadChangeOptions();
                 } else if (tabId === 'billing') {
                     loadPaymentHistory();
                 }
@@ -685,6 +1051,52 @@
             return Math.round(monthlyPrice * 12 * 0.8); // 20% discount
         }
         
+        // Load user profile
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(PROFILE_API);
+                if (response.ok) {
+                    const data = await response.json();
+                    userProfile = data.user || data;
+                    
+                    // Update UI with user info
+                    const userNameElement = document.getElementById('user-name');
+                    const userAvatarElement = document.getElementById('user-avatar');
+                    
+                    if (userProfile.name) {
+                        userNameElement.textContent = userProfile.name;
+                    } else if (userProfile.username) {
+                        userNameElement.textContent = userProfile.username;
+                    } else if (userProfile.email) {
+                        userNameElement.textContent = userProfile.email.split('@')[0];
+                    }
+                    
+                    // Update avatar
+                    if (userProfile.name) {
+                        userAvatarElement.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.name)}&background=10b981&color=fff`;
+                    }
+                    
+                    // Store active sessions if available
+                    if (data.activeSessions !== undefined) {
+                        activeSessionsCount = data.activeSessions;
+                        userProfile.activeSessions = data.activeSessions;
+                        
+                        // Update active sessions display
+                        document.getElementById('active-sessions').textContent = activeSessionsCount;
+                        document.getElementById('change-active-sessions').textContent = activeSessionsCount;
+                    }
+                    
+                    // Update balance
+                    updateUserBalanceUI(userProfile.balance || 0);
+                    
+                } else {
+                    console.error('Failed to load user profile');
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+        
         // Load current subscription
         async function loadCurrentSubscription() {
             try {
@@ -692,28 +1104,25 @@
                 if (response.ok) {
                     const data = await response.json();
                     currentSubscription = data;
+                    
+                    // Store the full subscription details
+                    if (data.subscription) {
+                        // Store sessions count globally
+                        currentSessions = data.subscription.sessions || 0;
+                        
+                        // Update UI with session count
+                        document.getElementById('current-sessions').textContent = currentSessions;
+                        document.getElementById('max-sessions').textContent = data.subscription.sessions;
+                        
+                        // Update progress bar
+                        updateSessionsProgressBar();
+                    }
+                    
                     updateCurrentSubscriptionUI();
                 } else {
-                    // If no current subscription, show free plan
-                    currentSubscription = {
-                        plan: {
-                            id: 'free',
-                            name: 'Free Trial',
-                            description: '14-day free trial with basic features',
-                            sessions: 1,
-                            price: 0,
-                            features: [
-                                '1 WhatsApp Number',
-                                '100 Messages per day',
-                                'Basic API Access',
-                                'Email Support'
-                            ]
-                        },
-                        status: 'active',
-                        billing_cycle: 'monthly',
-                        renewal_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-                        active_sessions: 1
-                    };
+                    // If no subscription, user needs to purchase one
+                    currentSubscription = null;
+                    currentSessions = 0;
                     updateCurrentSubscriptionUI();
                 }
             } catch (error) {
@@ -722,51 +1131,251 @@
             }
         }
         
+        // Update sessions progress bar
+        function updateSessionsProgressBar() {
+            if (currentSubscription && currentSubscription.subscription) {
+                const maxSessions = currentSubscription.subscription.sessions || 1;
+                const progressPercent = (activeSessionsCount / maxSessions) * 100;
+                const sessionsProgress = document.getElementById('sessions-progress');
+                sessionsProgress.style.width = `${Math.min(progressPercent, 100)}%`;
+            }
+        }
+        
         // Update current subscription UI
         function updateCurrentSubscriptionUI() {
-            if (!currentSubscription) return;
-            
-            const plan = currentSubscription.plan;
             const loadingEl = document.getElementById('current-plan-loading');
             const infoEl = document.getElementById('current-plan-info');
             const actionsEl = document.getElementById('current-plan-actions');
             
-            // Update plan info
-            document.getElementById('current-plan-name').textContent = plan.name;
-            document.getElementById('current-plan-description').textContent = plan.description;
-            document.getElementById('current-plan-status').textContent = currentSubscription.status;
-            document.getElementById('current-billing-cycle').textContent = currentSubscription.billing_cycle;
-            document.getElementById('current-sessions').textContent = currentSubscription.active_sessions || 0;
-            document.getElementById('max-sessions').textContent = plan.sessions;
-            document.getElementById('active-sessions').textContent = currentSubscription.active_sessions || 0;
-            
-            // Format renewal date
-            const renewalDate = new Date(currentSubscription.renewal_date);
-            document.getElementById('renewal-date').textContent = renewalDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-            
-            // Update features
-            const featuresContainer = document.getElementById('current-plan-features');
-            featuresContainer.innerHTML = plan.features.map(feature => 
-                `<div class="flex items-start">
-                    <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
-                    <span>${feature}</span>
-                </div>`
-            ).join('');
-            
-            // Show elements
-            loadingEl.classList.add('hidden');
-            infoEl.classList.remove('hidden');
-            actionsEl.classList.remove('hidden');
-            
-            // Only show upgrade button if not already on highest plan
-            const upgradeBtn = document.getElementById('upgrade-plan-btn');
-            if (plan.id === 'business') {
-                upgradeBtn.classList.add('hidden');
+            if (!currentSubscription || !currentSubscription.subscription) {
+                // No subscription - show "Get Started" button
+                loadingEl.classList.add('hidden');
+                infoEl.classList.remove('hidden');
+                infoEl.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="text-3xl font-bold mr-3">No Active Plan</span>
+                        <span class="status-badge status-expired">Inactive</span>
+                    </div>
+                    <p class="text-gray-400 mt-2">You don't have an active subscription. Choose a plan to get started.</p>
+                `;
+                
+                document.getElementById('current-billing-cycle').textContent = 'N/A';
+                document.getElementById('current-sessions').textContent = '0';
+                document.getElementById('max-sessions').textContent = '0';
+                document.getElementById('renewal-date').textContent = 'N/A';
+                document.getElementById('active-sessions').textContent = '0';
+                document.getElementById('subscription-id').textContent = 'N/A';
+                document.getElementById('subscription-start').textContent = 'N/A';
+                document.getElementById('subscription-end').textContent = 'N/A';
+                
+                // Reset progress bar
+                document.getElementById('sessions-progress').style.width = '0%';
+                
+                const featuresContainer = document.getElementById('current-plan-features');
+                featuresContainer.innerHTML = `
+                    <div class="col-span-2 text-center py-8 text-gray-500">
+                        <i class="fas fa-crown text-4xl mb-4"></i>
+                        <p>Subscribe to a plan to unlock features</p>
+                    </div>
+                `;
+                
+                // Hide auto-renew toggle
+                document.getElementById('auto-renew-toggle').parentElement.parentElement.classList.add('hidden');
+                
+                actionsEl.classList.remove('hidden');
+                const changeBtn = document.getElementById('change-plan-btn');
+                changeBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Get Started';
+                changeBtn.onclick = () => {
+                    document.querySelector('[data-tab="plans"]').click();
+                };
+                
+            } else {
+                const plan = currentSubscription.subscription;
+                
+                // Update plan info
+                document.getElementById('current-plan-name').textContent = plan.name;
+                document.getElementById('current-plan-description').textContent = plan.description;
+                
+                // Set status badge color
+                const statusBadge = document.getElementById('current-plan-status');
+                const subscriptionStatus = userProfile?.subscription?.status || 'active';
+                statusBadge.textContent = subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1);
+                statusBadge.className = 'status-badge';
+                
+                if (subscriptionStatus === 'active') {
+                    statusBadge.classList.add('status-active');
+                } else if (subscriptionStatus === 'expired' || subscriptionStatus === 'cancelled') {
+                    statusBadge.classList.add('status-expired');
+                } else {
+                    statusBadge.classList.add('status-pending');
+                }
+                
+                document.getElementById('current-billing-cycle').textContent = 'Monthly';
+                
+                // Update sessions display
+                document.getElementById('current-sessions').textContent = activeSessionsCount;
+                document.getElementById('max-sessions').textContent = plan.sessions;
+                
+                // Update progress bar
+                updateSessionsProgressBar();
+                
+                // Format dates from user profile subscription
+                if (userProfile?.subscription?.startDate) {
+                    const startDate = new Date(userProfile.subscription.startDate);
+                    document.getElementById('subscription-start').textContent = startDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                } else {
+                    document.getElementById('subscription-start').textContent = 'N/A';
+                }
+                
+                if (userProfile?.subscription?.endDate) {
+                    const endDate = new Date(userProfile.subscription.endDate);
+                    document.getElementById('subscription-end').textContent = endDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    
+                    // Update renewal date
+                    document.getElementById('renewal-date').textContent = endDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                } else {
+                    document.getElementById('subscription-end').textContent = 'N/A';
+                    document.getElementById('renewal-date').textContent = 'N/A';
+                }
+                
+                // Calculate member since
+                if (userProfile && userProfile.createdAt) {
+                    const memberSince = new Date(userProfile.createdAt);
+                    document.getElementById('member-since').textContent = memberSince.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                }
+                
+                // Update subscription details
+                document.getElementById('subscription-id').textContent = plan.id || 'N/A';
+                
+                // Update auto-renew toggle from user profile
+                const autoRenewToggle = document.getElementById('auto-renew-toggle');
+                const userAutoRenew = userProfile?.subscription?.autoRenew || false;
+                autoRenewToggle.checked = userAutoRenew;
+                document.getElementById('auto-renew-status-text').textContent = 
+                    userAutoRenew ? 'Enabled' : 'Disabled';
+                
+                // Show auto-renew toggle
+                document.getElementById('auto-renew-toggle').parentElement.parentElement.classList.remove('hidden');
+                
+                // Update features
+                const featuresContainer = document.getElementById('current-plan-features');
+                if (plan.features && plan.features.length > 0) {
+                    featuresContainer.innerHTML = plan.features.slice(0, 8).map(feature => 
+                        `<div class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>${feature}</span>
+                        </div>`
+                    ).join('');
+                } else {
+                    // Default features if none provided
+                    featuresContainer.innerHTML = `
+                        <div class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>${plan.sessions || 1} WhatsApp Number${plan.sessions !== 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>Unlimited Messages</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>API Access</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>Priority Support</span>
+                        </div>
+                    `;
+                }
+                
+                // Show elements
+                loadingEl.classList.add('hidden');
+                infoEl.classList.remove('hidden');
+                actionsEl.classList.remove('hidden');
+                
+                // Update change button
+                const changeBtn = document.getElementById('change-plan-btn');
+                changeBtn.innerHTML = '<i class="fas fa-exchange-alt mr-2"></i>Change Plan';
+                changeBtn.onclick = () => {
+                    document.querySelector('[data-tab="change"]').click();
+                };
+                
+                // Store current plan for change flow
+                currentPlanForChange = plan;
             }
+        }
+        
+        // Update auto-renew status
+        async function updateAutoRenewStatus(enabled) {
+            try {
+                const response = await fetch(UPDATE_AUTO_RENEW_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ autoRenew: enabled })
+                });
+                
+                if (response.ok) {
+                    // Update local state
+                    if (currentSubscription && currentSubscription.subscription) {
+                        currentSubscription.subscription.autoRenew = enabled;
+                    }
+                    
+                    // Update UI
+                    document.getElementById('auto-renew-status-text').textContent = 
+                        enabled ? 'Enabled' : 'Disabled';
+                    
+                    // Show success message
+                    showToast(enabled ? 'Auto-renew enabled' : 'Auto-renew disabled', 'success');
+                } else {
+                    throw new Error('Failed to update auto-renew status');
+                }
+            } catch (error) {
+                console.error('Error updating auto-renew:', error);
+                showToast('Failed to update auto-renew status', 'error');
+                
+                // Revert toggle state
+                const autoRenewToggle = document.getElementById('auto-renew-toggle');
+                autoRenewToggle.checked = !enabled;
+            }
+        }
+        
+        // Auto-renew toggle event listener
+        document.getElementById('auto-renew-toggle').addEventListener('change', function() {
+            const enabled = this.checked;
+            updateAutoRenewStatus(enabled);
+        });
+        
+        // Update user balance UI
+        function updateUserBalanceUI(balance) {
+            const balanceElement = document.getElementById('account-balance');
+            const userBalanceElement = document.getElementById('user-balance');
+            const changeBalanceElement = document.getElementById('change-balance');
+            const renewBalanceElement = document.getElementById('renew-user-balance');
+            
+            if (balanceElement) balanceElement.textContent = formatCurrency(balance, 'BDT');
+            if (userBalanceElement) userBalanceElement.textContent = formatCurrency(balance, 'BDT');
+            if (changeBalanceElement) changeBalanceElement.textContent = formatCurrency(balance, 'BDT');
+            if (renewBalanceElement) renewBalanceElement.textContent = formatCurrency(balance, 'BDT');
+            
+            return balance;
         }
         
         // Load available plans
@@ -801,17 +1410,21 @@
         // Render plans
         function renderPlans() {
             const plansContainer = document.getElementById('plans-container');
-            const currency = 'BDT'; // Assuming BDT for bKash
+            const currency = 'BDT';
+            const currentPlanId = currentSubscription?.subscription?.id;
             
-            plansContainer.innerHTML = availablePlans.map(plan => {
-                const isCurrentPlan = currentSubscription && currentSubscription.plan.id === plan.id;
+            // Sort plans by price (ascending)
+            const sortedPlans = [...availablePlans].sort((a, b) => a.price - b.price);
+            
+            plansContainer.innerHTML = sortedPlans.map(plan => {
+                const isCurrentPlan = currentPlanId === plan.id;
                 const price = billingCycle === 'yearly' ? getYearlyPrice(plan.price) : plan.price;
                 const displayPrice = billingCycle === 'yearly' ? price : plan.price;
                 const perSessionPrice = billingCycle === 'yearly' ? 
                     Math.round(plan.pricePerSession * 0.8) : plan.pricePerSession;
                 
                 return `
-                    <div class="plan-card bg-gray-900 rounded-xl p-6 border-2 ${plan.highlighted ? 'border-green-500' : 'border-gray-700'} ${isCurrentPlan ? 'current-plan' : ''}">
+                    <div class="plan-card bg-gray-900 rounded-xl p-6 border-2 ${plan.highlighted ? 'border-green-500 highlighted-plan' : 'border-gray-700'} ${isCurrentPlan ? 'current-plan' : ''}">
                         ${isCurrentPlan ? `
                             <div class="absolute top-4 right-4">
                                 <span class="status-badge status-active">Current</span>
@@ -853,9 +1466,9 @@
                             </div>
                         </div>
                         
-                        <button class="w-full ${isCurrentPlan ? 'bg-gray-700 cursor-default' : plan.highlighted ? 'gradient-bg' : 'bkash-bg'} hover:opacity-90 text-white font-bold py-3 rounded-lg transition duration-300" 
+                        <button class="w-full ${isCurrentPlan ? 'bg-gray-700 cursor-default' : 'gradient-bg hover:opacity-90'} text-white font-bold py-3 rounded-lg transition duration-300" 
                                 data-plan-id="${plan.id}" ${isCurrentPlan ? 'disabled' : ''}>
-                            ${isCurrentPlan ? 'Current Plan' : 'Subscribe with bKash'}
+                            ${isCurrentPlan ? 'Current Plan' : 'Subscribe Now'}
                         </button>
                     </div>
                 `;
@@ -867,7 +1480,7 @@
                     const planId = e.currentTarget.getAttribute('data-plan-id');
                     const plan = availablePlans.find(p => p.id === planId);
                     if (plan) {
-                        openBkashModal(plan);
+                        openPurchaseModal(plan);
                     }
                 });
             });
@@ -879,8 +1492,159 @@
             renderPlans();
         }
         
-        // Open bKash payment modal
-        function openBkashModal(plan) {
+        // Load change options
+        async function loadChangeOptions() {
+            try {
+                const changeLoading = document.getElementById('change-plans-loading');
+                const changeContainer = document.getElementById('change-plans-container');
+                const noSubscription = document.getElementById('no-subscription');
+                const renewSection = document.getElementById('renew-expired-section');
+                
+                changeLoading.classList.remove('hidden');
+                changeContainer.classList.add('hidden');
+                noSubscription.classList.add('hidden');
+                renewSection.classList.add('hidden');
+                
+                // Load available plans first
+                if (availablePlans.length === 0) {
+                    await loadAvailablePlans();
+                }
+                
+                // Check if user has current subscription
+                if (!currentSubscription || !currentSubscription.subscription) {
+                    // No current subscription
+                    changeLoading.classList.add('hidden');
+                    noSubscription.classList.remove('hidden');
+                    return;
+                }
+                
+                const currentPlan = currentSubscription.subscription;
+                
+                // Check if subscription is expired from user profile
+                const isExpired = userProfile?.subscription?.status === 'expired';
+                if (isExpired) {
+                    renewSection.classList.remove('hidden');
+                    document.getElementById('renew-plan-name').textContent = currentPlan.name;
+                    // Add event listener for renew button
+                    const renewBtn = document.getElementById('renew-plan-btn');
+                    renewBtn.onclick = () => {
+                        openRenewModal(currentPlan);
+                    };
+                }
+                
+                // Update current plan info in change tab
+                document.getElementById('change-current-plan-name').textContent = currentPlan.name;
+                document.getElementById('change-current-plan-description').textContent = currentPlan.description;
+                document.getElementById('change-current-plan-price').textContent = formatCurrency(currentPlan.price, 'BDT');
+                
+                // Calculate remaining days from user profile subscription
+                if (userProfile?.subscription?.endDate) {
+                    const endDate = new Date(userProfile.subscription.endDate);
+                    const now = new Date();
+                    const diffTime = endDate - now;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    document.getElementById('remaining-days').textContent = Math.max(0, diffDays);
+                }
+                
+                // Sort plans by price (ascending)
+                const sortedPlans = [...availablePlans].sort((a, b) => a.price - b.price);
+                
+                // Filter available plans (all plans except current)
+                const changePlans = sortedPlans.filter(plan => plan.id !== currentPlan.id);
+                
+                if (changePlans.length === 0) {
+                    // No other plans available
+                    document.getElementById('change-options-container').innerHTML = `
+                        <div class="col-span-3 text-center py-12">
+                            <i class="fas fa-info-circle text-4xl text-gray-500 mb-4"></i>
+                            <h3 class="text-xl font-bold mb-2">No Other Plans Available</h3>
+                            <p class="text-gray-400">You're currently on the only available plan.</p>
+                        </div>
+                    `;
+                } else {
+                    // Render change options
+                    const changeOptionsContainer = document.getElementById('change-options-container');
+                    changeOptionsContainer.innerHTML = changePlans.map(plan => {
+                        const isUpgrade = plan.price > currentPlan.price;
+                        const isDowngrade = plan.price < currentPlan.price;
+                        const priceDifference = Math.abs(plan.price - currentPlan.price);
+                        const sessionsDifference = plan.sessions - currentPlan.sessions;
+                        
+                        return `
+                            <div class="plan-card bg-gray-900 rounded-xl p-6 border-2 ${isUpgrade ? 'border-blue-500 upgrade-plan' : 'border-yellow-500 downgrade-plan'}">
+                                <div class="mb-6">
+                                    <h3 class="text-2xl font-bold mb-3">${plan.name}</h3>
+                                    <p class="text-gray-400 mb-4 text-sm">
+                                        ${plan.description}
+                                    </p>
+                                    
+                                    <div class="mb-4">
+                                        <div class="flex items-baseline mb-2">
+                                            <span class="text-3xl md:text-4xl font-bold">${formatCurrency(plan.price, 'BDT')}</span>
+                                            <span class="text-gray-400 ml-2">/month</span>
+                                        </div>
+                                        <div class="text-gray-400 text-sm">
+                                            <div class="flex items-center mb-1">
+                                                <span>${isUpgrade ? '+' : '-'}${formatCurrency(priceDifference, 'BDT')}/month</span>
+                                                <span class="${isUpgrade ? 'text-blue-400' : 'text-yellow-400'} ml-2 text-xs">(${isUpgrade ? '+' : ''}${sessionsDifference} sessions)</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span>${plan.sessions} WhatsApp Number${plan.sessions !== 1 ? 's' : ''}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <h4 class="font-semibold mb-3 text-gray-300">${isUpgrade ? 'New Features:' : 'Features:'}</h4>
+                                        <ul class="feature-list space-y-2">
+                                            ${plan.features.slice(0, 4).map(feature => 
+                                                `<li class="text-sm text-gray-300">${feature}</li>`
+                                            ).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <button class="w-full ${isUpgrade ? 'blue-bg' : 'yellow-bg'} hover:opacity-90 text-white font-bold py-3 rounded-lg transition duration-300" 
+                                        data-plan-id="${plan.id}" data-change-type="${isUpgrade ? 'upgrade' : 'downgrade'}">
+                                    <i class="fas fa-exchange-alt mr-2"></i>${isUpgrade ? 'Upgrade to' : 'Downgrade to'} ${plan.name}
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // Add event listeners to change buttons
+                    changeOptionsContainer.querySelectorAll('button').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const planId = e.currentTarget.getAttribute('data-plan-id');
+                            const changeType = e.currentTarget.getAttribute('data-change-type');
+                            const plan = availablePlans.find(p => p.id === planId);
+                            if (plan) {
+                                openChangeConfirmationModal(currentPlan, plan, changeType);
+                            }
+                        });
+                    });
+                }
+                
+                changeLoading.classList.add('hidden');
+                changeContainer.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error loading change options:', error);
+                document.getElementById('change-plans-loading').innerHTML = `
+                    <div class="bg-red-900/30 border border-red-700 rounded-xl p-8 max-w-md mx-auto">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Unable to Load Options</h3>
+                        <p class="text-gray-300 mb-4">${error.message}</p>
+                        <button onclick="loadChangeOptions()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg transition font-medium">
+                            <i class="fas fa-redo mr-2"></i>Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Open purchase confirmation modal
+        async function openPurchaseModal(plan) {
             selectedPlan = plan;
             
             const price = billingCycle === 'yearly' ? getYearlyPrice(plan.price) : plan.price;
@@ -888,29 +1652,246 @@
             const total = price + vat;
             
             // Update modal content
-            document.getElementById('selected-plan-name').textContent = plan.name;
-            document.getElementById('selected-plan-price').textContent = formatCurrency(price, 'BDT');
-            document.getElementById('selected-plan-description').textContent = plan.description;
+            document.getElementById('purchase-modal-title').textContent = 'Confirm Subscription';
+            document.getElementById('purchase-plan-name').textContent = plan.name;
+            document.getElementById('purchase-plan-price').textContent = formatCurrency(price, 'BDT');
+            document.getElementById('purchase-plan-description').textContent = plan.description;
+            document.getElementById('purchase-billing-cycle').textContent = billingCycle === 'yearly' ? 'Yearly' : 'Monthly';
             
-            document.getElementById('bkash-amount').textContent = formatCurrency(total, 'BDT');
-            document.getElementById('bkash-number').textContent = BKASH_NUMBER;
+            // Use balance from user profile
+            const userBalance = userProfile ? userProfile.balance : 0;
             
-            document.getElementById('modal-plan-price').textContent = formatCurrency(price, 'BDT');
-            document.getElementById('modal-vat').textContent = formatCurrency(vat, 'BDT');
-            document.getElementById('modal-total').textContent = formatCurrency(total, 'BDT');
+            // Update auto-renew toggle
+            const modalAutoRenewToggle = document.getElementById('modal-auto-renew-toggle');
+            if (currentSubscription && currentSubscription.subscription) {
+                modalAutoRenewToggle.checked = currentSubscription.subscription.autoRenew || true;
+            } else {
+                modalAutoRenewToggle.checked = true;
+            }
             
-            // Reset form
-            document.getElementById('trx-id-input').value = '';
-            document.getElementById('paid-amount').value = total;
-            document.getElementById('sender-number').value = '';
+            // Update balance info
+            const balanceInfo = document.getElementById('balance-info');
+            if (userBalance >= total) {
+                balanceInfo.innerHTML = `
+                    <div class="flex items-center text-green-400">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Sufficient balance to purchase this plan</span>
+                    </div>
+                `;
+            } else {
+                const needed = total - userBalance;
+                balanceInfo.innerHTML = `
+                    <div class="flex items-center text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span>Insufficient balance. You need ${formatCurrency(needed, 'BDT')} more</span>
+                    </div>
+                `;
+            }
+            
+            // Update payment summary
+            const paymentSummary = document.getElementById('payment-summary');
+            paymentSummary.innerHTML = `
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Plan Price:</span>
+                        <span class="font-medium">${formatCurrency(price, 'BDT')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">VAT (15%):</span>
+                        <span class="font-medium">${formatCurrency(vat, 'BDT')}</span>
+                    </div>
+                    <div class="flex justify-between border-t border-blue-800 pt-2 mt-2">
+                        <span class="text-gray-400">Total Amount:</span>
+                        <span class="font-bold text-blue-300">${formatCurrency(total, 'BDT')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Account Balance:</span>
+                        <span class="font-medium ${userBalance >= total ? 'text-green-400' : 'text-red-400'}">${formatCurrency(userBalance, 'BDT')}</span>
+                    </div>
+                </div>
+            `;
             
             // Show modal
-            bkashModal.style.display = 'flex';
+            purchaseModal.style.display = 'flex';
         }
         
-        // Close bKash modal
-        closeBkashModal.addEventListener('click', () => {
-            bkashModal.style.display = 'none';
+        // Open change confirmation modal
+        function openChangeConfirmationModal(currentPlan, newPlan, changeType) {
+            currentPlanForChange = currentPlan;
+            newPlanForChange = newPlan;
+            isUpgradeFlow = changeType === 'upgrade';
+            isDowngradeFlow = changeType === 'downgrade';
+            
+            const priceDifference = newPlan.price - currentPlan.price;
+            const sessionsDifference = newPlan.sessions - currentPlan.sessions;
+            
+            // Calculate prorated amount
+            let proratedAmount = 0;
+            if (isUpgradeFlow) {
+                // For upgrades, charge pro-rata for remaining period
+                proratedAmount = Math.round(Math.abs(priceDifference) * 0.5); // Simplified calculation
+            } else if (isDowngradeFlow) {
+                // For downgrades, credit will be applied to next billing cycle
+                proratedAmount = 0; // No immediate charge for downgrades
+            }
+            
+            // Update modal content
+            document.getElementById('change-modal-title').textContent = isUpgradeFlow ? 'Confirm Upgrade' : 'Confirm Downgrade';
+            document.getElementById('change-current-plan-name').textContent = currentPlan.name;
+            document.getElementById('change-current-price').textContent = formatCurrency(currentPlan.price, 'BDT');
+            document.getElementById('change-current-sessions').textContent = `${currentPlan.sessions} Session${currentPlan.sessions !== 1 ? 's' : ''}`;
+            
+            // Update auto-renew toggle from user profile
+            const changeAutoRenewToggle = document.getElementById('change-auto-renew-toggle');
+            const userAutoRenew = userProfile?.subscription?.autoRenew || true;
+            changeAutoRenewToggle.checked = userAutoRenew;
+            
+            // Update new plan container
+            const newPlanContainer = document.getElementById('new-plan-container');
+            newPlanContainer.className = `p-4 ${isUpgradeFlow ? 'bg-green-900/20 border border-green-800' : 'bg-yellow-900/20 border border-yellow-800'} rounded-lg`;
+            newPlanContainer.innerHTML = `
+                <div class="text-center mb-3">
+                    <div class="text-sm ${isUpgradeFlow ? 'text-green-400' : 'text-yellow-400'} mb-1">${isUpgradeFlow ? 'New Plan' : 'New Plan'}</div>
+                    <h4 class="text-xl font-bold">${newPlan.name}</h4>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold mb-1">${formatCurrency(newPlan.price, 'BDT')}</div>
+                    <div class="text-sm ${isUpgradeFlow ? 'text-green-400' : 'text-yellow-400'}>per month</div>
+                </div>
+                <div class="mt-3 text-sm">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-phone ${isUpgradeFlow ? 'text-green-400' : 'text-yellow-400'} mr-2"></i>
+                        <span>${newPlan.sessions} Session${newPlan.sessions !== 1 ? 's' : ''}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Update change details
+            const changeDetails = document.getElementById('change-details');
+            changeDetails.innerHTML = `
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Current Plan:</span>
+                        <span class="font-medium">${currentPlan.name}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">New Plan:</span>
+                        <span class="font-medium ${isUpgradeFlow ? 'text-green-400' : 'text-yellow-400'}">${newPlan.name}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Sessions Change:</span>
+                        <span class="font-medium">${isUpgradeFlow ? '+' : ''}${sessionsDifference}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Monthly Price Change:</span>
+                        <span class="font-medium">${isUpgradeFlow ? '+' : ''}${formatCurrency(priceDifference, 'BDT')}</span>
+                    </div>
+                    <div class="flex justify-between border-t ${isUpgradeFlow ? 'border-green-800' : 'border-yellow-800'} pt-2 mt-2">
+                        <span class="text-gray-400">${isUpgradeFlow ? 'Prorated Upgrade Cost' : 'Downgrade Credit'}:</span>
+                        <span class="font-bold ${isUpgradeFlow ? 'text-green-300' : 'text-yellow-300'}">${isUpgradeFlow ? formatCurrency(proratedAmount, 'BDT') : 'Applied next cycle'}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Update change amount
+            document.getElementById('change-amount-title').textContent = isUpgradeFlow ? 'Upgrade Amount' : 'Downgrade';
+            document.getElementById('change-amount-description').textContent = isUpgradeFlow ? 
+                'Pay only for the remaining period' : 'Credit will be applied to your next billing cycle';
+            document.getElementById('change-amount').textContent = isUpgradeFlow ? formatCurrency(proratedAmount, 'BDT') : '৳0';
+            document.getElementById('change-amount').className = `text-2xl font-bold ${isUpgradeFlow ? 'text-green-400' : 'text-yellow-400'}`;
+            
+            // Show modal
+            changeConfirmModal.style.display = 'flex';
+        }
+        
+        // Open renew modal
+        function openRenewModal(currentPlan) {
+            const price = currentPlan.price;
+            const vat = Math.round(price * 0.15);
+            const total = price + vat;
+            const userBalance = userProfile ? userProfile.balance : 0;
+            
+            // Update modal content
+            document.getElementById('renew-plan-name').textContent = currentPlan.name;
+            document.getElementById('renew-plan-price').textContent = formatCurrency(price, 'BDT');
+            document.getElementById('renew-plan-description').textContent = currentPlan.description;
+            
+            // Update auto-renew toggle
+            const renewAutoRenewToggle = document.getElementById('renew-auto-renew-toggle');
+            const userAutoRenew = userProfile?.subscription?.autoRenew || true;
+            renewAutoRenewToggle.checked = userAutoRenew;
+            
+            // Update balance info
+            const renewBalanceInfo = document.getElementById('renew-balance-info');
+            if (userBalance >= total) {
+                renewBalanceInfo.innerHTML = `
+                    <div class="flex items-center text-green-400">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Sufficient balance to renew this plan</span>
+                    </div>
+                `;
+            } else {
+                const needed = total - userBalance;
+                renewBalanceInfo.innerHTML = `
+                    <div class="flex items-center text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span>Insufficient balance. You need ${formatCurrency(needed, 'BDT')} more</span>
+                    </div>
+                `;
+            }
+            
+            // Update renew summary
+            const renewSummary = document.getElementById('renew-summary');
+            renewSummary.innerHTML = `
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Plan Price:</span>
+                        <span class="font-medium">${formatCurrency(price, 'BDT')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">VAT (15%):</span>
+                        <span class="font-medium">${formatCurrency(vat, 'BDT')}</span>
+                    </div>
+                    <div class="flex justify-between border-t border-blue-800 pt-2 mt-2">
+                        <span class="text-gray-400">Total Amount:</span>
+                        <span class="font-bold text-blue-300">${formatCurrency(total, 'BDT')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Account Balance:</span>
+                        <span class="font-medium ${userBalance >= total ? 'text-green-400' : 'text-red-400'}">${formatCurrency(userBalance, 'BDT')}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Show modal
+            renewConfirmModal.style.display = 'flex';
+        }
+        
+        // Close purchase modal
+        closePurchaseModal.addEventListener('click', () => {
+            purchaseModal.style.display = 'none';
+        });
+        
+        cancelPurchase.addEventListener('click', () => {
+            purchaseModal.style.display = 'none';
+        });
+        
+        // Close change modal
+        closeChangeModal.addEventListener('click', () => {
+            changeConfirmModal.style.display = 'none';
+        });
+        
+        cancelChange.addEventListener('click', () => {
+            changeConfirmModal.style.display = 'none';
+        });
+        
+        // Close renew modal
+        closeRenewModal.addEventListener('click', () => {
+            renewConfirmModal.style.display = 'none';
+        });
+        
+        cancelRenew.addEventListener('click', () => {
+            renewConfirmModal.style.display = 'none';
         });
         
         // Close success modal
@@ -919,10 +1900,31 @@
             window.location.href = '/sessions';
         });
         
+        // Auto-renew toggle for purchase modal
+        document.getElementById('modal-auto-renew-toggle').addEventListener('change', function() {
+            autoRenew = this.checked;
+        });
+        
+        // Auto-renew toggle for change modal
+        document.getElementById('change-auto-renew-toggle').addEventListener('change', function() {
+            autoRenew = this.checked;
+        });
+        
+        // Auto-renew toggle for renew modal
+        document.getElementById('renew-auto-renew-toggle').addEventListener('change', function() {
+            autoRenew = this.checked;
+        });
+        
         // Close modals when clicking outside
         window.addEventListener('click', (event) => {
-            if (event.target === bkashModal) {
-                bkashModal.style.display = 'none';
+            if (event.target === purchaseModal) {
+                purchaseModal.style.display = 'none';
+            }
+            if (event.target === changeConfirmModal) {
+                changeConfirmModal.style.display = 'none';
+            }
+            if (event.target === renewConfirmModal) {
+                renewConfirmModal.style.display = 'none';
             }
             if (event.target === successModal) {
                 successModal.style.display = 'none';
@@ -930,58 +1932,67 @@
             }
         });
         
-        // Copy bKash number
-        document.getElementById('copy-bkash-number').addEventListener('click', () => {
-            const bkashNumber = BKASH_NUMBER;
-            navigator.clipboard.writeText(bkashNumber).then(() => {
-                const button = document.getElementById('copy-bkash-number');
-                const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                }, 2000);
-            });
+        // Confirm purchase
+        document.getElementById('confirm-purchase-btn').addEventListener('click', async () => {
+            const price = billingCycle === 'yearly' ? getYearlyPrice(selectedPlan.price) : selectedPlan.price;
+            const total = price + Math.round(price * 0.15);
+            const userBalance = userProfile ? userProfile.balance : 0;
+            
+            if (userBalance < total) {
+                showToast('Insufficient balance. Please add funds to your account.', 'error');
+                return;
+            }
+            
+            // Process purchase with balance
+            await processPurchase();
         });
         
-        // Submit payment
-        document.getElementById('submit-payment-btn').addEventListener('click', async () => {
-            const trxId = document.getElementById('trx-id-input').value.trim();
-            const paidAmount = document.getElementById('paid-amount').value.trim();
-            const senderNumber = document.getElementById('sender-number').value.trim();
+        // Confirm change
+        document.getElementById('confirm-change-btn').addEventListener('click', async () => {
+            const userBalance = userProfile ? userProfile.balance : 0;
             
-            // Validation
-            if (!trxId) {
-                alert('Please enter the bKash Transaction ID');
-                return;
-            }
-            
-            if (!paidAmount) {
-                alert('Please enter the payment amount');
-                return;
-            }
-            
-            const price = billingCycle === 'yearly' ? getYearlyPrice(selectedPlan.price) : selectedPlan.price;
-            const vat = Math.round(price * 0.15);
-            const expectedTotal = price + vat;
-            
-            if (parseInt(paidAmount) !== expectedTotal) {
-                alert(`Please pay exactly ${formatCurrency(expectedTotal, 'BDT')}. You entered ${formatCurrency(paidAmount, 'BDT')}`);
-                return;
-            }
-            
-            // Submit payment
-            try {
-                const submitBtn = document.getElementById('submit-payment-btn');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            if (isUpgradeFlow) {
+                const priceDifference = newPlanForChange.price - currentPlanForChange.price;
+                const proratedAmount = Math.round(priceDifference * 0.5); // Simplified calculation
                 
-                const paymentData = {
-                    planId: selectedPlan.id,
+                if (userBalance < proratedAmount) {
+                    showToast('Insufficient balance. Please add funds to your account.', 'error');
+                    return;
+                }
+            }
+            
+            // Process change
+            await processChange();
+        });
+        
+        // Confirm renew
+        document.getElementById('confirm-renew-btn').addEventListener('click', async () => {
+            const currentPlan = currentSubscription.subscription;
+            const price = currentPlan.price;
+            const total = price + Math.round(price * 0.15);
+            const userBalance = userProfile ? userProfile.balance : 0;
+            
+            if (userBalance < total) {
+                showToast('Insufficient balance. Please add funds to your account.', 'error');
+                return;
+            }
+            
+            // Process renew
+            await processRenew();
+        });
+        
+        // Process purchase with balance
+        async function processPurchase() {
+            try {
+                const confirmBtn = document.getElementById('confirm-purchase-btn');
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+                
+                const purchaseData = {
+                    subscriptionId: selectedPlan.id,
                     billingCycle: billingCycle,
-                    trxId: trxId,
-                    amount: parseInt(paidAmount),
-                    senderNumber: senderNumber || undefined,
-                    paymentMethod: 'bkash'
+                    autoRenew: autoRenew,
+                    paymentMethod: 'balance'
                 };
                 
                 const response = await fetch(PURCHASE_API, {
@@ -989,36 +2000,154 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(paymentData)
+                    body: JSON.stringify(purchaseData)
                 });
                 
                 if (response.ok) {
                     const result = await response.json();
                     
                     // Update success modal
-                    document.getElementById('success-plan-name').textContent = selectedPlan.name;
-                    document.getElementById('success-trx-id').textContent = trxId;
+                    document.getElementById('success-title').textContent = 'Subscription Created Successfully!';
+                    document.getElementById('success-message').textContent = `Your ${selectedPlan.name} plan has been activated successfully.`;
                     document.getElementById('success-reference').textContent = result.reference || `SUB-${Date.now()}`;
+                    document.getElementById('success-amount').textContent = formatCurrency(selectedPlan.price, 'BDT');
                     
-                    // Show success modal
-                    bkashModal.style.display = 'none';
+                    // Close modals
+                    purchaseModal.style.display = 'none';
                     successModal.style.display = 'flex';
                     
-                    // Reload current subscription
-                    loadCurrentSubscription();
+                    // Reload data to update UI
+                    await Promise.all([
+                        loadUserProfile(),
+                        loadCurrentSubscription(),
+                        loadAvailablePlans()
+                    ]);
+                    
                 } else {
                     const error = await response.json();
-                    alert(`Payment failed: ${error.message || 'Unknown error'}`);
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Submit Payment Details';
+                    showToast(`Purchase failed: ${error.error || 'Unknown error'}`, 'error');
                 }
             } catch (error) {
-                console.error('Payment submission error:', error);
-                alert('Failed to submit payment. Please try again.');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Submit Payment Details';
+                console.error('Purchase error:', error);
+                showToast('Failed to process purchase. Please try again.', 'error');
+            } finally {
+                const confirmBtn = document.getElementById('confirm-purchase-btn');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Confirm with Balance';
             }
-        });
+        }
+        
+        // Process change (upgrade/downgrade)
+        async function processChange() {
+            try {
+                const confirmBtn = document.getElementById('confirm-change-btn');
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+                
+                const changeData = {
+                    subscriptionId: newPlanForChange.id,
+                    currentSubscriptionId: currentPlanForChange.id,
+                    changeType: isUpgradeFlow ? 'upgrade' : 'downgrade',
+                    paymentMethod: 'balance',
+                    autoRenew: autoRenew
+                };
+                
+                const response = await fetch(UPDATE_SUBSCRIPTION_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(changeData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Update success modal
+                    document.getElementById('success-title').textContent = isUpgradeFlow ? 'Plan Upgraded Successfully!' : 'Plan Downgraded Successfully!';
+                    document.getElementById('success-message').textContent = `Your plan has been changed to ${newPlanForChange.name} successfully.`;
+                    document.getElementById('success-reference').textContent = result.reference || `CHG-${Date.now()}`;
+                    document.getElementById('success-amount').textContent = formatCurrency(newPlanForChange.price, 'BDT');
+                    
+                    // Close modals
+                    changeConfirmModal.style.display = 'none';
+                    successModal.style.display = 'flex';
+                    
+                    // Reload data to update UI
+                    await Promise.all([
+                        loadUserProfile(),
+                        loadCurrentSubscription(),
+                        loadAvailablePlans()
+                    ]);
+                    
+                } else {
+                    const error = await response.json();
+                    showToast(`Change failed: ${error.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Change error:', error);
+                showToast('Failed to process change. Please try again.', 'error');
+            } finally {
+                const confirmBtn = document.getElementById('confirm-change-btn');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Confirm Change';
+            }
+        }
+        
+        // Process renew
+        async function processRenew() {
+            try {
+                const confirmBtn = document.getElementById('confirm-renew-btn');
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+                
+                const renewData = {
+                    subscriptionId: currentSubscription.subscription.id,
+                    paymentMethod: 'balance',
+                    autoRenew: autoRenew
+                };
+                
+                const response = await fetch(PURCHASE_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(renewData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Update success modal
+                    document.getElementById('success-title').textContent = 'Subscription Renewed Successfully!';
+                    document.getElementById('success-message').textContent = 'Your subscription has been renewed successfully.';
+                    document.getElementById('success-reference').textContent = result.reference || `REN-${Date.now()}`;
+                    document.getElementById('success-amount').textContent = formatCurrency(currentSubscription.subscription.price, 'BDT');
+                    
+                    // Close modals
+                    renewConfirmModal.style.display = 'none';
+                    successModal.style.display = 'flex';
+                    
+                    // Reload data to update UI
+                    await Promise.all([
+                        loadUserProfile(),
+                        loadCurrentSubscription(),
+                        loadAvailablePlans()
+                    ]);
+                    
+                } else {
+                    const error = await response.json();
+                    showToast(`Renewal failed: ${error.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Renew error:', error);
+                showToast('Failed to process renewal. Please try again.', 'error');
+            } finally {
+                const confirmBtn = document.getElementById('confirm-renew-btn');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-redo mr-2"></i>Confirm Renewal';
+            }
+        }
         
         // Load payment history
         async function loadPaymentHistory() {
@@ -1048,14 +2177,27 @@
                         if (payment.status === 'completed') statusClass = 'status-active';
                         if (payment.status === 'failed') statusClass = 'status-expired';
                         
+                        // Determine payment type
+                        let paymentType = 'New Subscription';
+                        if (payment.type === 'upgrade') paymentType = 'Upgrade';
+                        if (payment.type === 'downgrade') paymentType = 'Downgrade';
+                        if (payment.type === 'renewal') paymentType = 'Renewal';
+                        
+                        let typeColor = 'text-green-400';
+                        if (payment.type === 'upgrade') typeColor = 'text-blue-400';
+                        if (payment.type === 'downgrade') typeColor = 'text-yellow-400';
+                        if (payment.type === 'renewal') typeColor = 'text-purple-400';
+                        
                         return `
                             <tr>
                                 <td class="px-4 py-3">${formattedDate}</td>
                                 <td class="px-4 py-3 font-medium">${payment.plan}</td>
                                 <td class="px-4 py-3">${formatCurrency(payment.amount, 'BDT')}</td>
-                                <td class="px-4 py-3 font-mono">${payment.trxId}</td>
                                 <td class="px-4 py-3">
                                     <span class="status-badge ${statusClass}">${payment.status}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="text-sm ${typeColor}">${paymentType}</span>
                                 </td>
                             </tr>
                         `;
@@ -1071,15 +2213,70 @@
             }
         }
         
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCurrentSubscription();
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            // Remove existing toast if any
+            const existingToast = document.getElementById('toast-notification');
+            if (existingToast) {
+                existingToast.remove();
+            }
             
-            // Load plans if on plans tab
-            if (document.querySelector('.tab.active').getAttribute('data-tab') === 'plans') {
-                loadAvailablePlans();
+            const toast = document.createElement('div');
+            toast.id = 'toast-notification';
+            toast.className = `toast toast-${type}`;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 
+                        type === 'error' ? 'fa-exclamation-triangle' : 
+                        'fa-info-circle';
+            
+            toast.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Load user profile first (contains subscription status and activeSessions)
+                await loadUserProfile();
+                
+                // Load available plans
+                await loadAvailablePlans();
+                
+                // Load current subscription (uses data from /current endpoint)
+                await loadCurrentSubscription();
+                
+                // Load plans if on plans tab
+                if (document.querySelector('.tab.active').getAttribute('data-tab') === 'plans') {
+                    loadAvailablePlans();
+                }
+            } catch (error) {
+                console.error('Error initializing page:', error);
+                showToast('Failed to load page data. Please refresh.', 'error');
             }
         });
+        
+        // Helper function to show error
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<span class="text-red-400">${message}</span>`;
+            }
+        }
     </script>
 </body>
 </html>
