@@ -661,7 +661,12 @@
       /* ───────── CREATE SESSION ───────── */
       async function createSession() {
         try {
-          await api(`${API}/new`, { method: "POST" });
+          const data = await api(`${API}/new`, { method: "POST" });
+          if(data.error){
+            showToast('error', 'Creation Failed', data.error);
+            return;
+          }
+          
           showToast('success', 'Session Created', 'New WhatsApp session created successfully');
           loadSessions();
         } catch (error) {

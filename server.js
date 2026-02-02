@@ -8,11 +8,12 @@ import "dotenv/config";
 
 import authRouter from "./routers/authRouter.js";
 import connectDB from "./lib/mongodb.js";
-import { authenticate } from "./middlewares/authMiddlewares.js";
+import { authenticate } from "./middlewares/authMiddleware.js";
 import sessionRouter from "./routers/sessionRouter.js";
 import whatsappRouter from "./routers/whatsappRouter.js";
 import subscriptionRouter from "./routers/subscriptionRouter.js";
 import startCrons from "./crons/index.js";
+import { subscriptionMiddleware } from "./middlewares/subscriptionMiddleware.js";
 
 const app = express();
 await connectDB();
@@ -33,8 +34,8 @@ app.use(express.static("public"));
 /* ───────── API ───────── */
 app.use("/api/auth", authenticate, authRouter);
 app.use("/api/session", authenticate, sessionRouter);
-app.use("/api/whatsapp", whatsappRouter);
-app.use("/api/subscription",authenticate, subscriptionRouter);
+app.use("/api/whatsapp", subscriptionMiddleware, whatsappRouter);
+app.use("/api/subscription", authenticate, subscriptionRouter);
 
 app.get("/", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));

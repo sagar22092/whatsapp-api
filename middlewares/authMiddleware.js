@@ -6,23 +6,27 @@ export async function authenticate(req, res, next) {
     const token = req.cookies?.token;
 
     if (!token) {
+      req.user = null;
       return next();
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!decoded || !decoded.userId) {
-      return next()
+      req.user = null;
+      return next();
     }
 
     const user = await User.findById(decoded.userId).select("-password");
     if (!user) {
-      return next()
+      req.user = null;
+      return next();
     }
 
     req.user = user;
     next();
   } catch (err) {
+    req.user = null;
     return next();
   }
 }

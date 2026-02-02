@@ -8,6 +8,8 @@ import {
   getMyInfo as waGetMyInfo,
   logout as waLogout,
 } from "../lib/whatsapp.js";
+import User from "../models/userModel.js";
+import subscriptions from "../json/subscription.js";
 
 /* ───────────────── CREATE SESSION ───────────────── */
 export async function newSession(req, res) {
@@ -17,6 +19,26 @@ export async function newSession(req, res) {
 
   try {
     const userId = req.user._id;
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const activeSubscription = subscriptions.plans.filter(
+      (plan) => plan.id === user.subscription.id,
+    )[0];
+
+    if (!activeSubscription) {
+      return res.status(403).json({ error: "No active subscription" });
+    }
+
+    const activeSessions = await sessionModel.find({ user: userId }).lean();
+    if (activeSessions.length >= activeSubscription.sessions) {
+      return res
+        .status(403)
+        .json({ error: "You have reached the maximum number of sessions" });
+    }
 
     const session = await sessionModel.create({
       user: userId,
@@ -85,7 +107,6 @@ export async function getPairCode(req, res) {
     }
 
     const pairCode = await waGetPairCode(userId, sessionId, number);
-
 
     res.json({
       connected: !pairCode,

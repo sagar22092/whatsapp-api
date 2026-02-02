@@ -25,4 +25,6 @@ sessionModel.pre("save", function () {
     this.apiKey = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 });
-export default mongoose.model("Session", sessionModel);
+
+const Session = mongoose.models.Session || mongoose.model("Session", sessionModel);
+export default Session;
