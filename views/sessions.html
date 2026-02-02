@@ -55,6 +55,22 @@
       
       .btn-danger {
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        transition: all 0.3s ease;
+      }
+      
+      .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.3);
+      }
+      
+      .btn-logout {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        transition: all 0.3s ease;
+      }
+      
+      .btn-logout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.3);
       }
       
       .btn-pair {
@@ -65,6 +81,16 @@
       .btn-pair:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.3);
+      }
+      
+      .btn-webhook {
+        background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+        transition: all 0.3s ease;
+      }
+      
+      .btn-webhook:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.3);
       }
       
       .status-badge {
@@ -180,6 +206,18 @@
         background: linear-gradient(135deg, #059669 0%, #047857 100%);
       }
       
+      .webhook-url {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        background: rgba(236, 72, 153, 0.1);
+        border: 1px solid rgba(236, 72, 153, 0.2);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        color: #f0abfc;
+        word-break: break-all;
+        margin: 8px 0;
+      }
+      
       /* Responsive adjustments */
       @media (max-width: 640px) {
         .container-padding {
@@ -211,6 +249,10 @@
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+        }
+        
+        .action-buttons {
+          grid-template-columns: repeat(2, 1fr);
         }
       }
       
@@ -589,6 +631,78 @@
       </div>
     </div>
 
+    <!-- Webhook Modal -->
+    <div
+      id="webhookModal"
+      class="fixed inset-0 modal hidden items-center justify-center z-50 p-4"
+    >
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-4 md:p-6 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl fade-in mx-4">
+        <div class="flex justify-between items-center mb-4 md:mb-6">
+          <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
+            <i class="fas fa-link text-pink-400"></i>
+            Set Webhook URL
+          </h2>
+          <button
+            onclick="closeWebhookModal()"
+            class="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-700"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+        
+        <div class="bg-slate-900/80 p-4 md:p-6 rounded-xl border border-slate-700 mb-4 md:mb-6">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-slate-300 mb-2 text-sm font-medium">Current Webhook URL</label>
+              <div id="currentWebhook" class="webhook-url">
+                No webhook set
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-slate-300 mb-2 text-sm font-medium">New Webhook URL</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="fas fa-globe text-slate-500"></i>
+                </div>
+                <input
+                  id="webhookUrl"
+                  placeholder="https://example.com/webhook"
+                  class="bg-slate-900 border border-slate-700 p-3 rounded-xl w-full pl-10 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm md:text-base"
+                />
+              </div>
+              <p class="text-xs text-slate-500 mt-2">
+                Enter the URL where you want to receive WhatsApp event notifications. Leave empty to clear webhook.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+          <button
+            onclick="closeWebhookModal()"
+            class="bg-slate-700 hover:bg-slate-600 px-4 md:px-5 py-3 rounded-xl font-medium transition-colors text-sm md:text-base order-2 sm:order-1"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="clearWebhook()"
+            class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 px-4 md:px-5 py-3 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all text-sm md:text-base"
+          >
+            <i class="fas fa-trash"></i>
+            Clear
+          </button>
+          <button
+            onclick="saveWebhook()"
+            class="btn-webhook px-4 md:px-5 py-3 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all text-sm md:text-base order-1 sm:order-2"
+          >
+            <i class="fas fa-save"></i>
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white p-3 md:p-4 rounded-xl shadow-2xl border border-slate-700 max-w-xs md:max-w-sm transform translate-y-full transition-transform duration-300 z-50 mx-4">
       <div class="flex items-start gap-2 md:gap-3">
@@ -605,6 +719,7 @@
       let activeQRSession = null;
       let activePairSession = null;
       let activeMsgSession = null;
+      let activeWebhookSession = null;
       let sessionsData = [];
       let apiKeyVisibility = {};
       let pairCodeInterval = null;
@@ -848,6 +963,18 @@
                       </div>
                     </div>
                   </div>
+                  
+                  ${s.webhookUrl ? `
+                    <div class="mt-4">
+                      <h4 class="text-xs md:text-sm font-medium text-slate-300 mb-2 flex items-center gap-1">
+                        <i class="fas fa-link text-xs"></i>
+                        Webhook URL
+                      </h4>
+                      <div class="webhook-url" title="${s.webhookUrl}">
+                        ${s.webhookUrl.length > 60 ? s.webhookUrl.substring(0, 60) + '...' : s.webhookUrl}
+                      </div>
+                    </div>
+                  ` : ''}
                 </div>
                 
                 <div class="flex flex-col items-start md:items-end w-full md:w-auto">
@@ -859,48 +986,50 @@
                 </div>
               </div>
 
-              <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-800">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-4 border-t border-slate-800 action-buttons">
                 ${
                   s.status !== "CONNECTED"
                     ? `
                       <button onclick="openQR('${s._id}')"
-                        class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                        class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
                         <i class="fas fa-qrcode"></i>
-                        <span>QR Code</span>
+                        <span class="hidden sm:inline">QR</span>
                       </button>
                       <button onclick="openPairModal('${s._id}')"
-                        class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                        class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
                         <i class="fas fa-link"></i>
-                        <span>Pair Code</span>
+                        <span class="hidden sm:inline">Pair</span>
                       </button>
                     `
-                    : ""
-                }
-                
-                ${
-                  s.status === "CONNECTED"
-                    ? `<button onclick="openMsgModal('${s._id}')"
-                        class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                    : `
+                      <button onclick="openMsgModal('${s._id}')"
+                        class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
                         <i class="fas fa-paper-plane"></i>
-                        <span>Send</span>
-                      </button>`
-                    : ""
-                }
-
-                ${
-                  s.status === "CONNECTED"
-                    ? `<button onclick="showInfo('${s._id}')"
-                        class="flex-1 min-w-[140px] xs:min-w-[120px] bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                        <span class="hidden sm:inline">Send</span>
+                      </button>
+                      <button onclick="showInfo('${s._id}')"
+                        class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
                         <i class="fas fa-info-circle"></i>
-                        <span>Info</span>
-                      </button>`
-                    : ""
+                        <span class="hidden sm:inline">Info</span>
+                      </button>
+                      <button onclick="logoutSession('${s._id}')"
+                        class="btn-logout px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                      </button>
+                    `
                 }
 
-                <button onclick="logout('${s._id}')"
-                  class="flex-1 min-w-[140px] xs:min-w-[120px] btn-danger px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
-                  <i class="fas fa-sign-out-alt"></i>
-                  <span>Delete</span>
+                <button onclick="openWebhookModal('${s._id}')"
+                  class="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                  <i class="fas fa-link"></i>
+                  <span class="hidden sm:inline">Webhook</span>
+                </button>
+
+                <button onclick="deleteSession('${s._id}')"
+                  class="btn-danger px-3 md:px-4 py-2.5 rounded-lg text-xs md:text-sm font-medium text-white flex items-center justify-center gap-1 md:gap-2 transition-all">
+                  <i class="fas fa-trash"></i>
+                  <span class="hidden sm:inline">Delete</span>
                 </button>
               </div>
             `;
@@ -1240,6 +1369,97 @@
         }
       }
 
+      /* ───────── OPEN WEBHOOK MODAL ───────── */
+      function openWebhookModal(sessionId) {
+        activeWebhookSession = sessionId;
+        const modal = document.getElementById("webhookModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        
+        // Load current webhook URL
+        loadCurrentWebhook();
+        document.getElementById("webhookUrl").focus();
+      }
+
+      /* ───────── LOAD CURRENT WEBHOOK ───────── */
+      async function loadCurrentWebhook() {
+        try {
+          const sessions = await api(`${API}/list`);
+          const currentSession = sessions.sessions.find(s => s._id === activeWebhookSession);
+          
+          const currentWebhookElement = document.getElementById("currentWebhook");
+          if (currentSession && currentSession.webhookUrl) {
+            currentWebhookElement.textContent = currentSession.webhookUrl;
+            currentWebhookElement.title = currentSession.webhookUrl;
+          } else {
+            currentWebhookElement.textContent = "No webhook set";
+            currentWebhookElement.title = "";
+          }
+        } catch (error) {
+          console.error('Error loading webhook:', error);
+          document.getElementById("currentWebhook").textContent = "Error loading webhook";
+        }
+      }
+
+      /* ───────── SAVE WEBHOOK ───────── */
+      async function saveWebhook() {
+        const webhookUrl = document.getElementById("webhookUrl").value.trim();
+        
+        // Empty string is allowed to clear webhook
+        if (webhookUrl !== "") {
+          // Validate URL if not empty
+          try {
+            new URL(webhookUrl);
+          } catch (e) {
+            showToast('warning', 'Validation Error', 'Please enter a valid URL');
+            return;
+          }
+        }
+
+        try {
+          await api(`${API}/${activeWebhookSession}/set-webhook`, {
+            method: "POST",
+            body: JSON.stringify({ webhookUrl }),
+          });
+
+          if (webhookUrl === "") {
+            showToast('success', 'Webhook Cleared', 'Webhook URL has been cleared');
+          } else {
+            showToast('success', 'Webhook Updated', 'Webhook URL saved successfully');
+          }
+          
+          closeWebhookModal();
+          loadSessions();
+        } catch (error) {
+          showToast('error', 'Save Failed', 'Failed to save webhook URL');
+        }
+      }
+
+      /* ───────── CLEAR WEBHOOK ───────── */
+      async function clearWebhook() {
+        if (!confirm("Are you sure you want to clear the webhook URL?")) return;
+        
+        try {
+          await api(`${API}/${activeWebhookSession}/set-webhook`, {
+            method: "POST",
+            body: JSON.stringify({ webhookUrl: "" }),
+          });
+
+          showToast('success', 'Webhook Cleared', 'Webhook URL has been cleared');
+          closeWebhookModal();
+          loadSessions();
+        } catch (error) {
+          showToast('error', 'Clear Failed', 'Failed to clear webhook URL');
+        }
+      }
+
+      /* ───────── CLOSE WEBHOOK MODAL ───────── */
+      function closeWebhookModal() {
+        activeWebhookSession = null;
+        document.getElementById("webhookModal").classList.add("hidden");
+        document.getElementById("webhookUrl").value = "";
+      }
+
       /* ───────── INFO MODAL ───────── */
       async function showInfo(sessionId) {
         try {
@@ -1261,16 +1481,29 @@
         document.getElementById("infoModal").classList.add("hidden");
       }
 
-      /* ───────── LOGOUT ───────── */
-      async function logout(sessionId) {
+      /* ───────── LOGOUT SESSION ───────── */
+      async function logoutSession(sessionId) {
         if (!confirm("Are you sure you want to logout this session? This will disconnect WhatsApp.")) return;
         
         try {
           await api(`${API}/${sessionId}/logout`, { method: "POST" });
-          showToast('info', 'Logged Out', 'Session has been logged out');
+          showToast('info', 'Logged Out', 'Session has been logged out successfully');
           loadSessions();
         } catch (error) {
           showToast('error', 'Logout Failed', 'Failed to logout session');
+        }
+      }
+
+      /* ───────── DELETE SESSION ───────── */
+      async function deleteSession(sessionId) {
+        if (!confirm("Are you sure you want to delete this session? This action cannot be undone.")) return;
+        
+        try {
+          await api(`${API}/${sessionId}/delete`, { method: "POST" });
+          showToast('info', 'Deleted', 'Session has been deleted successfully');
+          loadSessions();
+        } catch (error) {
+          showToast('error', 'Delete Failed', 'Failed to delete session');
         }
       }
 
@@ -1285,6 +1518,7 @@
             closePairModal();
             closeMsgModal();
             closeInfoModal();
+            closeWebhookModal();
           }
         }
       });

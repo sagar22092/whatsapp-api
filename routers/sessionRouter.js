@@ -8,6 +8,7 @@ import {
   logoutSession,
   getSessionList,
   getPairCode,
+  deleteSession,
 } from "../controllers/sessionController.js";
 
 const sessionRouter = Router();
@@ -21,5 +22,6 @@ sessionRouter.get("/:sessionId/status", getStatus);
 sessionRouter.post("/:sessionId/send", sendMessage);
 sessionRouter.get("/:sessionId/info", getMyInfo);
 sessionRouter.post("/:sessionId/logout", logoutSession);
+sessionRouter.post("/:sessionId/delete", deleteSession);
 
 export default sessionRouter;

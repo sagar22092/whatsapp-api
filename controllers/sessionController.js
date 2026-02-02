@@ -7,9 +7,11 @@ import {
   sendMessage as waSendMessage,
   getMyInfo as waGetMyInfo,
   logout as waLogout,
+  clear as waClear,
 } from "../lib/whatsapp.js";
 import User from "../models/userModel.js";
 import subscriptions from "../json/subscription.js";
+
 
 /* ───────────────── CREATE SESSION ───────────────── */
 export async function newSession(req, res) {
@@ -231,6 +233,36 @@ export async function logoutSession(req, res) {
 
     session.status = "LOGGED_OUT";
     await session.save();
+
+    res.json({
+      success: true,
+      message: "Session logged out",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+/* ───────────────── DELETE ───────────────── */
+export async function deleteSession(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const userId = req.user._id.toString();
+    const { sessionId } = req.params;
+
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    await waClear(userId, sessionId);
+
 
     res.json({
       success: true,
