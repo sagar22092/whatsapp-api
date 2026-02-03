@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 //env config
 import "dotenv/config";
@@ -30,11 +31,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("public"));
+app.use(cors({ origin: "*" }));
 
 /* ───────── API ───────── */
 app.use("/api/auth", authenticate, authRouter);
 app.use("/api/session", authenticate, sessionRouter);
-app.use("/api/whatsapp", subscriptionMiddleware, whatsappRouter);
+app.use("/api/whatsapp", whatsappRouter);
 app.use("/api/subscription", authenticate, subscriptionRouter);
 
 app.get("/", authenticate, (req, res) => {
