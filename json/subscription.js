@@ -3,98 +3,189 @@ const subscriptions = {
   billing: "monthly",
   plans: [
     {
-      id: "basic",
-      name: "Basic",
-      price: 500,
-      pricePerSession: 6,
+      id: "starter",
+      name: "Starter",
+      price: 300,
+      pricePerSession: 300,
       sessions: 1,
       description:
-        "Perfect for individuals or small teams needing 1 WhatsApp number to connect with customers.",
+        "Perfect for individuals or small businesses starting with WhatsApp automation.",
       features: [
-        "You can use 1 session",
-        "Unlimited Contacts",
-        "No Daily Message Cap",
-        "MCP Server Integration",
-        "Send to Users & Groups",
-        "Send Text, Images, Files, Videos & Audio",
-        "Send Documents, Reactions & Locations",
-        "Full API Access",
-        "Real-time Webhooks",
-        "Priority Support",
+        "1 WhatsApp Number",
+        "Unlimited Messages",
+        "Basic Analytics",
+        "Email Support",
+        "API Access",
+        "Webhook Support",
+        "Message Templates",
+        "30 Days Message History"
       ],
-      cta: "Manage Plan",
+      cta: "Get Started",
       highlighted: false,
+      popular: false
+    },
+    {
+      id: "basic",
+      name: "Basic",
+      price: 800,
+      pricePerSession: 400,
+      sessions: 2,
+      description:
+        "Ideal for small businesses needing 2 WhatsApp numbers for customer communication.",
+      features: [
+        "2 WhatsApp Numbers",
+        "Unlimited Messages",
+        "Advanced Analytics",
+        "Priority Support",
+        "API Access",
+        "Webhook Support",
+        "Message Templates",
+        "90 Days Message History",
+        "Bulk Messaging",
+        "Auto-replies"
+      ],
+      cta: "Subscribe Now",
+      highlighted: false,
+      popular: true
     },
     {
       id: "pro",
       name: "Pro",
-      price: 1500,
-      pricePerSession: 5,
-      sessions: 3,
+      price: 1800,
+      pricePerSession: 360,
+      sessions: 5,
       description:
-        "Ideal for growing businesses managing up to 3 WhatsApp numbers to reach more customers.",
+        "Perfect for growing businesses with up to 5 WhatsApp numbers for team collaboration.",
       features: [
-        "You can use 3 sessions",
-        "Unlimited Contacts",
-        "No Daily Message Cap",
-        "MCP Server Integration",
-        "Send to Users & Groups",
-        "Send Text, Images, Files, Videos & Audio",
-        "Send Documents, Reactions & Locations",
-        "Full API Access",
-        "Real-time Webhooks",
+        "5 WhatsApp Numbers",
+        "Unlimited Messages",
+        "Advanced Analytics",
         "Priority Support",
+        "API Access",
+        "Webhook Support",
+        "Message Templates",
+        "180 Days Message History",
+        "Bulk Messaging",
+        "Auto-replies",
+        "Team Collaboration",
+        "Custom Webhooks",
+        "Advanced Reporting",
+        "WhatsApp Business API"
       ],
-      cta: "Preview Upgrade",
+      cta: "Upgrade Now",
       highlighted: true,
-    },
-    {
-      id: "plus",
-      name: "Plus",
-      price: 3000,
-      pricePerSession: 5,
-      sessions: 6,
-      description:
-        "Great for expanding teams needing 6 WhatsApp numbers for better coverage and capacity.",
-      features: [
-        "You can use 6 sessions",
-        "Unlimited Contacts",
-        "No Daily Message Cap",
-        "MCP Server Integration",
-        "Send to Users & Groups",
-        "Send Text, Images, Files, Videos & Audio",
-        "Send Documents, Reactions & Locations",
-        "Full API Access",
-        "Real-time Webhooks",
-        "Priority Support",
-      ],
-      cta: "Preview Upgrade",
-      highlighted: false,
+      popular: false
     },
     {
       id: "business",
       name: "Business",
-      price: 4500,
-      pricePerSession: 450,
+      price: 3500,
+      pricePerSession: 350,
       sessions: 10,
       description:
-        "Full support for up to 10 WhatsApp numbers with advanced tools for larger companies.",
+        "For established businesses requiring up to 10 WhatsApp numbers with advanced features.",
       features: [
-        "You can use 10 sessions",
-        "Unlimited Contacts",
-        "No Daily Message Cap",
-        "MCP Server Integration",
-        "Send to Users & Groups",
-        "Send Text, Images, Files, Videos & Audio",
-        "Send Documents, Reactions & Locations",
-        "Full API Access",
-        "Real-time Webhooks",
-        "Priority Support",
+        "10 WhatsApp Numbers",
+        "Unlimited Messages",
+        "Enterprise Analytics",
+        "24/7 Priority Support",
+        "Dedicated API",
+        "Custom Webhooks",
+        "Unlimited Message Templates",
+        "365 Days Message History",
+        "Advanced Bulk Messaging",
+        "Smart Auto-replies",
+        "Team Collaboration",
+        "Advanced Reporting",
+        "WhatsApp Business API",
+        "Custom Integrations",
+        "Dedicated Account Manager"
       ],
-      cta: "Preview Upgrade",
+      cta: "Contact Sales",
       highlighted: false,
+      popular: false
     },
+    {
+      id: "enterprise",
+      name: "Enterprise",
+      price: 8000,
+      pricePerSession: 400,
+      sessions: 20,
+      description:
+        "Complete solution for large organizations with custom requirements and unlimited scaling.",
+      features: [
+        "20+ WhatsApp Numbers",
+        "Unlimited Messages",
+        "Enterprise Analytics Dashboard",
+        "24/7 Dedicated Support",
+        "Custom API Integration",
+        "Advanced Webhooks",
+        "Unlimited Message Templates",
+        "Permanent Message History",
+        "Enterprise Bulk Messaging",
+        "AI-Powered Auto-replies",
+        "Multi-team Collaboration",
+        "Real-time Reporting",
+        "WhatsApp Business API Premium",
+        "Custom Feature Development",
+        "Dedicated Account Manager",
+        "SLA Guarantee 99.9%",
+        "On-premise Deployment Option"
+      ],
+      cta: "Contact Enterprise Sales",
+      highlighted: false,
+      popular: false
+    }
   ],
+  billingCycles: [
+    {
+      id: "monthly",
+      name: "Monthly",
+      discount: 0
+    },
+    {
+      id: "quarterly",
+      name: "Quarterly",
+      discount: 10
+    },
+    {
+      id: "yearly",
+      name: "Yearly",
+      discount: 20
+    }
+  ],
+  features: {
+    messaging: [
+      "Unlimited Messages",
+      "Text, Images, Videos, Audio",
+      "Documents & Files",
+      "Location Sharing",
+      "Message Templates",
+      "Bulk Messaging",
+      "Auto-replies"
+    ],
+    integration: [
+      "API Access",
+      "Webhook Support",
+      "Custom Integrations",
+      "MCP Server Integration",
+      "CRM Integration"
+    ],
+    management: [
+      "Multiple Sessions",
+      "Team Collaboration",
+      "Analytics Dashboard",
+      "Message History",
+      "User Management"
+    ],
+    support: [
+      "Email Support",
+      "Priority Support",
+      "24/7 Support",
+      "Dedicated Account Manager",
+      "SLA Guarantee"
+    ]
+  }
 };
 
 export default subscriptions;

@@ -14,6 +14,7 @@
             --darker-bg: #0f172a;
             --primary-blue: #3b82f6;
             --primary-yellow: #f59e0b;
+            --primary-purple: #8b5cf6;
         }
         
         body {
@@ -65,6 +66,10 @@
         
         .yellow-bg {
             background: linear-gradient(135deg, var(--primary-yellow), #d97706);
+        }
+        
+        .purple-bg {
+            background: linear-gradient(135deg, var(--primary-purple), #7c3aed);
         }
         
         .plan-card {
@@ -140,6 +145,11 @@
         .status-expired {
             background-color: rgba(239, 68, 68, 0.2);
             color: #ef4444;
+        }
+        
+        .status-cancelled {
+            background-color: rgba(107, 114, 128, 0.2);
+            color: #9ca3af;
         }
         
         /* Tabs */
@@ -257,6 +267,11 @@
             border-left: 4px solid #2563eb;
         }
         
+        .toast-warning {
+            background-color: var(--primary-yellow);
+            border-left: 4px solid #d97706;
+        }
+        
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -266,6 +281,21 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+        }
+        
+        /* Payment method selection */
+        .payment-method {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .payment-method.selected {
+            border-color: var(--primary-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .payment-method i {
+            font-size: 2rem;
         }
         
         /* Responsive adjustments */
@@ -279,6 +309,46 @@
                 width: 95%;
                 margin: 1rem;
             }
+            
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Custom amount input */
+        .custom-amount-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .amount-option {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .amount-option:hover {
+            transform: scale(1.05);
+        }
+        
+        .amount-option.selected {
+            border-color: var(--primary-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        /* Invoice styling */
+        .invoice-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #374151;
+        }
+        
+        .invoice-total {
+            font-weight: bold;
+            border-top: 2px solid #4b5563;
+            padding-top: 0.75rem;
         }
     </style>
 </head>
@@ -345,6 +415,7 @@
                 <div class="tab" data-tab="plans">All Plans</div>
                 <div class="tab" data-tab="change">Change Plan</div>
                 <div class="tab" data-tab="billing">Payment History</div>
+                <div class="tab" data-tab="balance">Add Balance</div>
             </div>
             
             <!-- Current Plan Tab -->
@@ -366,8 +437,11 @@
                             </div>
                         </div>
                         <div id="current-plan-actions" class="mt-4 md:mt-0 hidden">
-                            <button class="px-5 py-2.5 blue-bg hover:opacity-90 rounded-lg font-medium transition" id="change-plan-btn">
+                            <button class="px-5 py-2.5 blue-bg hover:opacity-90 rounded-lg font-medium transition mr-3" id="change-plan-btn">
                                 <i class="fas fa-exchange-alt mr-2"></i>Change Plan
+                            </button>
+                            <button class="px-5 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition" id="cancel-subscription-btn">
+                                <i class="fas fa-ban mr-2"></i>Cancel
                             </button>
                         </div>
                     </div>
@@ -616,6 +690,47 @@
                 <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
                     <h2 class="text-2xl font-bold mb-6">Payment History</h2>
                     
+                    <!-- Filters -->
+                    <div class="mb-6 flex flex-wrap gap-3">
+                        <select id="payment-filter-type" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500">
+                            <option value="all">All Types</option>
+                            <option value="new">New Subscription</option>
+                            <option value="upgrade">Upgrade</option>
+                            <option value="downgrade">Downgrade</option>
+                            <option value="renewal">Renewal</option>
+                            <option value="deposit">Deposit</option>
+                        </select>
+                        <select id="payment-filter-status" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500">
+                            <option value="all">All Statuses</option>
+                            <option value="completed">Completed</option>
+                            <option value="pending">Pending</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                        <input type="month" id="payment-filter-month" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500">
+                        <button onclick="loadPaymentHistory()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                            <i class="fas fa-filter mr-2"></i>Filter
+                        </button>
+                        <button onclick="resetPaymentFilters()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <div class="text-gray-400 text-sm mb-1">Total Spent</div>
+                            <div class="text-2xl font-bold text-green-400" id="total-spent">৳0</div>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <div class="text-gray-400 text-sm mb-1">Total Payments</div>
+                            <div class="text-2xl font-bold" id="total-payments">0</div>
+                        </div>
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <div class="text-gray-400 text-sm mb-1">Last Payment</div>
+                            <div class="text-xl font-bold" id="last-payment-date">N/A</div>
+                        </div>
+                    </div>
+                    
                     <div id="billing-loading" class="text-center py-12">
                         <div class="inline-block loading mr-3"></div>
                         <span class="text-gray-300">Loading payment history...</span>
@@ -627,10 +742,12 @@
                                 <thead>
                                     <tr>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Reference</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Plan</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="billing-table-body" class="divide-y divide-gray-800">
@@ -639,10 +756,125 @@
                             </table>
                         </div>
                         
+                        <!-- Pagination -->
+                        <div id="pagination" class="flex justify-center items-center mt-6 gap-2 hidden">
+                            <button id="prev-page" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span class="text-gray-300 mx-4" id="page-info">Page 1 of 1</span>
+                            <button id="next-page" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        
                         <div id="no-billing-history" class="text-center py-12 hidden">
                             <i class="fas fa-receipt text-4xl text-gray-600 mb-4"></i>
                             <h3 class="text-xl font-bold mb-2">No Payment History</h3>
                             <p class="text-gray-400">You haven't made any payments yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Balance Tab -->
+            <div id="balance-tab" class="tab-content">
+                <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+                    <h2 class="text-2xl font-bold mb-6">Add Balance to Account</h2>
+                    
+                    <!-- Current Balance -->
+                    <div class="mb-8 p-6 bg-gray-800 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-gray-400 mb-1">Current Balance</div>
+                                <div class="text-4xl font-bold text-green-400" id="current-balance-display">৳100,000</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-gray-400 mb-1">Last Added</div>
+                                <div id="last-deposit-date">Feb 5, 2026</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-400">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Add balance to your account to purchase or renew subscriptions. Balance is non-refundable.
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Add Options -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4">Quick Add</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="amount-option bg-gray-800 p-6 rounded-lg border-2 border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="500">
+                                <div class="text-3xl font-bold mb-2">৳500</div>
+                                <div class="text-gray-400">Starter Pack</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-6 rounded-lg border-2 border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="1000">
+                                <div class="text-3xl font-bold mb-2">৳1,000</div>
+                                <div class="text-gray-400">Most Popular</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-6 rounded-lg border-2 border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="5000">
+                                <div class="text-3xl font-bold mb-2">৳5,000</div>
+                                <div class="text-gray-400">Business Pack</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Amount -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4">Custom Amount</h3>
+                        <div class="flex">
+                            <div class="relative flex-1">
+                                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">৳</span>
+                                <input type="number" id="custom-amount-input" 
+                                       class="w-full bg-gray-800 border-2 border-gray-700 rounded-l-lg pl-10 pr-4 py-4 text-xl focus:outline-none focus:border-green-500" 
+                                       placeholder="Enter amount" min="100" step="100">
+                            </div>
+                            <button onclick="processCustomAmount()" class="gradient-bg hover:opacity-90 text-white font-bold px-8 py-4 rounded-r-lg transition">
+                                <i class="fas fa-plus mr-2"></i>Add Balance
+                            </button>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-2">Minimum amount: ৳100</p>
+                    </div>
+                    
+                    <!-- Suggested Amounts -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold mb-4">Suggested Amounts</h3>
+                        <div class="custom-amount-grid">
+                            <div class="amount-option bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="100">
+                                <div class="font-bold">৳100</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="200">
+                                <div class="font-bold">৳200</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="500">
+                                <div class="font-bold">৳500</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="1000">
+                                <div class="font-bold">৳1,000</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="2000">
+                                <div class="font-bold">৳2,000</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="5000">
+                                <div class="font-bold">৳5,000</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="10000">
+                                <div class="font-bold">৳10,000</div>
+                            </div>
+                            <div class="amount-option bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-amount="20000">
+                                <div class="font-bold">৳20,000</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transaction History -->
+                    <div class="mt-8 pt-8 border-t border-gray-800">
+                        <h3 class="text-xl font-bold mb-4">Recent Transactions</h3>
+                        <div id="transactions-loading" class="text-center py-8">
+                            <div class="inline-block loading mr-3"></div>
+                            <span class="text-gray-300">Loading transactions...</span>
+                        </div>
+                        <div id="transactions-list" class="hidden">
+                            <!-- Transactions will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -893,6 +1125,175 @@
         </div>
     </div>
     
+    <!-- Cancel Subscription Modal -->
+    <div id="cancel-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Cancel Subscription</h3>
+                    <button class="text-gray-400 hover:text-white text-2xl" id="close-cancel-modal">&times;</button>
+                </div>
+                
+                <!-- Warning -->
+                <div class="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-exclamation-triangle text-red-400 mr-3 text-xl"></i>
+                        <h4 class="font-medium">Important Notice</h4>
+                    </div>
+                    <p class="text-gray-300 text-sm">
+                        Cancelling your subscription will stop auto-renewal. You will continue to have access until the end of your current billing period (<span id="cancel-end-date">March 3, 2026</span>).
+                    </p>
+                </div>
+                
+                <!-- Current Plan Info -->
+                <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium" id="cancel-plan-name">Pro Plan</span>
+                        <span class="text-xl font-bold" id="cancel-plan-price">৳1,500</span>
+                    </div>
+                    <p class="text-gray-400 text-sm" id="cancel-plan-description">3 WhatsApp numbers, unlimited messages</p>
+                    <div class="mt-2 flex items-center text-sm text-gray-400">
+                        <i class="fas fa-clock mr-2"></i>
+                        Access until: <span class="ml-1 font-medium" id="cancel-access-until">March 3, 2026</span>
+                    </div>
+                </div>
+                
+                <!-- Cancellation Reason -->
+                <div class="mb-6">
+                    <h4 class="font-medium mb-3">Reason for cancellation (optional)</h4>
+                    <textarea id="cancel-reason" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-red-500" rows="3" placeholder="Please tell us why you're cancelling..."></textarea>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-800">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button id="close-cancel-btn" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
+                            Keep Subscription
+                        </button>
+                        <button id="confirm-cancel-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-lg transition duration-300">
+                            <i class="fas fa-ban mr-2"></i>Confirm Cancellation
+                        </button>
+                    </div>
+                    <p class="text-center text-gray-400 text-sm mt-3">
+                        You can resubscribe anytime
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Balance Modal -->
+    <div id="add-balance-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Add Balance</h3>
+                    <button class="text-gray-400 hover:text-white text-2xl" id="close-balance-modal">&times;</button>
+                </div>
+                
+                <!-- Amount -->
+                <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="font-medium">Amount to Add</div>
+                        <div class="text-2xl font-bold text-green-400" id="add-balance-amount">৳500</div>
+                    </div>
+                    <div class="text-sm text-gray-400">
+                        This amount will be added to your account balance immediately.
+                    </div>
+                </div>
+                
+                <!-- Payment Methods -->
+                <div class="mb-6">
+                    <h4 class="font-medium mb-3">Payment Method</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="payment-method bg-gray-800 p-4 rounded-lg border-2 border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-method="bkash">
+                            <i class="fas fa-mobile-alt text-green-500 text-2xl mb-2"></i>
+                            <div class="font-medium">bKash</div>
+                        </div>
+                        <div class="payment-method bg-gray-800 p-4 rounded-lg border-2 border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-method="nagad">
+                            <i class="fas fa-wallet text-red-500 text-2xl mb-2"></i>
+                            <div class="font-medium">Nagad</div>
+                        </div>
+                        <div class="payment-method bg-gray-800 p-4 rounded-lg border-2 border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-method="bank">
+                            <i class="fas fa-university text-blue-500 text-2xl mb-2"></i>
+                            <div class="font-medium">Bank Transfer</div>
+                        </div>
+                        <div class="payment-method bg-gray-800 p-4 rounded-lg border-2 border-gray-700 hover:border-green-500 transition cursor-pointer text-center" data-method="card">
+                            <i class="fas fa-credit-card text-purple-500 text-2xl mb-2"></i>
+                            <div class="font-medium">Credit/Debit Card</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Details -->
+                <div id="payment-details" class="mb-6 hidden">
+                    <h4 class="font-medium mb-3">Payment Details</h4>
+                    <div id="bkash-details" class="hidden">
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <p class="text-gray-300 mb-3">Send money to this bKash number:</p>
+                            <div class="text-center mb-3">
+                                <div class="text-2xl font-bold text-green-500">017XX-XXXXXX</div>
+                                <p class="text-gray-400 text-sm">(Company bKash Account)</p>
+                            </div>
+                            <div class="text-sm text-gray-400">
+                                <p class="mb-2"><i class="fas fa-info-circle mr-2"></i>Use this reference: <span class="font-mono font-bold" id="bkash-reference">WABAL-123456</span></p>
+                                <p><i class="fas fa-clock mr-2"></i>Balance will be added within 15 minutes after payment confirmation</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="nagad-details" class="hidden">
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <p class="text-gray-300 mb-3">Send money to this Nagad number:</p>
+                            <div class="text-center mb-3">
+                                <div class="text-2xl font-bold text-red-500">017XX-XXXXXX</div>
+                                <p class="text-gray-400 text-sm">(Company Nagad Account)</p>
+                            </div>
+                            <div class="text-sm text-gray-400">
+                                <p class="mb-2"><i class="fas fa-info-circle mr-2"></i>Use this reference: <span class="font-mono font-bold" id="nagad-reference">WABAL-123456</span></p>
+                                <p><i class="fas fa-clock mr-2"></i>Balance will be added within 15 minutes after payment confirmation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Invoice -->
+                <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+                    <h4 class="font-medium mb-3">Invoice Summary</h4>
+                    <div class="space-y-2">
+                        <div class="invoice-item">
+                            <span class="text-gray-400">Amount:</span>
+                            <span class="font-medium" id="invoice-amount">৳500</span>
+                        </div>
+                        <div class="invoice-item">
+                            <span class="text-gray-400">Processing Fee:</span>
+                            <span class="font-medium">৳0</span>
+                        </div>
+                        <div class="invoice-item">
+                            <span class="text-gray-400">VAT:</span>
+                            <span class="font-medium">৳0</span>
+                        </div>
+                        <div class="invoice-item invoice-total">
+                            <span>Total:</span>
+                            <span class="text-green-400 font-bold" id="invoice-total">৳500</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-800">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button id="cancel-balance" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
+                            Cancel
+                        </button>
+                        <button id="confirm-add-balance" class="flex-1 gradient-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition duration-300">
+                            <i class="fas fa-check-circle mr-2"></i>Proceed to Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Success Modal -->
     <div id="success-modal" class="modal">
         <div class="modal-content">
@@ -925,6 +1326,43 @@
             </div>
         </div>
     </div>
+    
+    <!-- Payment Success Modal -->
+    <div id="payment-success-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-8 text-center">
+                <div class="w-20 h-20 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check-circle text-4xl text-green-500"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3">Payment Successful!</h3>
+                <p class="text-gray-400 mb-6" id="payment-success-message">
+                    Your balance has been added successfully.
+                </p>
+                <div class="bg-gray-800 rounded-lg p-4 mb-6 text-left">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-400">Reference:</span>
+                        <span class="font-mono font-bold" id="payment-reference">DEP-2026-001</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-400">Amount:</span>
+                        <span class="font-mono" id="payment-amount">৳500</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">New Balance:</span>
+                        <span class="font-mono text-green-400" id="new-balance">৳100,500</span>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="close-payment-success" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg font-medium transition">
+                        Close
+                    </button>
+                    <button onclick="window.location.href='/subscriptions.html'" class="flex-1 gradient-bg hover:opacity-90 text-white py-3 rounded-lg font-medium transition">
+                        View Subscription
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // API Configuration
@@ -933,9 +1371,13 @@
         const CURRENT_SUBSCRIPTION_API = `${API_BASE_URL}/subscription/current`;
         const PURCHASE_API = `${API_BASE_URL}/subscription/purchase`;
         const UPDATE_SUBSCRIPTION_API = `${API_BASE_URL}/subscription/update`;
+        const CANCEL_SUBSCRIPTION_API = `${API_BASE_URL}/subscription/cancel`;
+        const RENEW_SUBSCRIPTION_API = `${API_BASE_URL}/subscription/renew`;
         const PROFILE_API = `${API_BASE_URL}/auth/profile`;
         const UPDATE_AUTO_RENEW_API = `${API_BASE_URL}/subscription/auto-renew`;
         const PAYMENT_HISTORY_API = `${API_BASE_URL}/subscription/payments`;
+        const ADD_BALANCE_API = `${API_BASE_URL}/subscription/add-balance`;
+        const TRANSACTIONS_API = `${API_BASE_URL}/subscription/transactions`;
         
         // Global variables
         let currentSubscription = null;
@@ -950,6 +1392,10 @@
         let newPlanForChange = null;
         let currentSessions = 0;
         let activeSessionsCount = 0;
+        let selectedAmount = 500;
+        let selectedPaymentMethod = 'bkash';
+        let paymentHistoryPage = 1;
+        let paymentHistoryTotalPages = 1;
         
         // DOM Elements
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -969,8 +1415,16 @@
         const renewConfirmModal = document.getElementById('renew-confirm-modal');
         const closeRenewModal = document.getElementById('close-renew-modal');
         const cancelRenew = document.getElementById('cancel-renew');
+        const cancelModal = document.getElementById('cancel-modal');
+        const closeCancelModal = document.getElementById('close-cancel-modal');
+        const closeCancelBtn = document.getElementById('close-cancel-btn');
+        const addBalanceModal = document.getElementById('add-balance-modal');
+        const closeBalanceModal = document.getElementById('close-balance-modal');
+        const cancelBalance = document.getElementById('cancel-balance');
         const successModal = document.getElementById('success-modal');
         const closeSuccessModal = document.getElementById('close-success-modal');
+        const paymentSuccessModal = document.getElementById('payment-success-modal');
+        const closePaymentSuccess = document.getElementById('close-payment-success');
         
         // Mobile menu toggle
         mobileMenuBtn.addEventListener('click', () => {
@@ -1008,6 +1462,8 @@
                     loadChangeOptions();
                 } else if (tabId === 'billing') {
                     loadPaymentHistory();
+                } else if (tabId === 'balance') {
+                    loadTransactions();
                 }
             });
         });
@@ -1089,6 +1545,9 @@
                     // Update balance
                     updateUserBalanceUI(userProfile.balance || 0);
                     
+                    // Update current balance display
+                    document.getElementById('current-balance-display').textContent = formatCurrency(userProfile.balance || 0, 'BDT');
+                    
                 } else {
                     console.error('Failed to load user profile');
                 }
@@ -1105,9 +1564,8 @@
                     const data = await response.json();
                     currentSubscription = data;
                     
-                    // Store the full subscription details
                     if (data.subscription) {
-                        // Store sessions count globally
+                        // Store the full subscription details
                         currentSessions = data.subscription.sessions || 0;
                         
                         // Update UI with session count
@@ -1146,6 +1604,7 @@
             const loadingEl = document.getElementById('current-plan-loading');
             const infoEl = document.getElementById('current-plan-info');
             const actionsEl = document.getElementById('current-plan-actions');
+            const cancelBtn = document.getElementById('cancel-subscription-btn');
             
             if (!currentSubscription || !currentSubscription.subscription) {
                 // No subscription - show "Get Started" button
@@ -1189,6 +1648,9 @@
                     document.querySelector('[data-tab="plans"]').click();
                 };
                 
+                // Hide cancel button
+                cancelBtn.style.display = 'none';
+                
             } else {
                 const plan = currentSubscription.subscription;
                 
@@ -1210,7 +1672,7 @@
                     statusBadge.classList.add('status-pending');
                 }
                 
-                document.getElementById('current-billing-cycle').textContent = 'Monthly';
+                document.getElementById('current-billing-cycle').textContent = plan.billingCycle ? plan.billingCycle.charAt(0).toUpperCase() + plan.billingCycle.slice(1) : 'Monthly';
                 
                 // Update sessions display
                 document.getElementById('current-sessions').textContent = activeSessionsCount;
@@ -1222,6 +1684,13 @@
                 // Format dates from user profile subscription
                 if (userProfile?.subscription?.startDate) {
                     const startDate = new Date(userProfile.subscription.startDate);
+                    document.getElementById('subscription-start').textContent = startDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                } else if (plan.startDate) {
+                    const startDate = new Date(plan.startDate);
                     document.getElementById('subscription-start').textContent = startDate.toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
@@ -1245,6 +1714,30 @@
                         month: 'short',
                         day: 'numeric'
                     });
+                    
+                    // Update cancel modal dates
+                    document.getElementById('cancel-end-date').textContent = endDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    document.getElementById('cancel-access-until').textContent = endDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                } else if (plan.endDate) {
+                    const endDate = new Date(plan.endDate);
+                    document.getElementById('subscription-end').textContent = endDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    document.getElementById('renewal-date').textContent = endDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
                 } else {
                     document.getElementById('subscription-end').textContent = 'N/A';
                     document.getElementById('renewal-date').textContent = 'N/A';
@@ -1262,6 +1755,11 @@
                 
                 // Update subscription details
                 document.getElementById('subscription-id').textContent = plan.id || 'N/A';
+                
+                // Update cancel modal info
+                document.getElementById('cancel-plan-name').textContent = plan.name;
+                document.getElementById('cancel-plan-price').textContent = formatCurrency(plan.price, 'BDT');
+                document.getElementById('cancel-plan-description').textContent = plan.description;
                 
                 // Update auto-renew toggle from user profile
                 const autoRenewToggle = document.getElementById('auto-renew-toggle');
@@ -1308,6 +1806,12 @@
                 loadingEl.classList.add('hidden');
                 infoEl.classList.remove('hidden');
                 actionsEl.classList.remove('hidden');
+                
+                // Show cancel button
+                cancelBtn.style.display = 'inline-block';
+                cancelBtn.onclick = () => {
+                    openCancelModal();
+                };
                 
                 // Update change button
                 const changeBtn = document.getElementById('change-plan-btn');
@@ -1369,11 +1873,13 @@
             const userBalanceElement = document.getElementById('user-balance');
             const changeBalanceElement = document.getElementById('change-balance');
             const renewBalanceElement = document.getElementById('renew-user-balance');
+            const currentBalanceDisplay = document.getElementById('current-balance-display');
             
             if (balanceElement) balanceElement.textContent = formatCurrency(balance, 'BDT');
             if (userBalanceElement) userBalanceElement.textContent = formatCurrency(balance, 'BDT');
             if (changeBalanceElement) changeBalanceElement.textContent = formatCurrency(balance, 'BDT');
             if (renewBalanceElement) renewBalanceElement.textContent = formatCurrency(balance, 'BDT');
+            if (currentBalanceDisplay) currentBalanceDisplay.textContent = formatCurrency(balance, 'BDT');
             
             return balance;
         }
@@ -1428,6 +1934,12 @@
                         ${isCurrentPlan ? `
                             <div class="absolute top-4 right-4">
                                 <span class="status-badge status-active">Current</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${plan.popular ? `
+                            <div class="absolute top-4 left-4">
+                                <span class="status-badge bg-purple-900 text-purple-300">Popular</span>
                             </div>
                         ` : ''}
                         
@@ -1643,6 +2155,301 @@
             }
         }
         
+        // Load payment history
+        async function loadPaymentHistory(page = 1) {
+            try {
+                const typeFilter = document.getElementById('payment-filter-type').value;
+                const statusFilter = document.getElementById('payment-filter-status').value;
+                const monthFilter = document.getElementById('payment-filter-month').value;
+                
+                let url = `${PAYMENT_HISTORY_API}?page=${page}`;
+                if (typeFilter !== 'all') url += `&type=${typeFilter}`;
+                if (statusFilter !== 'all') url += `&status=${statusFilter}`;
+                if (monthFilter) url += `&month=${monthFilter}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const tableBody = document.getElementById('billing-table-body');
+                const noHistory = document.getElementById('no-billing-history');
+                const billingLoading = document.getElementById('billing-loading');
+                const billingHistory = document.getElementById('billing-history');
+                const pagination = document.getElementById('pagination');
+                const prevPageBtn = document.getElementById('prev-page');
+                const nextPageBtn = document.getElementById('next-page');
+                const pageInfo = document.getElementById('page-info');
+                
+                billingLoading.classList.add('hidden');
+                
+                if (data.payments && data.payments.length > 0) {
+                    billingHistory.classList.remove('hidden');
+                    noHistory.classList.add('hidden');
+                    
+                    // Update stats
+                    document.getElementById('total-spent').textContent = formatCurrency(data.totalSpent || 0, 'BDT');
+                    document.getElementById('total-payments').textContent = data.total || 0;
+                    if (data.payments[0]) {
+                        const lastDate = new Date(data.payments[0].date);
+                        document.getElementById('last-payment-date').textContent = lastDate.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+                    }
+                    
+                    // Render payments
+                    tableBody.innerHTML = data.payments.map(payment => {
+                        const date = new Date(payment.date);
+                        const formattedDate = date.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        let statusClass = 'status-pending';
+                        if (payment.status === 'completed') statusClass = 'status-active';
+                        if (payment.status === 'failed') statusClass = 'status-expired';
+                        
+                        // Determine payment type
+                        let paymentType = 'Subscription';
+                        let typeColor = 'text-green-400';
+                        if (payment.type === 'upgrade') {
+                            paymentType = 'Upgrade';
+                            typeColor = 'text-blue-400';
+                        } else if (payment.type === 'downgrade') {
+                            paymentType = 'Downgrade';
+                            typeColor = 'text-yellow-400';
+                        } else if (payment.type === 'renewal') {
+                            paymentType = 'Renewal';
+                            typeColor = 'text-purple-400';
+                        } else if (payment.type === 'deposit') {
+                            paymentType = 'Deposit';
+                            typeColor = 'text-green-400';
+                        }
+                        
+                        return `
+                            <tr>
+                                <td class="px-4 py-3">${formattedDate}</td>
+                                <td class="px-4 py-3 font-mono text-sm">${payment.reference}</td>
+                                <td class="px-4 py-3 font-medium">${payment.plan || 'Balance Add'}</td>
+                                <td class="px-4 py-3 font-bold">${formatCurrency(payment.amount, 'BDT')}</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-sm ${typeColor}">${paymentType}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="status-badge ${statusClass}">${payment.status}</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <button class="text-blue-400 hover:text-blue-300" onclick="viewInvoice('${payment.reference}')">
+                                        <i class="fas fa-receipt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    
+                    // Update pagination
+                    paymentHistoryTotalPages = data.totalPages || 1;
+                    paymentHistoryPage = page;
+                    
+                    if (paymentHistoryTotalPages > 1) {
+                        pagination.classList.remove('hidden');
+                        pageInfo.textContent = `Page ${page} of ${paymentHistoryTotalPages}`;
+                        prevPageBtn.disabled = page <= 1;
+                        nextPageBtn.disabled = page >= paymentHistoryTotalPages;
+                        
+                        prevPageBtn.onclick = () => {
+                            if (page > 1) loadPaymentHistory(page - 1);
+                        };
+                        
+                        nextPageBtn.onclick = () => {
+                            if (page < paymentHistoryTotalPages) loadPaymentHistory(page + 1);
+                        };
+                    } else {
+                        pagination.classList.add('hidden');
+                    }
+                    
+                } else {
+                    billingHistory.classList.add('hidden');
+                    noHistory.classList.remove('hidden');
+                    pagination.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading payment history:', error);
+                document.getElementById('billing-loading').classList.add('hidden');
+                document.getElementById('no-billing-history').classList.remove('hidden');
+            }
+        }
+        
+        // Reset payment filters
+        function resetPaymentFilters() {
+            document.getElementById('payment-filter-type').value = 'all';
+            document.getElementById('payment-filter-status').value = 'all';
+            document.getElementById('payment-filter-month').value = '';
+            loadPaymentHistory(1);
+        }
+        
+        // Load transactions
+        async function loadTransactions() {
+            try {
+                const response = await fetch(TRANSACTIONS_API);
+                const data = await response.json();
+                
+                const transactionsList = document.getElementById('transactions-list');
+                const transactionsLoading = document.getElementById('transactions-loading');
+                
+                transactionsLoading.classList.add('hidden');
+                
+                if (data.transactions && data.transactions.length > 0) {
+                    transactionsList.classList.remove('hidden');
+                    
+                    // Show only last 5 transactions
+                    const recentTransactions = data.transactions.slice(0, 5);
+                    
+                    transactionsList.innerHTML = `
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-800">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Balance</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-800">
+                                    ${recentTransactions.map(transaction => {
+                                        const date = new Date(transaction.date);
+                                        const formattedDate = date.toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                        });
+                                        
+                                        let typeColor = 'text-green-400';
+                                        if (transaction.type === 'withdrawal') typeColor = 'text-red-400';
+                                        if (transaction.type === 'refund') typeColor = 'text-yellow-400';
+                                        
+                                        let statusClass = 'status-pending';
+                                        if (transaction.status === 'completed') statusClass = 'status-active';
+                                        if (transaction.status === 'failed') statusClass = 'status-expired';
+                                        
+                                        return `
+                                            <tr>
+                                                <td class="px-4 py-3">${formattedDate}</td>
+                                                <td class="px-4 py-3">
+                                                    <span class="text-sm ${typeColor}">${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</span>
+                                                </td>
+                                                <td class="px-4 py-3 font-medium">${formatCurrency(transaction.amount, 'BDT')}</td>
+                                                <td class="px-4 py-3">${formatCurrency(transaction.balanceAfter || 0, 'BDT')}</td>
+                                                <td class="px-4 py-3">
+                                                    <span class="status-badge ${statusClass}">${transaction.status}</span>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        ${data.transactions.length > 5 ? `
+                            <div class="mt-4 text-center">
+                                <button onclick="document.querySelector('[data-tab=billing]').click()" class="text-green-400 hover:text-green-300">
+                                    View all ${data.transactions.length} transactions
+                                </button>
+                            </div>
+                        ` : ''}
+                    `;
+                } else {
+                    transactionsList.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-exchange-alt text-4xl text-gray-600 mb-4"></i>
+                            <h3 class="text-xl font-bold mb-2">No Transactions</h3>
+                            <p class="text-gray-400">You haven't made any transactions yet.</p>
+                        </div>
+                    `;
+                    transactionsList.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                document.getElementById('transactions-loading').innerHTML = `
+                    <div class="text-center py-8 text-red-400">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p>Failed to load transactions</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Amount selection
+        document.querySelectorAll('.amount-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selected class from all options
+                document.querySelectorAll('.amount-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                
+                // Set selected amount
+                selectedAmount = parseInt(this.getAttribute('data-amount'));
+                
+                // Update custom amount input
+                document.getElementById('custom-amount-input').value = selectedAmount;
+            });
+        });
+        
+        // Process custom amount
+        function processCustomAmount() {
+            const customAmountInput = document.getElementById('custom-amount-input');
+            let amount = parseInt(customAmountInput.value);
+            
+            if (!amount || isNaN(amount) || amount < 100) {
+                showToast('Please enter a valid amount (minimum ৳100)', 'error');
+                customAmountInput.focus();
+                return;
+            }
+            
+            // Round to nearest 100
+            amount = Math.round(amount / 100) * 100;
+            
+            openAddBalanceModal(amount);
+        }
+        
+        // Payment method selection
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                // Remove selected class from all methods
+                document.querySelectorAll('.payment-method').forEach(m => {
+                    m.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked method
+                this.classList.add('selected');
+                
+                // Set selected payment method
+                selectedPaymentMethod = this.getAttribute('data-method');
+                
+                // Show payment details
+                document.querySelectorAll('#payment-details > div').forEach(detail => {
+                    detail.classList.add('hidden');
+                });
+                
+                const detailsDiv = document.getElementById(`${selectedPaymentMethod}-details`);
+                if (detailsDiv) {
+                    detailsDiv.classList.remove('hidden');
+                    document.getElementById('payment-details').classList.remove('hidden');
+                    
+                    // Generate reference
+                    const reference = `WABAL-${Date.now().toString().slice(-6)}`;
+                    document.getElementById(`${selectedPaymentMethod}-reference`).textContent = reference;
+                }
+            });
+        });
+        
         // Open purchase confirmation modal
         async function openPurchaseModal(plan) {
             selectedPlan = plan;
@@ -1854,7 +2661,7 @@
                     </div>
                     <div class="flex justify-between border-t border-blue-800 pt-2 mt-2">
                         <span class="text-gray-400">Total Amount:</span>
-                        <span class="font-bold text-blue-300">${formatCurrency(total, 'BDT')}</span>
+                            <span class="font-bold text-blue-300">${formatCurrency(total, 'BDT')}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-400">Account Balance:</span>
@@ -1867,7 +2674,44 @@
             renewConfirmModal.style.display = 'flex';
         }
         
-        // Close purchase modal
+        // Open cancel modal
+        function openCancelModal() {
+            cancelModal.style.display = 'flex';
+        }
+        
+        // Open add balance modal
+        function openAddBalanceModal(amount) {
+            selectedAmount = amount;
+            
+            // Update modal content
+            document.getElementById('add-balance-amount').textContent = formatCurrency(amount, 'BDT');
+            document.getElementById('invoice-amount').textContent = formatCurrency(amount, 'BDT');
+            document.getElementById('invoice-total').textContent = formatCurrency(amount, 'BDT');
+            
+            // Reset payment method selection
+            document.querySelectorAll('.payment-method').forEach(m => {
+                m.classList.remove('selected');
+            });
+            document.querySelector('.payment-method[data-method="bkash"]').classList.add('selected');
+            selectedPaymentMethod = 'bkash';
+            
+            // Show bKash details by default
+            document.querySelectorAll('#payment-details > div').forEach(detail => {
+                detail.classList.add('hidden');
+            });
+            document.getElementById('bkash-details').classList.remove('hidden');
+            document.getElementById('payment-details').classList.remove('hidden');
+            
+            // Generate reference
+            const reference = `WABAL-${Date.now().toString().slice(-6)}`;
+            document.getElementById('bkash-reference').textContent = reference;
+            document.getElementById('nagad-reference').textContent = reference;
+            
+            // Show modal
+            addBalanceModal.style.display = 'flex';
+        }
+        
+        // Close modals
         closePurchaseModal.addEventListener('click', () => {
             purchaseModal.style.display = 'none';
         });
@@ -1876,7 +2720,6 @@
             purchaseModal.style.display = 'none';
         });
         
-        // Close change modal
         closeChangeModal.addEventListener('click', () => {
             changeConfirmModal.style.display = 'none';
         });
@@ -1885,7 +2728,6 @@
             changeConfirmModal.style.display = 'none';
         });
         
-        // Close renew modal
         closeRenewModal.addEventListener('click', () => {
             renewConfirmModal.style.display = 'none';
         });
@@ -1894,10 +2736,29 @@
             renewConfirmModal.style.display = 'none';
         });
         
-        // Close success modal
+        closeCancelModal.addEventListener('click', () => {
+            cancelModal.style.display = 'none';
+        });
+        
+        closeCancelBtn.addEventListener('click', () => {
+            cancelModal.style.display = 'none';
+        });
+        
+        closeBalanceModal.addEventListener('click', () => {
+            addBalanceModal.style.display = 'none';
+        });
+        
+        cancelBalance.addEventListener('click', () => {
+            addBalanceModal.style.display = 'none';
+        });
+        
         closeSuccessModal.addEventListener('click', () => {
             successModal.style.display = 'none';
             window.location.href = '/sessions';
+        });
+        
+        closePaymentSuccess.addEventListener('click', () => {
+            paymentSuccessModal.style.display = 'none';
         });
         
         // Auto-renew toggle for purchase modal
@@ -1926,9 +2787,18 @@
             if (event.target === renewConfirmModal) {
                 renewConfirmModal.style.display = 'none';
             }
+            if (event.target === cancelModal) {
+                cancelModal.style.display = 'none';
+            }
+            if (event.target === addBalanceModal) {
+                addBalanceModal.style.display = 'none';
+            }
             if (event.target === successModal) {
                 successModal.style.display = 'none';
                 window.location.href = '/sessions';
+            }
+            if (event.target === paymentSuccessModal) {
+                paymentSuccessModal.style.display = 'none';
             }
         });
         
@@ -1981,6 +2851,16 @@
             await processRenew();
         });
         
+        // Confirm cancel
+        document.getElementById('confirm-cancel-btn').addEventListener('click', async () => {
+            await processCancel();
+        });
+        
+        // Confirm add balance
+        document.getElementById('confirm-add-balance').addEventListener('click', async () => {
+            await processAddBalance();
+        });
+        
         // Process purchase with balance
         async function processPurchase() {
             try {
@@ -2009,7 +2889,7 @@
                     // Update success modal
                     document.getElementById('success-title').textContent = 'Subscription Created Successfully!';
                     document.getElementById('success-message').textContent = `Your ${selectedPlan.name} plan has been activated successfully.`;
-                    document.getElementById('success-reference').textContent = result.reference || `SUB-${Date.now()}`;
+                    document.getElementById('success-reference').textContent = result.payment?.reference || `SUB-${Date.now()}`;
                     document.getElementById('success-amount').textContent = formatCurrency(selectedPlan.price, 'BDT');
                     
                     // Close modals
@@ -2046,9 +2926,7 @@
                 
                 const changeData = {
                     subscriptionId: newPlanForChange.id,
-                    currentSubscriptionId: currentPlanForChange.id,
                     changeType: isUpgradeFlow ? 'upgrade' : 'downgrade',
-                    paymentMethod: 'balance',
                     autoRenew: autoRenew
                 };
                 
@@ -2101,18 +2979,14 @@
                 confirmBtn.disabled = true;
                 confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
                 
-                const renewData = {
-                    subscriptionId: currentSubscription.subscription.id,
-                    paymentMethod: 'balance',
-                    autoRenew: autoRenew
-                };
-                
-                const response = await fetch(PURCHASE_API, {
+                const response = await fetch(RENEW_SUBSCRIPTION_API, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(renewData)
+                    body: JSON.stringify({
+                        autoRenew: autoRenew
+                    })
                 });
                 
                 if (response.ok) {
@@ -2121,7 +2995,7 @@
                     // Update success modal
                     document.getElementById('success-title').textContent = 'Subscription Renewed Successfully!';
                     document.getElementById('success-message').textContent = 'Your subscription has been renewed successfully.';
-                    document.getElementById('success-reference').textContent = result.reference || `REN-${Date.now()}`;
+                    document.getElementById('success-reference').textContent = result.payment?.reference || `REN-${Date.now()}`;
                     document.getElementById('success-amount').textContent = formatCurrency(currentSubscription.subscription.price, 'BDT');
                     
                     // Close modals
@@ -2149,68 +3023,110 @@
             }
         }
         
-        // Load payment history
-        async function loadPaymentHistory() {
+        // Process cancel
+        async function processCancel() {
             try {
-                const response = await fetch(PAYMENT_HISTORY_API);
-                const payments = await response.json();
+                const confirmBtn = document.getElementById('confirm-cancel-btn');
+                const reason = document.getElementById('cancel-reason').value;
                 
-                const tableBody = document.getElementById('billing-table-body');
-                const noHistory = document.getElementById('no-billing-history');
-                const billingLoading = document.getElementById('billing-loading');
-                const billingHistory = document.getElementById('billing-history');
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
                 
-                billingLoading.classList.add('hidden');
+                const response = await fetch(CANCEL_SUBSCRIPTION_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        reason: reason
+                    })
+                });
                 
-                if (payments && payments.length > 0) {
-                    billingHistory.classList.remove('hidden');
+                if (response.ok) {
+                    const result = await response.json();
                     
-                    tableBody.innerHTML = payments.map(payment => {
-                        const date = new Date(payment.date);
-                        const formattedDate = date.toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        });
-                        
-                        let statusClass = 'status-pending';
-                        if (payment.status === 'completed') statusClass = 'status-active';
-                        if (payment.status === 'failed') statusClass = 'status-expired';
-                        
-                        // Determine payment type
-                        let paymentType = 'New Subscription';
-                        if (payment.type === 'upgrade') paymentType = 'Upgrade';
-                        if (payment.type === 'downgrade') paymentType = 'Downgrade';
-                        if (payment.type === 'renewal') paymentType = 'Renewal';
-                        
-                        let typeColor = 'text-green-400';
-                        if (payment.type === 'upgrade') typeColor = 'text-blue-400';
-                        if (payment.type === 'downgrade') typeColor = 'text-yellow-400';
-                        if (payment.type === 'renewal') typeColor = 'text-purple-400';
-                        
-                        return `
-                            <tr>
-                                <td class="px-4 py-3">${formattedDate}</td>
-                                <td class="px-4 py-3 font-medium">${payment.plan}</td>
-                                <td class="px-4 py-3">${formatCurrency(payment.amount, 'BDT')}</td>
-                                <td class="px-4 py-3">
-                                    <span class="status-badge ${statusClass}">${payment.status}</span>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <span class="text-sm ${typeColor}">${paymentType}</span>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
+                    // Close modal
+                    cancelModal.style.display = 'none';
+                    
+                    // Show success message
+                    showToast('Subscription cancelled successfully. You will have access until ' + 
+                            new Date(result.willExpire).toLocaleDateString(), 'success');
+                    
+                    // Reload data to update UI
+                    await Promise.all([
+                        loadUserProfile(),
+                        loadCurrentSubscription()
+                    ]);
+                    
                 } else {
-                    billingHistory.classList.add('hidden');
-                    noHistory.classList.remove('hidden');
+                    const error = await response.json();
+                    showToast(`Cancellation failed: ${error.error || 'Unknown error'}`, 'error');
                 }
             } catch (error) {
-                console.error('Error loading payment history:', error);
-                document.getElementById('billing-loading').classList.add('hidden');
-                document.getElementById('no-billing-history').classList.remove('hidden');
+                console.error('Cancel error:', error);
+                showToast('Failed to cancel subscription. Please try again.', 'error');
+            } finally {
+                const confirmBtn = document.getElementById('confirm-cancel-btn');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-ban mr-2"></i>Confirm Cancellation';
             }
+        }
+        
+        // Process add balance
+        async function processAddBalance() {
+            try {
+                const confirmBtn = document.getElementById('confirm-add-balance');
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+                
+                const response = await fetch(ADD_BALANCE_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: selectedAmount,
+                        paymentMethod: selectedPaymentMethod
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Update payment success modal
+                    document.getElementById('payment-success-message').textContent = `Your account has been credited with ${formatCurrency(selectedAmount, 'BDT')}.`;
+                    document.getElementById('payment-reference').textContent = result.transaction?.reference || `DEP-${Date.now()}`;
+                    document.getElementById('payment-amount').textContent = formatCurrency(selectedAmount, 'BDT');
+                    document.getElementById('new-balance').textContent = formatCurrency(result.balance, 'BDT');
+                    
+                    // Close modals
+                    addBalanceModal.style.display = 'none';
+                    paymentSuccessModal.style.display = 'flex';
+                    
+                    // Reload data to update UI
+                    await Promise.all([
+                        loadUserProfile(),
+                        loadTransactions()
+                    ]);
+                    
+                } else {
+                    const error = await response.json();
+                    showToast(`Payment failed: ${error.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Add balance error:', error);
+                showToast('Failed to add balance. Please try again.', 'error');
+            } finally {
+                const confirmBtn = document.getElementById('confirm-add-balance');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Proceed to Payment';
+            }
+        }
+        
+        // View invoice
+        async function viewInvoice(reference) {
+            // This would typically open a detailed invoice view
+            showToast(`Invoice ${reference} details would be shown here`, 'info');
         }
         
         // Show toast notification
@@ -2227,6 +3143,7 @@
             
             const icon = type === 'success' ? 'fa-check-circle' : 
                         type === 'error' ? 'fa-exclamation-triangle' : 
+                        type === 'warning' ? 'fa-exclamation-triangle' :
                         'fa-info-circle';
             
             toast.innerHTML = `
@@ -2251,18 +3168,21 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Load user profile first (contains subscription status and activeSessions)
+                // Load user profile first
                 await loadUserProfile();
                 
                 // Load available plans
                 await loadAvailablePlans();
                 
-                // Load current subscription (uses data from /current endpoint)
+                // Load current subscription
                 await loadCurrentSubscription();
                 
-                // Load plans if on plans tab
-                if (document.querySelector('.tab.active').getAttribute('data-tab') === 'plans') {
-                    loadAvailablePlans();
+                // Load initial data for active tab
+                const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                if (activeTab === 'billing') {
+                    loadPaymentHistory();
+                } else if (activeTab === 'balance') {
+                    loadTransactions();
                 }
             } catch (error) {
                 console.error('Error initializing page:', error);
