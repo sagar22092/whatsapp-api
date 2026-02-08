@@ -415,7 +415,7 @@
                 <div class="tab" data-tab="plans">All Plans</div>
                 <div class="tab" data-tab="change">Change Plan</div>
                 <div class="tab" data-tab="billing">Payment History</div>
-                <div class="tab" data-tab="balance">Add Balance</div>
+                <!-- <div class="tab" data-tab="balance">Add Balance</div> -->
             </div>
             
             <!-- Current Plan Tab -->
@@ -566,7 +566,7 @@
                     
                     <div class="flex items-center mt-6 bg-gray-800 rounded-lg p-1 w-fit">
                         <span id="billing-toggle-monthly" class="px-4 py-2 rounded-lg bg-green-600 cursor-pointer font-medium">Monthly</span>
-                        <span id="billing-toggle-yearly" class="px-4 py-2 rounded-lg cursor-pointer text-gray-400 hover:text-white transition">Yearly (Save 20%)</span>
+                        <!-- <span id="billing-toggle-yearly" class="px-4 py-2 rounded-lg cursor-pointer text-gray-400 hover:text-white transition">Yearly (Save 20%)</span> -->
                     </div>
                 </div>
                 
@@ -1478,14 +1478,14 @@
             updatePlanPrices();
         });
         
-        billingToggleYearly.addEventListener('click', () => {
-            billingCycle = 'yearly';
-            billingToggleYearly.classList.add('bg-green-600', 'text-white');
-            billingToggleYearly.classList.remove('text-gray-400');
-            billingToggleMonthly.classList.remove('bg-green-600', 'text-white');
-            billingToggleMonthly.classList.add('text-gray-400');
-            updatePlanPrices();
-        });
+        // billingToggleYearly.addEventListener('click', () => {
+        //     billingCycle = 'yearly';
+        //     billingToggleYearly.classList.add('bg-green-600', 'text-white');
+        //     billingToggleYearly.classList.remove('text-gray-400');
+        //     billingToggleMonthly.classList.remove('bg-green-600', 'text-white');
+        //     billingToggleMonthly.classList.add('text-gray-400');
+        //     updatePlanPrices();
+        // });
         
         // Currency symbol mapping
         const currencySymbols = {

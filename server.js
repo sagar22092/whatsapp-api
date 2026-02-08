@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import morgan from "morgan";
 
 //env config
 import "dotenv/config";
@@ -15,6 +16,7 @@ import whatsappRouter from "./routers/whatsappRouter.js";
 import subscriptionRouter from "./routers/subscriptionRouter.js";
 import startCrons from "./crons/index.js";
 import { subscriptionMiddleware } from "./middlewares/subscriptionMiddleware.js";
+import rechargeRouter from "./routers/rechargeRouter.js";
 
 const app = express();
 await connectDB();
@@ -32,12 +34,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("public"));
 app.use(cors({ origin: "*" }));
+app.use(morgan("dev"));
 
 /* ───────── API ───────── */
 app.use("/api/auth", authenticate, authRouter);
 app.use("/api/session", authenticate, sessionRouter);
 app.use("/api/whatsapp", whatsappRouter);
 app.use("/api/subscription", authenticate, subscriptionRouter);
+app.use("/api/recharge", authenticate, rechargeRouter);
 
 app.get("/", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));

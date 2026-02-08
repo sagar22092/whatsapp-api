@@ -1,5 +1,4 @@
 import subscriptions from "../json/subscription.js";
-import User from "../models/userModel.js";
 
 export async function getSubscriptionList(req, res) {
   try {

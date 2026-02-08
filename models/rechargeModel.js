@@ -8,6 +8,13 @@ const rechargeSchema = new mongoose.Schema(
       required: true,
     },
 
+    id: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+
     amount: {
       type: Number,
       required: true,
@@ -15,10 +22,14 @@ const rechargeSchema = new mongoose.Schema(
       max: 100000,
     },
 
-    bKashNumber: {
+    number: {
       type: String,
       required: true,
       match: /^01[3-9]\d{8}$/, // Bangladeshi mobile number validation
+    },
+    method: {
+      type: String,
+      required: true,
     },
 
     transactionId: {
@@ -28,20 +39,11 @@ const rechargeSchema = new mongoose.Schema(
       trim: true,
     },
 
-    screenshot: {
-      type: String, // URL or path to screenshot
-      required: true,
-    },
-
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
       default: "pending",
       index: true,
-    },
-
-    processedAt: {
-      type: Date,
     },
 
     adminNote: {

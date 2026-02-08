@@ -1,476 +1,1397 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recharge Account</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Recharge | bKash Payment</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 500px;
-            width: 100%;
-        }
-        
-        .recharge-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            animation: slideUp 0.5s ease;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .header h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 16px;
-        }
-        
-        .current-balance {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .current-balance h3 {
-            font-size: 16px;
-            margin-bottom: 5px;
-            opacity: 0.9;
-        }
-        
-        .balance-amount {
-            font-size: 32px;
-            font-weight: bold;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 600;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e5ee;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .amount-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .amount-option {
-            padding: 12px;
-            text-align: center;
-            background: #f8f9fa;
-            border: 2px solid #e1e5ee;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-        
-        .amount-option:hover {
-            background: #e9ecef;
-        }
-        
-        .amount-option.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-        
-        .payment-method {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .payment-icon {
-            font-size: 30px;
-            color: #e2136e;
-        }
-        
-        .payment-details h4 {
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .payment-details p {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .instructions {
-            background: #fff9e6;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        
-        .instructions h4 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-        
-        .instructions ol {
-            padding-left: 20px;
-            color: #856404;
-        }
-        
-        .instructions li {
-            margin-bottom: 5px;
-        }
-        
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            margin-top: 10px;
-        }
-        
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .history-btn {
-            width: 100%;
-            padding: 12px;
-            background: #f8f9fa;
-            color: #667eea;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 15px;
-        }
-        
-        .history-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="recharge-card">
-            <div class="header">
-                <h1>Account Recharge</h1>
-                <p>Add funds to your account using bKash</p>
-            </div>
-            
-            <div class="current-balance">
-                <h3>Current Balance</h3>
-                <div class="balance-amount">৳ <span id="currentBalance">0.00</span></div>
-            </div>
-            
-            <div id="alertMessage" class="alert"></div>
-            
-            <form id="rechargeForm">
-                <div class="form-group">
-                    <label for="amount">Amount (৳)</label>
-                    <input 
-                        type="number" 
-                        id="amount" 
-                        class="form-control" 
-                        placeholder="Enter amount"
-                        min="10"
-                        max="100000"
-                        required
-                    >
-                    <div class="amount-options">
-                        <div class="amount-option" data-amount="50">৳ 50</div>
-                        <div class="amount-option" data-amount="100">৳ 100</div>
-                        <div class="amount-option" data-amount="200">৳ 200</div>
-                        <div class="amount-option" data-amount="500">৳ 500</div>
-                        <div class="amount-option" data-amount="1000">৳ 1000</div>
-                        <div class="amount-option" data-amount="5000">৳ 5000</div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="bKashNumber">Your bKash Number</label>
-                    <input 
-                        type="tel" 
-                        id="bKashNumber" 
-                        class="form-control" 
-                        placeholder="01XXXXXXXXX"
-                        pattern="01[3-9]\d{8}"
-                        required
-                    >
-                </div>
-                
-                <div class="form-group">
-                    <label for="transactionId">bKash Transaction ID</label>
-                    <input 
-                        type="text" 
-                        id="transactionId" 
-                        class="form-control" 
-                        placeholder="Enter transaction ID"
-                        required
-                    >
-                </div>
-            
-                
-                <div class="payment-method">
-                    <div class="payment-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <div class="payment-details">
-                        <h4>Send Money to bKash</h4>
-                        <p>Merchant Number: <strong>017XXXXXXXX</strong></p>
-                    </div>
-                </div>
-                
-                <div class="instructions">
-                    <h4>How to Pay:</h4>
-                    <ol>
-                        <li>Go to bKash Mobile Menu</li>
-                        <li>Select "Send Money"</li>
-                        <li>Enter Merchant Number: <strong>017XXXXXXXX</strong></li>
-                        <li>Enter the amount you want to recharge</li>
-                        <li>Enter your bKash PIN to confirm</li>
-                        <li>Save the transaction ID</li>
-                    </ol>
-                </div>
-                
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <span id="btnText">Submit Recharge Request</span>
-                    <div id="btnLoading" class="loading" style="display: none; margin: 0 auto;"></div>
-                </button>
-            </form>
+      :root {
+        --primary: #e2136e;
+        --primary-dark: #c1105d;
+        --secondary: #6a11cb;
+        --success: #28a745;
+        --danger: #dc3545;
+        --warning: #ffc107;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --card-shadow:
+          0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --border-radius: 16px;
+      }
 
-        </div>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 520px;
+        width: 100%;
+      }
+
+      /* Header Buttons */
+      .header-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+      }
+
+      .back-btn,
+      .profile-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 24px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+        z-index: 10;
+      }
+
+      .back-btn {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+      }
+
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateX(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .profile-btn {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+      }
+
+      .profile-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateX(5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-icon {
+        font-size: 18px;
+      }
+
+      .btn-text {
+        font-size: 15px;
+      }
+
+      /* Logo */
+      .logo-container {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 15px 25px;
+        border-radius: 50px;
+        color: white;
+      }
+
+      .logo-icon {
+        font-size: 28px;
+        background: white;
+        color: var(--primary);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logo-text h1 {
+        font-size: 24px;
+        font-weight: 700;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .logo-text p {
+        font-size: 13px;
+        opacity: 0.9;
+      }
+
+      /* Main Card */
+      .recharge-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 40px 35px;
+        box-shadow: var(--card-shadow);
+        animation: slideUp 0.5s ease-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .recharge-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Balance Card */
+      .balance-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .balance-card::before {
+        content: "";
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        top: -50px;
+        right: -50px;
+      }
+
+      .balance-label {
+        font-size: 15px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .balance-amount {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .balance-subtitle {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+
+      /* Alert Messages */
+      .alert {
+        padding: 16px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        display: none;
+        animation: fadeIn 0.3s ease;
+        border-left: 4px solid transparent;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .alert-success {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-left-color: var(--success);
+      }
+
+      .alert-error {
+        background: #ffebee;
+        color: #c62828;
+        border-left-color: var(--danger);
+      }
+
+      .alert-info {
+        background: #e3f2fd;
+        color: #1565c0;
+        border-left-color: #2196f3;
+      }
+
+      /* Form Elements */
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--dark);
+        font-weight: 600;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .form-label i {
+        color: var(--primary);
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 16px 20px;
+        border: 2px solid var(--light-gray);
+        border-radius: 12px;
+        font-size: 16px;
+        font-family: "Poppins", sans-serif;
+        transition: var(--transition);
+        background: #fcfcfc;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(226, 19, 110, 0.1);
+        background: white;
+      }
+
+      .form-control.error {
+        border-color: var(--danger);
+      }
+
+      /* Amount Options */
+      .amount-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 12px;
+        margin-top: 10px;
+      }
+
+      .amount-option {
+        padding: 14px 10px;
+        text-align: center;
+        background: white;
+        border: 2px solid var(--light-gray);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 16px;
+      }
+
+      .amount-option:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary);
+      }
+
+      .amount-option.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 5px 15px rgba(226, 19, 110, 0.3);
+      }
+
+      /* Payment Method Card */
+      .payment-method-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid var(--light-gray);
+      }
+
+      .payment-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .payment-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 22px;
+      }
+
+      .payment-title h4 {
+        color: var(--dark);
+        font-size: 18px;
+        margin-bottom: 3px;
+      }
+
+      .payment-title p {
+        color: var(--gray);
+        font-size: 14px;
+      }
+
+      .payment-details {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+      }
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--light-gray);
+      }
+
+      .detail-row:last-child {
+        border-bottom: none;
+      }
+
+      .detail-label {
+        color: var(--gray);
+        font-size: 14px;
+      }
+
+      .detail-value {
+        color: var(--dark);
+        font-weight: 600;
+      }
+
+      /* Instructions */
+      .instructions-card {
+        background: #fff8e1;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border-left: 4px solid var(--warning);
+      }
+
+      .instructions-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #856404;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      .instructions-list {
+        padding-left: 20px;
+      }
+
+      .instructions-list li {
+        margin-bottom: 10px;
+        color: #856404;
+        font-size: 14px;
+      }
+
+      .instructions-list strong {
+        color: #212529;
+      }
+
+      /* Buttons */
+      .submit-btn {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        box-shadow: 0 10px 20px rgba(226, 19, 110, 0.2);
+      }
+
+      .submit-btn:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(226, 19, 110, 0.3);
+      }
+
+      .submit-btn:active:not(:disabled) {
+        transform: translateY(-1px);
+      }
+
+      .submit-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .loading {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* History Button */
+      .history-btn {
+        width: 100%;
+        padding: 15px;
+        background: white;
+        color: var(--primary);
+        border: 2px solid var(--primary);
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .history-btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(226, 19, 110, 0.2);
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        margin-top: 25px;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 10px;
+      }
+
+      .footer-links a {
+        color: white;
+        text-decoration: none;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+      }
+
+      .footer-links a:hover {
+        opacity: 1;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .recharge-card {
+          padding: 30px 25px;
+        }
+
+        .balance-amount {
+          font-size: 36px;
+        }
+
+        .amount-options {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .logo-text h1 {
+          font-size: 20px;
+        }
+
+        .back-btn,
+        .profile-btn {
+          padding: 10px 18px;
+        }
+
+        .btn-text {
+          display: none;
+        }
+
+        .btn-icon {
+          font-size: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 15px;
+        }
+
+        .recharge-card {
+          padding: 25px 20px;
+        }
+
+        .balance-amount {
+          font-size: 32px;
+        }
+
+        .amount-options {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-control {
+          padding: 14px 16px;
+        }
+
+        .submit-btn {
+          padding: 16px;
+        }
+
+        .logo {
+          padding: 12px 20px;
+        }
+
+        .header-buttons {
+          margin-bottom: 15px;
+        }
+      }
+
+      /* Animation for success */
+      @keyframes successPulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .success-pulse {
+        animation: successPulse 0.5s ease;
+      }
+
+      /* Receipt Modal */
+      .receipt-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .receipt-content {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 100%;
+        animation: scaleIn 0.3s ease;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .receipt-header {
+        text-align: center;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--light-gray);
+      }
+
+      .receipt-header h3 {
+        color: var(--primary);
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .receipt-details {
+        margin-bottom: 25px;
+      }
+
+      .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--light-gray);
+      }
+
+      .receipt-row.total {
+        border-bottom: 2px solid var(--dark);
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--primary);
+      }
+
+      .receipt-label {
+        color: var(--gray);
+      }
+
+      .receipt-value {
+        font-weight: 600;
+        color: var(--dark);
+      }
+
+      .receipt-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .receipt-btn {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        font-family: "Poppins", sans-serif;
+      }
+
+      .receipt-btn.primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .receipt-btn.secondary {
+        background: var(--light-gray);
+        color: var(--dark);
+      }
+
+      .receipt-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      /* User Profile Preview */
+      .user-profile-preview {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 8px 16px;
+        border-radius: 50px;
+        color: white;
+        cursor: pointer;
+        transition: var(--transition);
+        z-index: 100;
+      }
+
+      .user-profile-preview:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .user-name {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        .user-profile-preview {
+          top: 10px;
+          right: 10px;
+          padding: 6px 12px;
+        }
+
+        .user-name {
+          display: none;
+        }
+
+        .user-avatar {
+          width: 32px;
+          height: 32px;
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- User Profile Preview -->
+    <div
+      class="user-profile-preview"
+      id="userProfilePreview"
+      onclick="window.location.href = '/profile'"
+    >
+      <div class="user-avatar" id="userAvatar">
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="user-name" id="userName">Loading...</div>
     </div>
-    
+
+    <div class="container">
+      <!-- Logo -->
+      <div class="logo-container">
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div class="logo-text">
+            <h1>Account Recharge</h1>
+            <p>Fast & Secure bKash Payments</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Card -->
+      <div class="recharge-card">
+        <!-- Balance Display -->
+        <div class="balance-card">
+          <div class="balance-label">
+            <i class="fas fa-coins"></i>
+            Available Balance
+          </div>
+          <div class="balance-amount">
+            ৳ <span id="currentBalance">0.00</span>
+          </div>
+          <div class="balance-subtitle" id="balanceTimestamp">
+            Last updated just now
+          </div>
+        </div>
+
+        <!-- Alert Message -->
+        <div id="alertMessage" class="alert"></div>
+
+        <!-- Recharge Form -->
+        <form id="rechargeForm">
+          <!-- Amount Input -->
+          <div class="form-group">
+            <label class="form-label" for="amount">
+              <i class="fas fa-money-bill-wave"></i>
+              Recharge Amount
+            </label>
+            <input
+              type="number"
+              id="amount"
+              class="form-control"
+              placeholder="Enter amount in ৳"
+              min="10"
+              max="100000"
+              step="10"
+              required
+            />
+            <div class="amount-options">
+              <div class="amount-option" data-amount="50">৳ 50</div>
+              <div class="amount-option" data-amount="100">৳ 100</div>
+              <div class="amount-option" data-amount="200">৳ 200</div>
+              <div class="amount-option" data-amount="500">৳ 500</div>
+              <div class="amount-option" data-amount="1000">৳ 1000</div>
+              <div class="amount-option" data-amount="5000">৳ 5000</div>
+            </div>
+          </div>
+
+          <!-- bKash Number -->
+          <div class="form-group">
+            <label class="form-label" for="bKashNumber">
+              <i class="fas fa-mobile-alt"></i>
+              Your bKash Number
+            </label>
+            <input
+              type="tel"
+              id="bKashNumber"
+              class="form-control"
+              placeholder="01XXXXXXXXX"
+              pattern="01[3-9]\d{8}"
+              required
+            />
+          </div>
+
+          <!-- Transaction ID -->
+          <div class="form-group">
+            <label class="form-label" for="transactionId">
+              <i class="fas fa-receipt"></i>
+              Transaction ID
+            </label>
+            <input
+              type="text"
+              id="transactionId"
+              class="form-control"
+              placeholder="Enter 10-digit transaction ID"
+              required
+            />
+          </div>
+
+          <!-- Payment Method -->
+          <div class="payment-method-card">
+            <div class="payment-header">
+              <div class="payment-icon">
+                <i class="fas fa-qrcode"></i>
+              </div>
+              <div class="payment-title">
+                <h4>Send Money to bKash</h4>
+                <p>Merchant Account</p>
+              </div>
+            </div>
+            <div class="payment-details">
+              <div class="detail-row">
+                <span class="detail-label">Merchant Number</span>
+                <span class="detail-value">017XXXXXXXX</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Account Type</span>
+                <span class="detail-value">Personal</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Payment Method</span>
+                <span class="detail-value">Send Money</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructions -->
+          <div class="instructions-card">
+            <div class="instructions-title">
+              <i class="fas fa-info-circle"></i>
+              <span>How to Pay via bKash:</span>
+            </div>
+            <ol class="instructions-list">
+              <li>Go to bKash Mobile Menu by dialing <strong>*247#</strong></li>
+              <li>Select <strong>"Send Money"</strong> option</li>
+              <li>Enter Merchant Number: <strong>017XXXXXXXX</strong></li>
+              <li>Enter the exact recharge amount</li>
+              <li>Enter your bKash PIN to confirm payment</li>
+              <li>Save the <strong>Transaction ID</strong> for verification</li>
+            </ol>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <i class="fas fa-paper-plane"></i>
+            <span id="btnText">Submit Recharge Request</span>
+            <div id="btnLoading" class="loading" style="display: none"></div>
+          </button>
+
+          <!-- History Button -->
+          <button type="button" class="history-btn" id="historyBtn">
+            <i class="fas fa-history"></i>
+            View Recharge History
+          </button>
+        </form>
+      </div>
+
+      <!-- Receipt Modal -->
+      <div class="receipt-modal" id="receiptModal">
+        <div class="receipt-content">
+          <div class="receipt-header">
+            <h3>Recharge Successful!</h3>
+            <p>Your recharge request has been submitted</p>
+          </div>
+          <div class="receipt-details">
+            <div class="receipt-row">
+              <span class="receipt-label">Transaction ID:</span>
+              <span class="receipt-value" id="receiptTransId">--</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-label">Amount:</span>
+              <span class="receipt-value" id="receiptAmount">--</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-label">bKash Number:</span>
+              <span class="receipt-value" id="receiptBkash">--</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-label">Date & Time:</span>
+              <span class="receipt-value" id="receiptDate">--</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-label">Status:</span>
+              <span class="receipt-value" style="color: var(--success)"
+                >Pending Verification</span
+              >
+            </div>
+            <div class="receipt-row total">
+              <span class="receipt-label">Reference Number:</span>
+              <span class="receipt-value" id="receiptRef">--</span>
+            </div>
+          </div>
+          <div class="receipt-actions">
+            <button class="receipt-btn secondary" id="closeReceiptBtn">
+              <i class="fas fa-times"></i> Close
+            </button>
+            <button class="receipt-btn primary" id="printReceiptBtn">
+              <i class="fas fa-print"></i> Print Receipt
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>© 2024 Payment System. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#"><i class="fas fa-shield-alt"></i> Security</a>
+          <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+          <a href="#"><i class="fas fa-file-contract"></i> Terms</a>
+        </div>
+      </div>
+    </div>
+
     <script>
-        // Load current balance
-        async function loadBalance() {
-            try {
-                const response = await fetch('/api/auth/profile');
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('currentBalance').textContent = 
-                        data.user.balance.toFixed(2);
-                }
-            } catch (error) {
-                console.error('Failed to load balance:', error);
+      // Load user info and balance
+      async function loadUserInfo() {
+        try {
+          const response = await fetch("/api/auth/profile", {
+            credentials: "include", // Important: sends cookies
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+
+            // Update user info in profile preview
+            const userName = data.user.name || data.user.email || "User";
+            document.getElementById("userName").textContent = userName;
+
+            // Update user avatar with initials
+            const avatar = document.getElementById("userAvatar");
+            if (data.user.name) {
+              const initials = data.user.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase();
+              avatar.innerHTML = initials.substring(0, 2);
+            } else if (data.user.email) {
+              avatar.innerHTML = data.user.email[0].toUpperCase();
             }
-        }
-        
-        // Amount option selection
-        document.querySelectorAll('.amount-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.amount-option').forEach(opt => {
-                    opt.classList.remove('active');
-                });
-                
-                this.classList.add('active');
-                document.getElementById('amount').value = this.dataset.amount;
-            });
-        });
-        
-        // Form submission
-        document.getElementById('rechargeForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData();
-            const amount = document.getElementById('amount').value;
-            const bKashNumber = document.getElementById('bKashNumber').value;
-            const transactionId = document.getElementById('transactionId').value;
-            const screenshot = document.getElementById('screenshot').files[0];
-            
-            // Validation
-            if (amount < 10 || amount > 100000) {
-                showAlert('Amount must be between ৳10 and ৳100,000', 'error');
-                return;
-            }
-            
-            if (!/^01[3-9]\d{8}$/.test(bKashNumber)) {
-                showAlert('Please enter a valid bKash number', 'error');
-                return;
-            }
-            
-            if (!transactionId.trim()) {
-                showAlert('Transaction ID is required', 'error');
-                return;
-            }
-            
-            if (!screenshot) {
-                showAlert('Payment screenshot is required', 'error');
-                return;
-            }
-            
-            formData.append('amount', amount);
-            formData.append('bKashNumber', bKashNumber);
-            formData.append('transactionId', transactionId.trim());
-            formData.append('screenshot', screenshot);
-            
-            // Show loading
-            const submitBtn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const btnLoading = document.getElementById('btnLoading');
-            
-            submitBtn.disabled = true;
-            btnText.style.display = 'none';
-            btnLoading.style.display = 'block';
-            
-            try {
-                const response = await fetch('/api/recharge/submit', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showAlert('Recharge request submitted successfully! It will be processed within 24 hours.', 'success');
-                    document.getElementById('rechargeForm').reset();
-                    document.querySelectorAll('.amount-option').forEach(opt => {
-                        opt.classList.remove('active');
-                    });
-                    loadBalance(); // Reload balance
-                } else {
-                    showAlert(result.message || 'Submission failed', 'error');
-                }
-            } catch (error) {
-                showAlert('Network error. Please try again.', 'error');
-                console.error('Submission error:', error);
-            } finally {
-                submitBtn.disabled = false;
-                btnText.style.display = 'block';
-                btnLoading.style.display = 'none';
-            }
-        });
-        
-        function showAlert(message, type) {
-            const alertDiv = document.getElementById('alertMessage');
-            alertDiv.textContent = message;
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.style.display = 'block';
-            
+
+            // Update balance
+            const balance = data.user.balance?.toFixed(2) || "0.00";
+            document.getElementById("currentBalance").textContent = balance;
+
+            // Update timestamp
+            document.getElementById("balanceTimestamp").textContent =
+              `Last updated: ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+
+            // Add pulse animation
+            document
+              .getElementById("currentBalance")
+              .classList.add("success-pulse");
             setTimeout(() => {
-                alertDiv.style.display = 'none';
-            }, 5000);
+              document
+                .getElementById("currentBalance")
+                .classList.remove("success-pulse");
+            }, 500);
+
+            return true;
+          } else if (response.status === 401) {
+            // Not authenticated, redirect to login
+            window.location.href = "/login";
+            return false;
+          } else {
+            showAlert("Failed to load user information", "error");
+            return false;
+          }
+        } catch (error) {
+          console.error("Failed to load user info:", error);
+          showAlert("Network error. Please try again.", "error");
+          return false;
         }
+      }
+
+      // Amount option selection
+      document.querySelectorAll(".amount-option").forEach((option) => {
+        option.addEventListener("click", function () {
+          document.querySelectorAll(".amount-option").forEach((opt) => {
+            opt.classList.remove("active");
+          });
+
+          this.classList.add("active");
+          document.getElementById("amount").value = this.dataset.amount;
+          document.getElementById("amount").focus();
+        });
+      });
+
+      // Input validation
+      document.getElementById("amount").addEventListener("input", function (e) {
+        const value = parseFloat(this.value);
+        if (value < 10 || value > 100000) {
+          this.classList.add("error");
+        } else {
+          this.classList.remove("error");
+        }
+      });
+
+      document
+        .getElementById("bKashNumber")
+        .addEventListener("input", function (e) {
+          const value = this.value;
+          if (!/^01[3-9]\d{0,8}$/.test(value)) {
+            this.classList.add("error");
+          } else {
+            this.classList.remove("error");
+          }
+        });
+
+      // Form submission to /api/recharge/submit
+      document
+        .getElementById("rechargeForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const amount = document.getElementById("amount").value;
+          const bKashNumber = document.getElementById("bKashNumber").value;
+          const transactionId = document
+            .getElementById("transactionId")
+            .value.trim();
+
+          // Clear previous errors
+          document.querySelectorAll(".form-control").forEach((input) => {
+            input.classList.remove("error");
+          });
+
+          // Validation
+          let isValid = true;
+
+          if (!amount || amount < 10 || amount > 100000) {
+            document.getElementById("amount").classList.add("error");
+            showAlert("Amount must be between ৳10 and ৳100,000", "error");
+            isValid = false;
+          }
+
+          if (!/^01[3-9]\d{8}$/.test(bKashNumber)) {
+            document.getElementById("bKashNumber").classList.add("error");
+            showAlert("Please enter a valid bKash number", "error");
+            isValid = false;
+          }
+
+          if (!transactionId || transactionId.length < 5) {
+            document.getElementById("transactionId").classList.add("error");
+            showAlert("Please enter a valid transaction ID", "error");
+            isValid = false;
+          }
+
+          if (!isValid) return;
+
+          // Prepare JSON data
+          const rechargeData = {
+            amount: parseFloat(amount),
+            bKashNumber: bKashNumber,
+            transactionId: transactionId,
+          };
+
+          // Show loading
+          const submitBtn = document.getElementById("submitBtn");
+          const btnText = document.getElementById("btnText");
+          const btnLoading = document.getElementById("btnLoading");
+          const btnIcon = submitBtn.querySelector("i");
+
+          submitBtn.disabled = true;
+          btnText.style.display = "none";
+          btnIcon.style.display = "none";
+          btnLoading.style.display = "block";
+
+          try {
+            // Make API call to /api/recharge/submit with cookies
+            const response = await fetch("/api/recharge/submit", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include", // Important: sends cookies
+              body: JSON.stringify(rechargeData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              showAlert(
+                result.message || "Recharge request submitted successfully!",
+                "success",
+              );
+              // Show receipt modal
+              showReceiptModal(rechargeData, result.data);
+
+              // Reset form
+              document.getElementById("rechargeForm").reset();
+              document.querySelectorAll(".amount-option").forEach((opt) => {
+                opt.classList.remove("active");
+              });
+
+              // Set default amount
+              document.getElementById("amount").value = "100";
+              document
+                .querySelector('[data-amount="100"]')
+                .classList.add("active");
+
+              // Update user info and balance
+              await loadUserInfo();
+
+              // Show success animation on button
+              submitBtn.style.background =
+                "linear-gradient(135deg, #28a745 0%, #218838 100%)";
+              setTimeout(() => {
+                submitBtn.style.background =
+                  "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)";
+              }, 2000);
+            } else {
+              // Handle API errors
+              let errorMessage = "Submission failed";
+
+              if (result.error) {
+                errorMessage = result.error;
+              } else if (response.status === 401) {
+                errorMessage = "Please login to continue";
+                setTimeout(() => {
+                  window.location.href = "/login";
+                }, 2000);
+              } else if (response.status === 400) {
+                errorMessage = "Invalid data. Please check your inputs.";
+              } else if (response.status === 500) {
+                errorMessage = "Server error. Please try again later.";
+              }
+
+              showAlert(errorMessage, "error");
+            }
+          } catch (error) {
+            console.error("Submission error:", error);
+            showAlert(
+              "Network error. Please check your connection and try again.",
+              "error",
+            );
+          } finally {
+            submitBtn.disabled = false;
+            btnText.style.display = "block";
+            btnIcon.style.display = "inline-block";
+            btnLoading.style.display = "none";
+          }
+        });
+
+      // Show receipt modal
+      function showReceiptModal(data, responseData = {}) {
+        const modal = document.getElementById("receiptModal");
+        const now = new Date();
         
-        // Initialize
-        document.addEventListener('DOMContentLoaded', loadBalance);
+    
+        // Fill receipt details
+        document.getElementById("receiptTransId").textContent =
+          data.transactionId;
+        document.getElementById("receiptAmount").textContent =
+          `৳ ${data.amount.toFixed(2)}`;
+        document.getElementById("receiptBkash").textContent = data.bKashNumber;
+        document.getElementById("receiptDate").textContent =
+          now.toLocaleString();
+        document.getElementById("receiptRef").textContent =
+          responseData.recharge.id;
+
+        // Show modal
+        modal.style.display = "flex";
+      }
+
+      // Close receipt modal
+      document
+        .getElementById("closeReceiptBtn")
+        .addEventListener("click", function () {
+          document.getElementById("receiptModal").style.display = "none";
+        });
+
+      // Print receipt
+      document
+        .getElementById("printReceiptBtn")
+        .addEventListener("click", function () {
+          window.print();
+        });
+
+      // Close modal when clicking outside
+      document
+        .getElementById("receiptModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            this.style.display = "none";
+          }
+        });
+
+      // History button
+      document
+        .getElementById("historyBtn")
+        .addEventListener("click", function () {
+          window.location.href = "/recharge/history";
+        });
+
+      // Profile preview click
+      document
+        .getElementById("userProfilePreview")
+        .addEventListener("click", function () {
+          window.location.href = "/profile";
+        });
+
+      // Alert function
+      function showAlert(message, type) {
+        const alertDiv = document.getElementById("alertMessage");
+        alertDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-${type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle"}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.display = "block";
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          alertDiv.style.display = "none";
+        }, 5000);
+      }
+
+      // Quick amount fill on input focus
+      document.getElementById("amount").addEventListener("focus", function () {
+        if (!this.value) {
+          this.value = "100";
+          document.querySelectorAll(".amount-option").forEach((opt) => {
+            opt.classList.remove("active");
+            if (opt.dataset.amount === "100") {
+              opt.classList.add("active");
+            }
+          });
+        }
+      });
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", async function () {
+        // Load user info (will redirect to login if not authenticated)
+        await loadUserInfo();
+
+        // Set default amount
+        document.getElementById("amount").value = "100";
+        document.querySelector('[data-amount="100"]').classList.add("active");
+
+        // Show welcome message
+        setTimeout(() => {
+          showAlert("Welcome! Enter your recharge details below.", "info");
+        }, 1000);
+
+        // Auto-refresh balance every 30 seconds
+        setInterval(loadUserInfo, 30000);
+
+        // Add back button keyboard shortcut (Alt+Left Arrow)
+        document.addEventListener("keydown", function (e) {
+          if (e.altKey && e.key === "ArrowLeft") {
+            window.location.href = "/dashboard";
+          }
+
+          // Alt+P for profile
+          if (e.altKey && e.key === "p") {
+            window.location.href = "/profile";
+          }
+        });
+      });
+
+      // Add keyboard shortcuts
+      document.addEventListener("keydown", function (e) {
+        // Ctrl+Enter to submit form
+        if (e.ctrlKey && e.key === "Enter") {
+          document.getElementById("submitBtn").click();
+        }
+
+        // Escape to clear form
+        if (e.key === "Escape") {
+          document.getElementById("rechargeForm").reset();
+          document.querySelectorAll(".amount-option").forEach((opt) => {
+            opt.classList.remove("active");
+          });
+          document.querySelector('[data-amount="100"]').classList.add("active");
+        }
+
+        // F1 for help
+        if (e.key === "F1") {
+          e.preventDefault();
+          showAlert(
+            "Press Ctrl+Enter to submit, Escape to clear form, Alt+Left for Back, Alt+P for Profile",
+            "info",
+          );
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
