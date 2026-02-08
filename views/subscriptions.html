@@ -506,7 +506,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="bg-gray-800 p-4 rounded-lg">
                                 <div class="text-gray-400 mb-1">Account Balance</div>
-                                <div class="text-2xl font-bold text-green-400" id="account-balance">৳100,000</div>
+                                <div class="text-2xl font-bold text-green-400" id="account-balance">৳0</div>
                                 <div class="text-sm text-gray-400 mt-1">Available for subscription payments</div>
                             </div>
                             <div class="bg-gray-800 p-4 rounded-lg">
@@ -518,44 +518,7 @@
                     </div>
                 </div>
                 
-                <!-- Usage Statistics -->
-                <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
-                    <h2 class="text-2xl font-bold mb-6">Usage Statistics</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="bg-gray-800 p-5 rounded-lg">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-gray-400">Messages Sent</div>
-                                <i class="fas fa-envelope text-green-500"></i>
-                            </div>
-                            <div class="text-2xl font-bold">1,245</div>
-                            <div class="text-sm text-gray-400 mt-1">This month</div>
-                        </div>
-                        <div class="bg-gray-800 p-5 rounded-lg">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-gray-400">Active Sessions</div>
-                                <i class="fas fa-plug text-green-500"></i>
-                            </div>
-                            <div class="text-2xl font-bold" id="active-sessions">1</div>
-                            <div class="text-sm text-gray-400 mt-1">Connected WhatsApp numbers</div>
-                        </div>
-                        <div class="bg-gray-800 p-5 rounded-lg">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-gray-400">API Calls</div>
-                                <i class="fas fa-code text-green-500"></i>
-                            </div>
-                            <div class="text-2xl font-bold">5,892</div>
-                            <div class="text-sm text-gray-400 mt-1">Last 30 days</div>
-                        </div>
-                        <div class="bg-gray-800 p-5 rounded-lg">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-gray-400">Uptime</div>
-                                <i class="fas fa-chart-line text-green-500"></i>
-                            </div>
-                            <div class="text-2xl font-bold">99.8%</div>
-                            <div class="text-sm text-gray-400 mt-1">Service reliability</div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
             
             <!-- All Plans Tab -->
@@ -633,7 +596,7 @@
                             </div>
                             <div class="bg-gray-800 p-3 rounded-lg">
                                 <div class="text-gray-400 text-sm">Account Balance</div>
-                                <div class="font-bold text-green-400" id="change-balance">৳100,000</div>
+                                <div class="font-bold text-green-400" id="change-balance">৳0</div>
                             </div>
                         </div>
                         <div class="mt-4 p-3 bg-blue-900/20 border border-blue-800 rounded-lg">
@@ -922,7 +885,7 @@
                 <div class="mb-6 p-4 bg-gray-800 rounded-lg">
                     <div class="flex items-center justify-between mb-3">
                         <div class="font-medium">Your Account Balance</div>
-                        <div class="text-xl font-bold text-green-400" id="user-balance">৳100,000</div>
+                        <div class="text-xl font-bold text-green-400" id="user-balance">৳0</div>
                     </div>
                     <div class="text-sm text-gray-400" id="balance-info">
                         <!-- Balance info will be shown here -->
@@ -1076,7 +1039,7 @@
                 <div class="mb-6 p-4 bg-gray-800 rounded-lg">
                     <div class="flex items-center justify-between mb-3">
                         <div class="font-medium">Your Account Balance</div>
-                        <div class="text-xl font-bold text-green-400" id="renew-user-balance">৳100,000</div>
+                        <div class="text-xl font-bold text-green-400" id="renew-user-balance">৳0</div>
                     </div>
                     <div class="text-sm text-gray-400" id="renew-balance-info">
                         <!-- Balance info will be shown here -->
@@ -1538,7 +1501,6 @@
                         userProfile.activeSessions = data.activeSessions;
                         
                         // Update active sessions display
-                        document.getElementById('active-sessions').textContent = activeSessionsCount;
                         document.getElementById('change-active-sessions').textContent = activeSessionsCount;
                     }
                     
@@ -1622,7 +1584,6 @@
                 document.getElementById('current-sessions').textContent = '0';
                 document.getElementById('max-sessions').textContent = '0';
                 document.getElementById('renewal-date').textContent = 'N/A';
-                document.getElementById('active-sessions').textContent = '0';
                 document.getElementById('subscription-id').textContent = 'N/A';
                 document.getElementById('subscription-start').textContent = 'N/A';
                 document.getElementById('subscription-end').textContent = 'N/A';
