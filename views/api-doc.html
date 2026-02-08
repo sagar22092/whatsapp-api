@@ -796,10 +796,10 @@
       <!-- Sidebar Navigation -->
       <nav class="sidebar" id="sidebar">
         <div class="logo-container">
-          <div class="logo">
+          <a style="text-decoration: none" href="/"><div class="logo">
             <i class="fab fa-whatsapp"></i>
             <h1>WhatsApp <span>API</span></h1>
-          </div>
+          </div></a>
         </div>
 
         <div class="nav-section">
@@ -1401,14 +1401,11 @@
 
         <footer>
           <p>
-            WhatsApp API Documentation &copy; 2023 | Built with
+            WhatsApp API Documentation &copy; 2025 | Built with
             <i class="fas fa-heart" style="color: #e74c3c; margin: 0 5px;"></i>
-            by WhatsApp API Team
+            by <a target="_blank" href="https://wa.me/8801964753086">Md Jubayer</a>
           </p>
-          <p>
-            This documentation dynamically adapts to your current environment. 
-            Base URL: <code id="currentBaseUrl">Loading...</code>
-          </p>
+
           <p style="margin-top: 15px;">
             <a href="#"><i class="fas fa-question-circle"></i> Need help?</a> | 
             <a href="#"><i class="fas fa-book"></i> API Reference</a> | 
@@ -1442,7 +1439,6 @@
         
         // Update base URL display
         document.getElementById('baseUrlDisplay').textContent = baseUrl;
-        document.getElementById('currentBaseUrl').textContent = baseUrl;
         
         // Update all dynamic URL placeholders
         document.querySelectorAll('.dynamic-url').forEach(element => {

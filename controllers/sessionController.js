@@ -28,7 +28,7 @@ export async function newSession(req, res) {
     }
 
     const activeSubscription = subscriptions.plans.filter(
-      (plan) => plan.id === user.subscription.id,
+      (plan) => plan.id === user.subscription?.id,
     )[0];
 
     if (!activeSubscription) {
