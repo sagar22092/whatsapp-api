@@ -8,69 +8,144 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
     <style>
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       }
 
       :root {
         --primary-color: #25d366;
-        --secondary-color: #128c7e;
-        --dark-color: #075e54;
-        --light-color: #dcf8c6;
-        --text-color: #333;
-        --light-gray: #f5f5f5;
-        --border-color: #e0e0e0;
-        --code-bg: #2d2d2d;
-        --location-color: #3498db;
+        --primary-dark: #128c7e;
+        --primary-light: #dcf8c6;
+        --secondary-color: #075e54;
+        --accent-color: #3498db;
+        --danger-color: #e74c3c;
+        --warning-color: #f39c12;
+        --text-color: #2d3436;
+        --text-light: #636e72;
+        --light-gray: #f8f9fa;
+        --border-color: #dfe6e9;
+        --dark-bg: #1a1d28;
+        --code-bg: #282c34;
+        --success-bg: #d4edda;
+        --success-color: #155724;
+        --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --radius: 12px;
+        --radius-sm: 8px;
       }
 
       body {
         background-color: #f9f9f9;
         color: var(--text-color);
         line-height: 1.6;
+        overflow-x: hidden;
       }
 
+      /* Container & Layout */
       .container {
         display: flex;
-        max-width: 1400px;
+        max-width: 1600px;
         margin: 0 auto;
         min-height: 100vh;
+        position: relative;
       }
 
-      /* Sidebar Navigation */
+      /* Sidebar */
       .sidebar {
-        width: 300px;
+        width: 320px;
         background-color: white;
-        border-right: 1px solid var(--border-color);
-        position: sticky;
+        position: fixed;
         top: 0;
+        left: 0;
         height: 100vh;
         overflow-y: auto;
-        padding: 20px 0;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        padding: 25px 0;
+        border-right: 1px solid var(--border-color);
+        box-shadow: var(--shadow);
+        z-index: 100;
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+
+      .logo-container {
+        padding: 0 25px 25px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
 
       .logo {
-        padding: 0 20px 20px;
-        border-bottom: 1px solid var(--border-color);
-        margin-bottom: 20px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
       }
 
       .logo i {
         color: var(--primary-color);
-        font-size: 28px;
+        font-size: 32px;
+        background-color: var(--primary-light);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .logo h1 {
-        font-size: 22px;
-        color: var(--dark-color);
+        font-size: 24px;
+        color: var(--secondary-color);
+        font-weight: 700;
+      }
+
+      .logo span {
+        color: var(--primary-color);
+      }
+
+      .sidebar-toggle {
+        display: none;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 20px;
+        cursor: pointer;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 101;
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+      }
+
+      /* Navigation */
+      .nav-section {
+        margin-bottom: 30px;
+      }
+
+      .nav-section h3 {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-light);
+        padding: 0 25px 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
       }
 
       .nav-list {
@@ -78,85 +153,269 @@
       }
 
       .nav-item {
-        margin-bottom: 5px;
+        margin-bottom: 2px;
       }
 
       .nav-link {
-        display: block;
-        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 25px;
         text-decoration: none;
         color: var(--text-color);
         font-weight: 500;
-        transition: all 0.3s ease;
-        border-left: 3px solid transparent;
+        transition: var(--transition);
+        border-left: 4px solid transparent;
       }
 
       .nav-link:hover {
         background-color: var(--light-gray);
-        color: var(--secondary-color);
+        color: var(--primary-dark);
       }
 
       .nav-link.active {
-        background-color: var(--light-color);
-        color: var(--secondary-color);
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
         border-left-color: var(--primary-color);
+        font-weight: 600;
+      }
+
+      .nav-link i {
+        width: 20px;
+        text-align: center;
+        font-size: 16px;
       }
 
       /* Main Content */
       .content {
         flex: 1;
-        padding: 30px;
-        overflow-y: auto;
+        padding: 30px 40px;
+        margin-left: 320px;
+        transition: margin-left 0.3s ease;
+      }
+
+      .content.expanded {
+        margin-left: 0;
       }
 
       header {
         margin-bottom: 40px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid var(--border-color);
+        padding: 30px;
+        background: linear-gradient(135deg, var(--primary-dark), var(--secondary-color));
+        color: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
       }
 
       header h1 {
-        color: var(--dark-color);
-        margin-bottom: 10px;
-        font-size: 32px;
+        font-size: 42px;
+        margin-bottom: 15px;
+        font-weight: 700;
+        line-height: 1.2;
       }
 
       header p {
-        color: #666;
         font-size: 18px;
+        opacity: 0.9;
         max-width: 800px;
+        line-height: 1.6;
       }
 
-      .section {
-        background-color: white;
-        border-radius: 8px;
+      /* Base URL Card */
+      .base-url-card {
+        background: white;
+        border-radius: var(--radius);
         padding: 25px;
         margin-bottom: 30px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        border-left: 4px solid var(--primary-color);
+        box-shadow: var(--shadow);
+        border-top: 5px solid var(--primary-color);
+        position: relative;
+        overflow: hidden;
       }
 
-      .section.location-section {
-        border-left-color: var(--location-color);
+      .base-url-card:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      }
+
+      .base-url-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .base-url-header i {
+        font-size: 28px;
+        color: var(--primary-color);
+        background-color: var(--primary-light);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .base-url-header h3 {
+        font-size: 22px;
+        color: var(--secondary-color);
+      }
+
+      .url-display {
+        background-color: var(--dark-bg);
+        color: white;
+        padding: 18px 20px;
+        border-radius: var(--radius-sm);
+        font-family: 'Courier New', monospace;
+        font-size: 17px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        overflow-x: auto;
+      }
+
+      .url-display span {
+        word-break: break-all;
+      }
+
+      .copy-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+        flex-shrink: 0;
+      }
+
+      .copy-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+      }
+
+      .copy-btn.copied {
+        background-color: var(--success-color);
+      }
+
+      /* Quick Jump */
+      .quick-jump {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+        margin-bottom: 40px;
+      }
+
+      .jump-card {
+        background: white;
+        border-radius: var(--radius);
+        padding: 20px;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        cursor: pointer;
+        border-top: 4px solid var(--primary-color);
+      }
+
+      .jump-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .jump-card.location {
+        border-top-color: var(--accent-color);
+      }
+
+      .jump-card i {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: var(--primary-color);
+        background-color: var(--primary-light);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .jump-card.location i {
+        color: var(--accent-color);
+        background-color: rgba(52, 152, 219, 0.1);
+      }
+
+      .jump-card h4 {
+        font-size: 16px;
+        color: var(--secondary-color);
+        margin-bottom: 5px;
+      }
+
+      .jump-card p {
+        font-size: 13px;
+        color: var(--text-light);
+      }
+
+      /* Section Styling */
+      .section {
+        background-color: white;
+        border-radius: var(--radius);
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .section:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 6px;
+        height: 100%;
+        background-color: var(--primary-color);
+      }
+
+      .section.location-section:before {
+        background-color: var(--accent-color);
       }
 
       .section h2 {
         color: var(--secondary-color);
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 24px;
+        margin-bottom: 25px;
+        font-size: 26px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 15px;
       }
 
       .section h2 i {
         color: var(--primary-color);
+        background-color: var(--primary-light);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
       }
 
-      .section h2 .location-icon {
-        color: var(--location-color);
+      .section.location-section h2 i {
+        color: var(--accent-color);
+        background-color: rgba(52, 152, 219, 0.1);
       }
 
       .endpoint-info {
@@ -166,390 +425,625 @@
       .endpoint-header {
         display: flex;
         align-items: center;
-        margin-bottom: 15px;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 15px;
+        margin-bottom: 20px;
+        background-color: var(--light-gray);
+        padding: 15px 20px;
+        border-radius: var(--radius-sm);
       }
 
       .method {
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-weight: bold;
+        padding: 8px 18px;
+        border-radius: 6px;
+        font-weight: 700;
         font-size: 14px;
+        letter-spacing: 0.5px;
       }
 
       .method.post {
-        background-color: #49cc90;
+        background-color: var(--primary-color);
         color: white;
       }
 
       .method.get {
-        background-color: #61affe;
+        background-color: var(--accent-color);
         color: white;
       }
 
       .endpoint-path {
-        font-family: monospace;
+        font-family: 'Courier New', monospace;
         font-size: 18px;
-        background-color: var(--light-gray);
-        padding: 6px 12px;
-        border-radius: 4px;
-        color: var(--dark-color);
+        background-color: white;
+        padding: 10px 15px;
+        border-radius: var(--radius-sm);
+        color: var(--text-color);
+        flex-grow: 1;
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
       }
 
       .description {
-        margin-bottom: 15px;
-        color: #555;
+        margin-bottom: 20px;
+        color: var(--text-light);
+        font-size: 16px;
+        line-height: 1.7;
+        padding-left: 5px;
       }
 
       /* Table Styling */
       table {
         width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-        border-radius: 8px;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 25px 0;
+        border-radius: var(--radius-sm);
         overflow: hidden;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
       }
 
       table th {
-        background-color: var(--dark-color);
+        background-color: var(--secondary-color);
         color: white;
         text-align: left;
-        padding: 15px;
+        padding: 18px 20px;
         font-weight: 600;
+        border-bottom: 2px solid var(--primary-dark);
       }
 
       table td {
-        padding: 15px;
+        padding: 16px 20px;
         border-bottom: 1px solid var(--border-color);
       }
 
+      table tr:last-child td {
+        border-bottom: none;
+      }
+
       table tr:nth-child(even) {
-        background-color: #f9f9f9;
+        background-color: #fafafa;
       }
 
       table tr:hover {
-        background-color: var(--light-color);
+        background-color: var(--primary-light);
       }
 
       .required {
-        color: #e74c3c;
-        font-weight: bold;
+        color: var(--danger-color);
+        font-weight: 700;
+        background-color: rgba(231, 76, 60, 0.1);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 13px;
       }
 
       .optional {
-        color: #3498db;
-        font-weight: bold;
+        color: var(--accent-color);
+        font-weight: 700;
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 13px;
       }
 
-      /* Code Styling */
+      /* Code Block */
       .code-block {
         background-color: var(--code-bg);
-        color: #f8f8f2;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 20px 0;
+        color: #abb2bf;
+        padding: 25px;
+        border-radius: var(--radius-sm);
+        margin: 25px 0;
         overflow-x: auto;
-        font-family: "Courier New", Courier, monospace;
+        font-family: 'Fira Code', 'Courier New', monospace;
         font-size: 15px;
-        line-height: 1.5;
+        line-height: 1.6;
+        border-left: 5px solid var(--primary-color);
+        position: relative;
       }
 
       .code-block .comment {
-        color: #6a9955;
+        color: #5c6370;
+        font-style: italic;
       }
 
       .code-block .key {
-        color: #9cdcfe;
+        color: #c678dd;
       }
 
       .code-block .string {
-        color: #ce9178;
+        color: #98c379;
       }
 
       .code-block .number {
-        color: #b5cea8;
+        color: #d19a66;
       }
 
-      /* Responsive Design */
-      @media (max-width: 1024px) {
-        .container {
-          flex-direction: column;
-        }
-
-        .sidebar {
-          width: 100%;
-          height: auto;
-          position: relative;
-          border-right: none;
-          border-bottom: 1px solid var(--border-color);
-        }
-
-        .nav-list {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-
-        .nav-item {
-          margin: 5px;
-        }
-
-        .nav-link {
-          padding: 10px 15px;
-          border-radius: 4px;
-          border-left: none;
-        }
-
-        .nav-link.active {
-          border-left: none;
-          background-color: var(--light-color);
-        }
+      .code-block .function {
+        color: #61afef;
       }
 
-      @media (max-width: 768px) {
-        .content {
-          padding: 20px 15px;
-        }
+      .code-block .copy-icon {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: #abb2bf;
+        cursor: pointer;
+        transition: var(--transition);
+        background: rgba(255, 255, 255, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        .section {
-          padding: 20px 15px;
-        }
-
-        table {
-          display: block;
-          overflow-x: auto;
-        }
+      .code-block .copy-icon:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.2);
       }
 
       /* Footer */
       footer {
         text-align: center;
-        padding: 30px 0 20px;
-        color: #777;
-        font-size: 14px;
+        padding: 40px 0 30px;
+        color: var(--text-light);
+        font-size: 15px;
+        margin-top: 50px;
         border-top: 1px solid var(--border-color);
-        margin-top: 40px;
       }
 
       footer a {
-        color: var(--secondary-color);
+        color: var(--primary-dark);
         text-decoration: none;
+        font-weight: 600;
       }
 
-      /* Quick Jump List */
-      .quick-jump {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 30px;
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      footer a:hover {
+        text-decoration: underline;
       }
 
-      .quick-jump a {
-        background-color: var(--light-color);
-        color: var(--dark-color);
-        padding: 8px 15px;
-        border-radius: 20px;
-        text-decoration: none;
-        font-size: 14px;
-        transition: all 0.3s;
-      }
-
-      .quick-jump a:hover {
+      /* Back to top button */
+      .back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
         background-color: var(--primary-color);
         color: white;
-      }
-
-      .quick-jump a.location-link {
-        background-color: #e3f2fd;
-      }
-
-      .quick-jump a.location-link:hover {
-        background-color: var(--location-color);
-      }
-
-      /* Base URL Info */
-      .base-url {
-        background-color: var(--light-color);
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 30px;
-        border-left: 4px solid var(--primary-color);
-      }
-
-      .base-url h3 {
-        color: var(--dark-color);
-        margin-bottom: 10px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 10px;
-      }
-
-      .base-url code {
-        font-family: monospace;
-        background-color: white;
-        padding: 8px 12px;
-        border-radius: 4px;
-        display: inline-block;
-        margin-top: 5px;
-        font-size: 16px;
-        color: var(--dark-color);
-      }
-
-      /* Copy button */
-      .copy-btn {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
+        justify-content: center;
+        font-size: 20px;
         cursor: pointer;
-        font-size: 12px;
-        margin-left: 10px;
-        transition: background-color 0.3s;
+        z-index: 99;
+        box-shadow: 0 5px 20px rgba(37, 211, 102, 0.4);
+        transition: var(--transition);
+        border: none;
+        opacity: 0;
+        visibility: hidden;
       }
 
-      .copy-btn:hover {
+      .back-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .back-to-top:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5);
+      }
+
+      /* Toast Notification */
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
         background-color: var(--secondary-color);
+        color: white;
+        padding: 15px 25px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: transform 0.4s ease;
+        max-width: 400px;
+      }
+
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .toast i {
+        font-size: 24px;
+        color: var(--primary-color);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1200px) {
+        .sidebar {
+          width: 280px;
+        }
+        
+        .content {
+          margin-left: 280px;
+          padding: 25px 30px;
+        }
+        
+        .quick-jump {
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+      }
+
+      @media (max-width: 992px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        
+        .sidebar.visible {
+          transform: translateX(0);
+        }
+        
+        .content {
+          margin-left: 0;
+          padding: 20px;
+        }
+        
+        .sidebar-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        header h1 {
+          font-size: 34px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .content {
+          padding: 15px;
+        }
+        
+        header {
+          padding: 25px 20px;
+        }
+        
+        header h1 {
+          font-size: 28px;
+        }
+        
+        .section {
+          padding: 25px 20px;
+        }
+        
+        .section h2 {
+          font-size: 22px;
+        }
+        
+        .endpoint-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .endpoint-path {
+          width: 100%;
+        }
+        
+        table {
+          display: block;
+          overflow-x: auto;
+        }
+        
+        .quick-jump {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .back-to-top {
+          bottom: 20px;
+          right: 20px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .quick-jump {
+          grid-template-columns: 1fr;
+        }
+        
+        .url-display {
+          flex-direction: column;
+          gap: 15px;
+          align-items: flex-start;
+        }
+        
+        .copy-btn {
+          align-self: stretch;
+          justify-content: center;
+        }
+        
+        .logo-container {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 15px;
+        }
+        
+        .logo h1 {
+          font-size: 22px;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- Sidebar Toggle -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="toastMessage">Copied to clipboard!</span>
+    </div>
+
     <div class="container">
       <!-- Sidebar Navigation -->
-      <nav class="sidebar">
-        <div class="logo">
-          <i class="fab fa-whatsapp"></i>
-          <h1>WhatsApp API</h1>
+      <nav class="sidebar" id="sidebar">
+        <div class="logo-container">
+          <div class="logo">
+            <i class="fab fa-whatsapp"></i>
+            <h1>WhatsApp <span>API</span></h1>
+          </div>
         </div>
-        <ul class="nav-list">
-          <li class="nav-item">
-            <a href="#introduction" class="nav-link active">Introduction</a>
-          </li>
-          <li class="nav-item">
-            <a href="#authentication" class="nav-link">Authentication</a>
-          </li>
-          <li class="nav-item">
-            <a href="#send-text" class="nav-link">Send Text</a>
-          </li>
-          <li class="nav-item">
-            <a href="#send-photo" class="nav-link">Send Photo</a>
-          </li>
-          <li class="nav-item">
-            <a href="#send-video" class="nav-link">Send Video</a>
-          </li>
-          <li class="nav-item">
-            <a href="#send-audio" class="nav-link">Send Audio</a>
-          </li>
-          <li class="nav-item">
-            <a href="#send-file" class="nav-link">Send File</a>
-          </li>
-          <li class="nav-item">
-            <a href="#send-location" class="nav-link">Send Location</a>
-          </li>
-          <li class="nav-item">
-            <a href="#send-poll" class="nav-link">Send Poll</a>
-          </li>
-          <li class="nav-item">
-            <a href="#reaction" class="nav-link">Message Reaction</a>
-          </li>
-          <li class="nav-item">
-            <a href="#delete" class="nav-link">Delete Message</a>
-          </li>
-          <li class="nav-item">
-            <a href="#get-groups" class="nav-link">Get Groups</a>
-          </li>
-          <li class="nav-item">
-            <a href="#examples" class="nav-link">Examples</a>
-          </li>
-        </ul>
+
+        <div class="nav-section">
+          <h3>Getting Started</h3>
+          <ul class="nav-list">
+            <li class="nav-item">
+              <a href="#introduction" class="nav-link active">
+                <i class="fas fa-info-circle"></i>
+                <span>Introduction</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#authentication" class="nav-link">
+                <i class="fas fa-key"></i>
+                <span>Authentication</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#base-url" class="nav-link">
+                <i class="fas fa-link"></i>
+                <span>Base URL</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3>Send Messages</h3>
+          <ul class="nav-list">
+            <li class="nav-item">
+              <a href="#send-text" class="nav-link">
+                <i class="fas fa-comment-alt"></i>
+                <span>Text Message</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#send-photo" class="nav-link">
+                <i class="fas fa-image"></i>
+                <span>Photo</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#send-video" class="nav-link">
+                <i class="fas fa-video"></i>
+                <span>Video</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#send-audio" class="nav-link">
+                <i class="fas fa-volume-up"></i>
+                <span>Audio</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#send-file" class="nav-link">
+                <i class="fas fa-file"></i>
+                <span>File</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#send-location" class="nav-link">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Location</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#send-poll" class="nav-link">
+                <i class="fas fa-poll"></i>
+                <span>Poll</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3>Message Management</h3>
+          <ul class="nav-list">
+            <li class="nav-item">
+              <a href="#reaction" class="nav-link">
+                <i class="fas fa-smile"></i>
+                <span>Reactions</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#delete" class="nav-link">
+                <i class="fas fa-trash-alt"></i>
+                <span>Delete Message</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#get-groups" class="nav-link">
+                <i class="fas fa-users"></i>
+                <span>Get Groups</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3>Examples</h3>
+          <ul class="nav-list">
+            <li class="nav-item">
+              <a href="#examples" class="nav-link">
+                <i class="fas fa-code"></i>
+                <span>Code Examples</span>
+              </a>
+            </li>
+          </ul>
+        </div>
       </nav>
 
       <!-- Main Content -->
-      <main class="content">
+      <main class="content" id="mainContent">
         <header>
           <h1>WhatsApp API Documentation</h1>
           <p>
-            A comprehensive API for sending messages, media, locations, polls,
-            and managing WhatsApp interactions programmatically.
+            A comprehensive REST API for sending messages, media, locations, polls, 
+            and managing WhatsApp interactions programmatically with dynamic endpoint URLs.
           </p>
         </header>
 
-        <!-- Base URL Information -->
-        <div class="base-url">
-          <h3><i class="fas fa-link"></i> Base URL</h3>
-          <p>All API endpoints start with the following base URL:</p>
-          <code id="baseUrlDisplay">http://localhost:3002</code>
-          <button class="copy-btn" onclick="copyBaseUrl()">
-            <i class="fas fa-copy"></i> Copy
-          </button>
-          <p style="margin-top: 10px; font-size: 14px; color: #666">
+        <!-- Base URL Card -->
+        <section id="base-url" class="base-url-card">
+          <div class="base-url-header">
+            <i class="fas fa-server"></i>
+            <div>
+              <h3>Base URL</h3>
+            </div>
+          </div>
+          <div class="url-display">
+            <span id="baseUrlDisplay">Loading...</span>
+            <button class="copy-btn" id="copyBaseUrlBtn">
+              <i class="fas fa-copy"></i>
+              Copy Base URL
+            </button>
+          </div>
+          <p style="color: var(--text-light); font-size: 15px; margin-top: 10px;">
+            <i class="fas fa-info-circle" style="color: var(--accent-color);"></i>
             All API endpoints are prefixed with <code>/api/whatsapp</code> after this base URL.
+            This URL is automatically detected from your current window location.
           </p>
-        </div>
+        </section>
 
-        <!-- Quick Jump List -->
+        <!-- Quick Jump Cards -->
         <div class="quick-jump">
-          <a href="#send-text">Text</a>
-          <a href="#send-photo">Photo</a>
-          <a href="#send-video">Video</a>
-          <a href="#send-audio">Audio</a>
-          <a href="#send-file">File</a>
-          <a href="#send-location" class="location-link">Location</a>
-          <a href="#send-poll">Poll</a>
-          <a href="#reaction">Reaction</a>
-          <a href="#delete">Delete</a>
-          <a href="#get-groups">Groups</a>
+          <div class="jump-card" data-target="#send-text">
+            <i class="fas fa-comment-alt"></i>
+            <h4>Text Message</h4>
+            <p>Send text messages</p>
+          </div>
+          <div class="jump-card" data-target="#send-photo">
+            <i class="fas fa-image"></i>
+            <h4>Photo</h4>
+            <p>Send images</p>
+          </div>
+          <div class="jump-card" data-target="#send-video">
+            <i class="fas fa-video"></i>
+            <h4>Video</h4>
+            <p>Send videos & GIFs</p>
+          </div>
+          <div class="jump-card" data-target="#send-audio">
+            <i class="fas fa-volume-up"></i>
+            <h4>Audio</h4>
+            <p>Send audio & voice notes</p>
+          </div>
+          <div class="jump-card" data-target="#send-file">
+            <i class="fas fa-file"></i>
+            <h4>File</h4>
+            <p>Send documents</p>
+          </div>
+          <div class="jump-card location" data-target="#send-location">
+            <i class="fas fa-map-marker-alt"></i>
+            <h4>Location</h4>
+            <p>Send GPS coordinates</p>
+          </div>
+          <div class="jump-card" data-target="#send-poll">
+            <i class="fas fa-poll"></i>
+            <h4>Poll</h4>
+            <p>Create polls</p>
+          </div>
+          <div class="jump-card" data-target="#get-groups">
+            <i class="fas fa-users"></i>
+            <h4>Get Groups</h4>
+            <p>List all groups</p>
+          </div>
         </div>
 
         <!-- Introduction -->
         <section id="introduction" class="section">
           <h2><i class="fas fa-info-circle"></i> Introduction</h2>
-          <p>
-            This API allows you to interact with WhatsApp programmatically to
-            send messages, media files, locations, polls, reactions, and perform
-            other messaging operations.
-          </p>
-          <p>
-            All endpoints require authentication via an API key passed in the
-            request headers. The base URL for all endpoints is
-            <code id="baseUrlCode">http://localhost:3002</code> with the API prefix <code>/api/whatsapp</code>.
-          </p>
+          <div class="description">
+            <p>
+              This API allows you to interact with WhatsApp programmatically to send messages, 
+              media files, locations, polls, reactions, and perform other messaging operations.
+            </p>
+            <p>
+              The API uses a RESTful architecture with JSON request/response formats and 
+              supports all major WhatsApp features. All endpoints require authentication 
+              via an API key passed in the request headers.
+            </p>
+            <p>
+              <strong>Note:</strong> This API requires an active WhatsApp session 
+              and proper API key authentication. All URLs are dynamically generated 
+              based on your current window location.
+            </p>
+          </div>
         </section>
 
         <!-- Authentication -->
         <section id="authentication" class="section">
           <h2><i class="fas fa-key"></i> Authentication</h2>
-          <p>
-            All API requests must include an <code>X-API-Key</code> header with
-            a valid API key associated with an active WhatsApp session.
-          </p>
-
-          <div class="code-block" id="authExample">
-            <span class="comment">// Example Header</span>
-            <span class="key">X-API-Key</span>:
-            <span class="string">"your-api-key-here"</span>
+          <div class="description">
+            <p>
+              All API requests must include an <code>X-API-Key</code> header with
+              a valid API key associated with an active WhatsApp session.
+            </p>
           </div>
 
-          <p>
-            Without a valid API key, requests will return a <code>400</code> or
-            <code>404</code> error.
-          </p>
+          <div class="code-block" id="authExample">
+            <span class="comment">// Example request headers</span>
+            <span class="key">headers</span>: {
+              <span class="key">'X-API-Key'</span>: <span class="string">'your-api-key-here'</span>,
+              <span class="key">'Content-Type'</span>: <span class="string">'application/json'</span>
+            }
+            <div class="copy-icon" data-target="authExample">
+              <i class="fas fa-copy"></i>
+            </div>
+          </div>
+
+          <div class="description">
+            <p>
+              Without a valid API key, requests will return a <code>401 Unauthorized</code> error.
+              You can obtain an API key by registering your application with the WhatsApp Business API.
+            </p>
+          </div>
         </section>
 
         <!-- Send Text -->
         <section id="send-text" class="section">
+          <h2><i class="fas fa-comment-alt"></i> Send Text Message</h2>
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path" id="textEndpoint"
-                >http://localhost:3002/api/whatsapp/send/text</span
-              >
+              <span class="endpoint-path" id="textEndpoint">/api/whatsapp/send/text</span>
             </div>
             <p class="description">
               Send a text message to a phone number or WhatsApp group.
@@ -569,8 +1063,14 @@
                 <tr>
                   <td>X-API-Key</td>
                   <td>String</td>
-                  <td><span class="required">Yes</span></td>
+                  <td><span class="required">Required</span></td>
                   <td>Your API key for authentication</td>
+                </tr>
+                <tr>
+                  <td>Content-Type</td>
+                  <td>String</td>
+                  <td><span class="required">Required</span></td>
+                  <td>Must be <code>application/json</code></td>
                 </tr>
               </tbody>
             </table>
@@ -591,8 +1091,7 @@
                   <td>String</td>
                   <td><span class="optional">Optional*</span></td>
                   <td>
-                    Recipient phone number (with country code, without '+' or
-                    spaces)
+                    Recipient phone number (with country code, without '+' or spaces)
                   </td>
                 </tr>
                 <tr>
@@ -604,51 +1103,48 @@
                 <tr>
                   <td>message</td>
                   <td>String</td>
-                  <td><span class="required">Yes</span></td>
+                  <td><span class="required">Required</span></td>
                   <td>Text message content</td>
                 </tr>
               </tbody>
             </table>
-            <p>
-              <small
-                >* Either <code>number</code> or <code>group</code> must be
-                provided</small
-              >
-            </p>
+            <p><small>* Either <code>number</code> or <code>group</code> must be provided</small></p>
 
             <h3>Example Request</h3>
             <div class="code-block" id="textExample">
-              <span class="comment">// Using curl</span>
-              curl -X POST \ -H
-              <span class="string">"X-API-Key: your-api-key-here"</span> \ -H
-              <span class="string">"Content-Type: application/json"</span> \ -d
-              '<span class="key">{</span> <span class="key">"number"</span>:
-              <span class="string">"1234567890"</span>,
-              <span class="key">"message"</span>:
-              <span class="string">"Hello from WhatsApp API!"</span>
-              <span class="key">}</span>' \
-              <span class="string">http://localhost:3002/api/whatsapp/send/text</span>
+              <span class="comment">// JavaScript Fetch API example</span>
+              <span class="key">const</span> response = <span class="key">await</span> <span class="function">fetch</span>(<span class="string">'<span class="dynamic-url" data-endpoint="/api/whatsapp/send/text"></span>'</span>, {
+                method: <span class="string">'POST'</span>,
+                headers: {
+                  <span class="key">'X-API-Key'</span>: <span class="string">'your-api-key-here'</span>,
+                  <span class="key">'Content-Type'</span>: <span class="string">'application/json'</span>
+                },
+                body: <span class="function">JSON.stringify</span>({
+                  <span class="key">number</span>: <span class="string">'1234567890'</span>,
+                  <span class="key">message</span>: <span class="string">'Hello from WhatsApp API!'</span>
+                })
+              });
+              <div class="copy-icon" data-target="textExample">
+                <i class="fas fa-copy"></i>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- Send Photo -->
         <section id="send-photo" class="section">
+          <h2><i class="fas fa-image"></i> Send Photo</h2>
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/photo</span>
+              <span class="endpoint-path">/api/whatsapp/send/photo</span>
             </div>
             <p class="description">
-              Send one or multiple images (up to 10) to a phone number or
-              WhatsApp group.
+              Send one or multiple images (up to 10) to a phone number or WhatsApp group.
             </p>
 
             <h3>Request Format</h3>
-            <p>
-              This endpoint uses <code>multipart/form-data</code> for file
-              uploads.
-            </p>
+            <p>This endpoint uses <code>multipart/form-data</code> for file uploads.</p>
 
             <h3>Parameters</h3>
             <table>
@@ -664,7 +1160,7 @@
                 <tr>
                   <td>photos</td>
                   <td>File[]</td>
-                  <td><span class="required">Yes</span></td>
+                  <td><span class="required">Required</span></td>
                   <td>Image files (max 10)</td>
                 </tr>
                 <tr>
@@ -682,13 +1178,13 @@
                 <tr>
                   <td>caption</td>
                   <td>String</td>
-                  <td><span class="optional">No</span></td>
+                  <td><span class="optional">Optional</span></td>
                   <td>Caption for the image(s)</td>
                 </tr>
                 <tr>
                   <td>viewOnce</td>
                   <td>Boolean</td>
-                  <td><span class="optional">No</span></td>
+                  <td><span class="optional">Optional</span></td>
                   <td>If true, sends as view-once media</td>
                 </tr>
               </tbody>
@@ -696,205 +1192,36 @@
 
             <h3>Example Request</h3>
             <div class="code-block" id="photoExample">
-              <span class="comment">// Using JavaScript fetch</span>
-              <span class="key">const</span> formData =
-              <span class="key">new</span> FormData(); formData.append(<span
-                class="string"
-                >'photos'</span
-              >, photoFile); formData.append(<span class="string">'number'</span
-              >, <span class="string">'1234567890'</span>);
-              formData.append(<span class="string">'caption'</span>,
-              <span class="string">'Check out this image!'</span>);
+              <span class="comment">// JavaScript fetch with FormData</span>
+              <span class="key">const</span> formData = <span class="key">new</span> FormData();
+              formData.<span class="function">append</span>(<span class="string">'photos'</span>, photoFile);
+              formData.<span class="function">append</span>(<span class="string">'number'</span>, <span class="string">'1234567890'</span>);
+              formData.<span class="function">append</span>(<span class="string">'caption'</span>, <span class="string">'Check out this image!'</span>);
 
-              <span class="key">const</span> response =
-              <span class="key">await</span> fetch(<span class="string"
-                >'http://localhost:3002/api/whatsapp/send/photo'</span
-              >, { method: <span class="string">'POST'</span>, headers: {
-              <span class="key">'X-API-Key'</span>:
-              <span class="string">'your-api-key-here'</span>
-              }, body: formData });
+              <span class="key">const</span> response = <span class="key">await</span> <span class="function">fetch</span>(<span class="string">'<span class="dynamic-url" data-endpoint="/api/whatsapp/send/photo"></span>'</span>, {
+                method: <span class="string">'POST'</span>,
+                headers: {
+                  <span class="key">'X-API-Key'</span>: <span class="string">'your-api-key-here'</span>
+                },
+                body: formData
+              });
+              <div class="copy-icon" data-target="photoExample">
+                <i class="fas fa-copy"></i>
+              </div>
             </div>
-          </div>
-        </section>
-
-        <!-- Send Video -->
-        <section id="send-video" class="section">
-          <div class="endpoint-info">
-            <div class="endpoint-header">
-              <span class="method post">POST</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/video</span>
-            </div>
-            <p class="description">
-              Send one or multiple videos (up to 5) to a phone number or
-              WhatsApp group.
-            </p>
-
-            <h3>Parameters</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Parameter</th>
-                  <th>Type</th>
-                  <th>Required</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>videos</td>
-                  <td>File[]</td>
-                  <td><span class="required">Yes</span></td>
-                  <td>Video files (max 5)</td>
-                </tr>
-                <tr>
-                  <td>number</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Recipient phone number</td>
-                </tr>
-                <tr>
-                  <td>group</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Group ID for sending to a group</td>
-                </tr>
-                <tr>
-                  <td>caption</td>
-                  <td>String</td>
-                  <td><span class="optional">No</span></td>
-                  <td>Caption for the video(s)</td>
-                </tr>
-                <tr>
-                  <td>gif</td>
-                  <td>Boolean</td>
-                  <td><span class="optional">No</span></td>
-                  <td>If true, sends as GIF</td>
-                </tr>
-                <tr>
-                  <td>viewOnce</td>
-                  <td>Boolean</td>
-                  <td><span class="optional">No</span></td>
-                  <td>If true, sends as view-once media</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Send Audio -->
-        <section id="send-audio" class="section">
-          <div class="endpoint-info">
-            <div class="endpoint-header">
-              <span class="method post">POST</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/audio</span>
-            </div>
-            <p class="description">
-              Send audio files or voice notes to a phone number or WhatsApp
-              group.
-            </p>
-
-            <h3>Parameters</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Parameter</th>
-                  <th>Type</th>
-                  <th>Required</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>audios</td>
-                  <td>File[]</td>
-                  <td><span class="required">Yes</span></td>
-                  <td>Audio files (max 5)</td>
-                </tr>
-                <tr>
-                  <td>number</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Recipient phone number</td>
-                </tr>
-                <tr>
-                  <td>group</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Group ID for sending to a group</td>
-                </tr>
-                <tr>
-                  <td>voice</td>
-                  <td>Boolean</td>
-                  <td><span class="optional">No</span></td>
-                  <td>If true, sends as WhatsApp voice note (PTT)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Send File -->
-        <section id="send-file" class="section">
-          <div class="endpoint-info">
-            <div class="endpoint-header">
-              <span class="method post">POST</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/file</span>
-            </div>
-            <p class="description">
-              Send any type of file (document) to a phone number or WhatsApp
-              group.
-            </p>
-
-            <h3>Parameters</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Parameter</th>
-                  <th>Type</th>
-                  <th>Required</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>files</td>
-                  <td>File[]</td>
-                  <td><span class="required">Yes</span></td>
-                  <td>Document files (max 5)</td>
-                </tr>
-                <tr>
-                  <td>number</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Recipient phone number</td>
-                </tr>
-                <tr>
-                  <td>group</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Group ID for sending to a group</td>
-                </tr>
-                <tr>
-                  <td>caption</td>
-                  <td>String</td>
-                  <td><span class="optional">No</span></td>
-                  <td>Caption for the file(s)</td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </section>
 
         <!-- Send Location -->
         <section id="send-location" class="section location-section">
+          <h2><i class="fas fa-map-marker-alt"></i> Send Location</h2>
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method post">POST</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/location</span>
+              <span class="endpoint-path">/api/whatsapp/send/location</span>
             </div>
             <p class="description">
-              Send a location with latitude and longitude coordinates to a phone
-              number or WhatsApp group.
+              Send a location with latitude and longitude coordinates to a phone number or WhatsApp group.
             </p>
 
             <h3>Request Body (JSON)</h3>
@@ -923,242 +1250,53 @@
                 <tr>
                   <td>location.degreesLatitude</td>
                   <td>Number</td>
-                  <td><span class="required">Yes</span></td>
+                  <td><span class="required">Required</span></td>
                   <td>Latitude coordinate (e.g., 40.7128)</td>
                 </tr>
                 <tr>
                   <td>location.degreesLongitude</td>
                   <td>Number</td>
-                  <td><span class="required">Yes</span></td>
+                  <td><span class="required">Required</span></td>
                   <td>Longitude coordinate (e.g., -74.0060)</td>
                 </tr>
               </tbody>
             </table>
-            <p>
-              <small
-                >* Either <code>number</code> or <code>group</code> must be
-                provided</small
-              >
-            </p>
+            <p><small>* Either <code>number</code> or <code>group</code> must be provided</small></p>
 
             <h3>Example Request</h3>
             <div class="code-block" id="locationExample">
-              <span class="comment"
-                >// Sending location coordinates for New York City</span
-              >
-              <span class="key">const</span> response =
-              <span class="key">await</span> fetch(<span class="string"
-                >'http://localhost:3002/api/whatsapp/send/location'</span
-              >, { method: <span class="string">'POST'</span>, headers: {
-              <span class="key">'Content-Type'</span>:
-              <span class="string">'application/json'</span>,
-              <span class="key">'X-API-Key'</span>:
-              <span class="string">'your-api-key-here'</span>
-              }, body: JSON.stringify({
-              <span class="key">number</span>:
-              <span class="string">'1234567890'</span>,
-              <span class="key">location</span>: {
-              <span class="key">degreesLatitude</span>:
-              <span class="number">40.7128</span>,
-              <span class="key">degreesLongitude</span>:
-              <span class="number">-74.0060</span>
-              } }) });
+              <span class="comment">// Sending location coordinates for New York City</span>
+              <span class="key">const</span> response = <span class="key">await</span> <span class="function">fetch</span>(<span class="string">'<span class="dynamic-url" data-endpoint="/api/whatsapp/send/location"></span>'</span>, {
+                method: <span class="string">'POST'</span>,
+                headers: {
+                  <span class="key">'Content-Type'</span>: <span class="string">'application/json'</span>,
+                  <span class="key">'X-API-Key'</span>: <span class="string">'your-api-key-here'</span>
+                },
+                body: <span class="function">JSON.stringify</span>({
+                  <span class="key">number</span>: <span class="string">'1234567890'</span>,
+                  <span class="key">location</span>: {
+                    <span class="key">degreesLatitude</span>: <span class="number">40.7128</span>,
+                    <span class="key">degreesLongitude</span>: <span class="number">-74.0060</span>
+                  }
+                })
+              });
+              <div class="copy-icon" data-target="locationExample">
+                <i class="fas fa-copy"></i>
+              </div>
             </div>
-          </div>
-        </section>
-
-        <!-- Send Poll -->
-        <section id="send-poll" class="section">
-          <div class="endpoint-info">
-            <div class="endpoint-header">
-              <span class="method post">POST</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/send/poll</span>
-            </div>
-            <p class="description">
-              Create and send a poll to a phone number or WhatsApp group.
-            </p>
-
-            <h3>Parameters</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Parameter</th>
-                  <th>Type</th>
-                  <th>Required</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>number</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Recipient phone number</td>
-                </tr>
-                <tr>
-                  <td>group</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Group ID for sending to a group</td>
-                </tr>
-                <tr>
-                  <td>name</td>
-                  <td>String</td>
-                  <td><span class="required">Yes</span></td>
-                  <td>Poll question/title</td>
-                </tr>
-                <tr>
-                  <td>values</td>
-                  <td>String[]</td>
-                  <td><span class="required">Yes</span></td>
-                  <td>Array of poll options (minimum 2)</td>
-                </tr>
-                <tr>
-                  <td>selectableCount</td>
-                  <td>Number</td>
-                  <td><span class="optional">No</span></td>
-                  <td>Number of options users can select (default: 1)</td>
-                </tr>
-                <tr>
-                  <td>toAnnouncementGroup</td>
-                  <td>Boolean</td>
-                  <td><span class="optional">No</span></td>
-                  <td>If sending to an announcement group</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Message Reaction -->
-        <section id="reaction" class="section">
-          <div class="endpoint-info">
-            <div class="endpoint-header">
-              <span class="method post">POST</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/message/react</span>
-            </div>
-            <p class="description">React to a message with an emoji.</p>
-
-            <h3>Parameters</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Parameter</th>
-                  <th>Type</th>
-                  <th>Required</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>number</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Recipient phone number</td>
-                </tr>
-                <tr>
-                  <td>group</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Group ID for sending to a group</td>
-                </tr>
-                <tr>
-                  <td>messageKey</td>
-                  <td>Object</td>
-                  <td><span class="required">Yes</span></td>
-                  <td>Message key object containing message details</td>
-                </tr>
-                <tr>
-                  <td>emoji</td>
-                  <td>String</td>
-                  <td><span class="required">Yes</span></td>
-                  <td>Emoji character for the reaction</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <h3>Example Request</h3>
-            <div class="code-block" id="reactionExample">
-              <span class="comment">// React with 👍 to a message</span>
-              <span class="key">const</span> response =
-              <span class="key">await</span> fetch(<span class="string"
-                >'http://localhost:3002/api/whatsapp/message/react'</span
-              >, { method: <span class="string">'POST'</span>, headers: {
-              <span class="key">'Content-Type'</span>:
-              <span class="string">'application/json'</span>,
-              <span class="key">'X-API-Key'</span>:
-              <span class="string">'your-api-key-here'</span>
-              }, body: JSON.stringify({
-              <span class="key">number</span>:
-              <span class="string">'1234567890'</span>,
-              <span class="key">messageKey</span>: {
-              <span class="key">remoteJid</span>:
-              <span class="string">'1234567890@s.whatsapp.net'</span>,
-              <span class="key">fromMe</span>: <span class="key">true</span>,
-              <span class="key">id</span>:
-              <span class="string">'3EB0A5EF77EAFADBEFF2D6'</span>
-              },
-              <span class="key">emoji</span>: <span class="string">'👍'</span>
-              }) });
-            </div>
-          </div>
-        </section>
-
-        <!-- Delete Message -->
-        <section id="delete" class="section">
-          <div class="endpoint-info">
-            <div class="endpoint-header">
-              <span class="method post">POST</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/message/delete</span>
-            </div>
-            <p class="description">
-              Delete a message for everyone in the chat.
-            </p>
-
-            <h3>Parameters</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Parameter</th>
-                  <th>Type</th>
-                  <th>Required</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>number</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Recipient phone number</td>
-                </tr>
-                <tr>
-                  <td>group</td>
-                  <td>String</td>
-                  <td><span class="optional">Optional*</span></td>
-                  <td>Group ID for sending to a group</td>
-                </tr>
-                <tr>
-                  <td>messageKey</td>
-                  <td>Object</td>
-                  <td><span class="required">Yes</span></td>
-                  <td>Message key object containing message details</td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </section>
 
         <!-- Get Groups -->
         <section id="get-groups" class="section">
+          <h2><i class="fas fa-users"></i> Get Groups</h2>
           <div class="endpoint-info">
             <div class="endpoint-header">
               <span class="method get">GET</span>
-              <span class="endpoint-path">http://localhost:3002/api/whatsapp/get/groups</span>
+              <span class="endpoint-path">/api/whatsapp/get/groups</span>
             </div>
             <p class="description">
-              Retrieve a list of all WhatsApp groups for the authenticated
-              session.
+              Retrieve a list of all WhatsApp groups for the authenticated session.
             </p>
 
             <h3>Request Headers</h3>
@@ -1175,7 +1313,7 @@
                 <tr>
                   <td>X-API-Key</td>
                   <td>String</td>
-                  <td><span class="required">Yes</span></td>
+                  <td><span class="required">Required</span></td>
                   <td>Your API key for authentication</td>
                 </tr>
               </tbody>
@@ -1184,114 +1322,346 @@
             <h3>Example Request</h3>
             <div class="code-block" id="groupsExample">
               <span class="comment">// Get all WhatsApp groups</span>
-              <span class="key">const</span> response =
-              <span class="key">await</span> fetch(<span class="string"
-                >'http://localhost:3002/api/whatsapp/get/groups'</span
-              >, { method: <span class="string">'GET'</span>, headers: {
-              <span class="key">'X-API-Key'</span>:
-              <span class="string">'your-api-key-here'</span>
-              } });
-              <span class="key">const</span> data =
-              <span class="key">await</span> response.json();
-              console.log(data.groups);
+              <span class="key">const</span> response = <span class="key">await</span> <span class="function">fetch</span>(<span class="string">'<span class="dynamic-url" data-endpoint="/api/whatsapp/get/groups"></span>'</span>, {
+                method: <span class="string">'GET'</span>,
+                headers: {
+                  <span class="key">'X-API-Key'</span>: <span class="string">'your-api-key-here'</span>
+                }
+              });
+              
+              <span class="key">const</span> data = <span class="key">await</span> response.<span class="function">json</span>();
+              console.<span class="function">log</span>(data.groups);
+              <div class="copy-icon" data-target="groupsExample">
+                <i class="fas fa-copy"></i>
+              </div>
             </div>
+
+            <h3>Example Response</h3>
+            <div class="code-block">
+              {
+                <span class="key">"success"</span>: <span class="key">true</span>,
+                <span class="key">"groups"</span>: [
+                  {
+                    <span class="key">"id"</span>: <span class="string">"group-id-1"</span>,
+                    <span class="key">"name"</span>: <span class="string">"Family Group"</span>,
+                    <span class="key">"participants"</span>: <span class="number">15</span>
+                  },
+                  {
+                    <span class="key">"id"</span>: <span class="string">"group-id-2"</span>,
+                    <span class="key">"name"</span>: <span class="string">"Work Team"</span>,
+                    <span class="key">"participants"</span>: <span class="number">8</span>
+                  }
+                ]
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section id="examples" class="section">
+          <h2><i class="fas fa-code"></i> Code Examples</h2>
+          <div class="description">
+            <p>Here are some complete examples using the API with dynamic URLs:</p>
+          </div>
+
+          <h3>Full JavaScript Example</h3>
+          <div class="code-block">
+            <span class="comment">// WhatsApp API Client Example</span>
+            <span class="key">class</span> WhatsAppAPI {
+              <span class="function">constructor</span>(apiKey, baseUrl = <span class="function">window</span>.location.origin) {
+                <span class="key">this</span>.apiKey = apiKey;
+                <span class="key">this</span>.baseUrl = baseUrl;
+              }
+              
+              <span class="function">async</span> <span class="function">sendText</span>(number, message) {
+                <span class="key">const</span> response = <span class="key">await</span> <span class="function">fetch</span>(<span class="string">`${this.baseUrl}/api/whatsapp/send/text`</span>, {
+                  method: <span class="string">'POST'</span>,
+                  headers: {
+                    <span class="key">'X-API-Key'</span>: <span class="key">this</span>.apiKey,
+                    <span class="key">'Content-Type'</span>: <span class="string">'application/json'</span>
+                  },
+                  body: <span class="function">JSON.stringify</span>({ number, message })
+                });
+                <span class="key">return</span> <span class="key">await</span> response.<span class="function">json</span>();
+              }
+              
+              <span class="function">async</span> <span class="function">getGroups</span>() {
+                <span class="key">const</span> response = <span class="key">await</span> <span class="function">fetch</span>(<span class="string">`${this.baseUrl}/api/whatsapp/get/groups`</span>, {
+                  headers: { <span class="key">'X-API-Key'</span>: <span class="key">this</span>.apiKey }
+                });
+                <span class="key">return</span> <span class="key">await</span> response.<span class="function">json</span>();
+              }
+            }
+            
+            <span class="comment">// Usage</span>
+            <span class="key">const</span> whatsapp = <span class="key">new</span> <span class="function">WhatsAppAPI</span>(<span class="string">'your-api-key-here'</span>);
+            <span class="function">whatsapp.sendText</span>(<span class="string">'1234567890'</span>, <span class="string">'Hello!'</span>);
           </div>
         </section>
 
         <footer>
           <p>
             WhatsApp API Documentation &copy; 2023 | Built with
-            <i class="fas fa-heart" style="color: #e74c3c"></i>
+            <i class="fas fa-heart" style="color: #e74c3c; margin: 0 5px;"></i>
+            by WhatsApp API Team
           </p>
           <p>
-            Note: This API requires an active WhatsApp session and proper API
-            key authentication.
+            This documentation dynamically adapts to your current environment. 
+            Base URL: <code id="currentBaseUrl">Loading...</code>
+          </p>
+          <p style="margin-top: 15px;">
+            <a href="#"><i class="fas fa-question-circle"></i> Need help?</a> | 
+            <a href="#"><i class="fas fa-book"></i> API Reference</a> | 
+            <a href="#"><i class="fas fa-envelope"></i> Contact Support</a>
           </p>
         </footer>
       </main>
     </div>
 
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
     <script>
-      // Copy base URL to clipboard
-      function copyBaseUrl() {
-        const baseUrl = "http://localhost:3002";
-        navigator.clipboard.writeText(baseUrl).then(() => {
-          const btn = event.target.closest(".copy-btn");
-          const originalText = btn.innerHTML;
-          btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-          setTimeout(() => {
-            btn.innerHTML = originalText;
-          }, 2000);
+      // Dynamic URL management
+      function getBaseUrl() {
+        // Get current window origin
+        const origin = window.location.origin;
+        
+        // For local development, default to localhost:3002 if origin is file://
+        if (origin === 'file://' || origin === 'null' || !origin) {
+          return 'http://localhost:3000';
+        }
+        
+        return origin;
+      }
+
+      function updateAllUrls() {
+        const baseUrl = getBaseUrl();
+        
+        // Update base URL display
+        document.getElementById('baseUrlDisplay').textContent = baseUrl;
+        document.getElementById('currentBaseUrl').textContent = baseUrl;
+        
+        // Update all dynamic URL placeholders
+        document.querySelectorAll('.dynamic-url').forEach(element => {
+          const endpoint = element.getAttribute('data-endpoint');
+          element.textContent = baseUrl + endpoint;
+        });
+        
+        // Update code blocks with full URLs
+        document.querySelectorAll('.code-block').forEach(block => {
+          const dynamicUrlElements = block.querySelectorAll('.dynamic-url');
+          dynamicUrlElements.forEach(el => {
+            const endpoint = el.getAttribute('data-endpoint');
+            el.textContent = baseUrl + endpoint;
+          });
         });
       }
 
-      // Smooth scrolling for anchor links
-      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-        anchor.addEventListener("click", function (e) {
-          e.preventDefault();
+      // Copy functionality
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        toastMessage.textContent = message;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
 
-          const targetId = this.getAttribute("href");
-          if (targetId === "#") return;
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Copied to clipboard!');
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+          showToast('Failed to copy to clipboard');
+        });
+      }
 
-          const targetElement = document.querySelector(targetId);
+      // Sidebar toggle
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('visible');
+        mainContent.classList.toggle('expanded');
+        
+        // Update toggle icon
+        const icon = sidebarToggle.querySelector('i');
+        if (sidebar.classList.contains('visible')) {
+          icon.classList.remove('fa-bars');
+          icon.classList.add('fa-times');
+        } else {
+          icon.classList.remove('fa-times');
+          icon.classList.add('fa-bars');
+        }
+      });
+
+      // Copy buttons
+      document.getElementById('copyBaseUrlBtn').addEventListener('click', () => {
+        const baseUrl = getBaseUrl();
+        copyToClipboard(baseUrl);
+        
+        // Visual feedback
+        const btn = document.getElementById('copyBaseUrlBtn');
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<i class="fas fa-copy"></i> Copy Base URL';
+        }, 2000);
+      });
+
+
+
+      // Code block copy icons
+      document.querySelectorAll('.copy-icon').forEach(icon => {
+        icon.addEventListener('click', () => {
+          const targetId = icon.getAttribute('data-target');
+          const codeBlock = document.getElementById(targetId);
+          const text = codeBlock.textContent;
+          copyToClipboard(text);
+        });
+      });
+
+      // Quick jump cards
+      document.querySelectorAll('.jump-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const target = card.getAttribute('data-target');
+          const targetElement = document.querySelector(target);
+          
           if (targetElement) {
-            // Update active nav link
-            document.querySelectorAll(".nav-link").forEach((link) => {
-              link.classList.remove("active");
-            });
-            this.classList.add("active");
-
+            // Close sidebar on mobile
+            if (window.innerWidth <= 992) {
+              sidebar.classList.remove('visible');
+              mainContent.classList.remove('expanded');
+              sidebarToggle.querySelector('i').classList.remove('fa-times');
+              sidebarToggle.querySelector('i').classList.add('fa-bars');
+            }
+            
             // Scroll to target
             window.scrollTo({
-              top: targetElement.offsetTop - 20,
-              behavior: "smooth",
+              top: targetElement.offsetTop - 30,
+              behavior: 'smooth'
+            });
+            
+            // Highlight the target section
+            targetElement.style.boxShadow = '0 0 0 3px rgba(37, 211, 102, 0.3)';
+            setTimeout(() => {
+              targetElement.style.boxShadow = '';
+            }, 1500);
+          }
+        });
+      });
+
+      // Navigation active state
+      function updateActiveNav() {
+        const sections = document.querySelectorAll('.section, .base-url-card');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        let currentSection = '';
+        const scrollPosition = window.scrollY + 100;
+        
+        sections.forEach(section => {
+          if (section.offsetTop <= scrollPosition) {
+            currentSection = section.id;
+          }
+        });
+        
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('active');
+          }
+        });
+      }
+
+      // Back to top button
+      const backToTop = document.getElementById('backToTop');
+      
+      window.addEventListener('scroll', () => {
+        updateActiveNav();
+        
+        // Show/hide back to top button
+        if (window.scrollY > 500) {
+          backToTop.classList.add('visible');
+        } else {
+          backToTop.classList.remove('visible');
+        }
+      });
+
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            // Close sidebar on mobile
+            if (window.innerWidth <= 992) {
+              sidebar.classList.remove('visible');
+              mainContent.classList.remove('expanded');
+              sidebarToggle.querySelector('i').classList.remove('fa-times');
+              sidebarToggle.querySelector('i').classList.add('fa-bars');
+            }
+            
+            // Update active nav
+            document.querySelectorAll('.nav-link').forEach(link => {
+              link.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Scroll to target
+            window.scrollTo({
+              top: targetElement.offsetTop - 30,
+              behavior: 'smooth'
             });
           }
         });
       });
 
-      // Highlight active section based on scroll position
-      window.addEventListener("scroll", () => {
-        const sections = document.querySelectorAll(".section, .base-url");
-        const navLinks = document.querySelectorAll(".nav-link");
-
-        let currentSection = "";
-
-        sections.forEach((section) => {
-          const sectionTop = section.offsetTop;
-          const sectionHeight = section.clientHeight;
-
-          if (scrollY >= sectionTop - 100) {
-            currentSection = section.getAttribute("id");
+      // Initialize on page load
+      document.addEventListener('DOMContentLoaded', () => {
+        updateAllUrls();
+        updateActiveNav();
+        
+        // Add a slight delay to show dynamic URL loading
+        setTimeout(() => {
+          document.getElementById('baseUrlDisplay').style.opacity = '1';
+        }, 300);
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+          if (window.innerWidth <= 992 && 
+              !sidebar.contains(e.target) && 
+              !sidebarToggle.contains(e.target) &&
+              sidebar.classList.contains('visible')) {
+            sidebar.classList.remove('visible');
+            mainContent.classList.remove('expanded');
+            sidebarToggle.querySelector('i').classList.remove('fa-times');
+            sidebarToggle.querySelector('i').classList.add('fa-bars');
           }
         });
-
-        navLinks.forEach((link) => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === `#${currentSection}`) {
-            link.classList.add("active");
-          }
-        });
       });
 
-      // Add copy functionality to code blocks
-      document.querySelectorAll(".code-block").forEach((block) => {
-        block.addEventListener("click", () => {
-          const text = block.textContent;
-          navigator.clipboard.writeText(text).then(() => {
-            const originalColor = block.style.backgroundColor;
-            block.style.backgroundColor = "#27ae60";
-            setTimeout(() => {
-              block.style.backgroundColor = originalColor;
-            }, 300);
-          });
-        });
-      });
-
-      // Initialize when page loads
-      document.addEventListener("DOMContentLoaded", function () {
-        // No need for dynamic URL updates since we're using fixed localhost URLs
-      });
+      // Update URLs if window location changes
+      window.addEventListener('popstate', updateAllUrls);
     </script>
   </body>
 </html>
