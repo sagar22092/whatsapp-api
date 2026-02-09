@@ -9,6 +9,7 @@ import {
   getSessionList,
   getPairCode,
   deleteSession,
+  setWebhook,
 } from "../controllers/sessionController.js";
 
 const sessionRouter = Router();
@@ -23,5 +24,6 @@ sessionRouter.post("/:sessionId/send", sendMessage);
 sessionRouter.get("/:sessionId/info", getMyInfo);
 sessionRouter.post("/:sessionId/logout", logoutSession);
 sessionRouter.post("/:sessionId/delete", deleteSession);
+sessionRouter.post("/:sessionId/set-webhook", setWebhook);
 
 export default sessionRouter;

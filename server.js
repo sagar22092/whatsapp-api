@@ -79,6 +79,13 @@ app.get("/recharge", authenticate, (req, res) => {
     return res.redirect("/login");
   }
 });
+app.get("/recharge/history", authenticate, (req, res) => {
+  if (req.user) {
+    res.sendFile(path.join(__dirname, "views", "history/recharge.html"));
+  } else {
+    return res.redirect("/login");
+  }
+});
 app.get("/profile", authenticate, (req, res) => {
   if (req.user) {
     res.sendFile(path.join(__dirname, "views", "profile.html"));

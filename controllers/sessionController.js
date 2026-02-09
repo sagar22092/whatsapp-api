@@ -12,7 +12,6 @@ import {
 import User from "../models/userModel.js";
 import subscriptions from "../json/subscription.js";
 
-
 /* ───────────────── CREATE SESSION ───────────────── */
 export async function newSession(req, res) {
   if (!req.user) {
@@ -263,7 +262,6 @@ export async function deleteSession(req, res) {
 
     await waClear(userId, sessionId);
 
-
     res.json({
       success: true,
       message: "Session logged out",
@@ -282,7 +280,7 @@ export async function getSessionList(req, res) {
     const userId = req.user._id.toString();
     const sessions = await sessionModel
       .find({ user: userId })
-      .select("_id status apiKey")
+      .select("_id status apiKey webhookUrl")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -290,4 +288,23 @@ export async function getSessionList(req, res) {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+}
+
+export async function setWebhook(req, res) {
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+  const { sessionId } = req.params;
+  if (!sessionId) {
+    res.status(404).json({ error: "Session not found" });
+  }
+  try {
+    const userId = req.user._id.toString();
+    const session = await sessionModel.findOne({ _id: sessionId, user: userId });
+    if (!session) {
+      res.status(404).json({ error: "Session not found" });
+    }
+    const { webhookUrl } = req.body;
+    session.webhookUrl = webhookUrl;
+    await session.save();
+    res.json({ success: true});
+  } catch (error) {}
 }

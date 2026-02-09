@@ -25,7 +25,7 @@
             width: 100%;
         }
         
-        /* Header Styles - Mobile First */
+        /* Header Styles */
         .header {
             display: flex;
             flex-direction: column;
@@ -95,7 +95,7 @@
             transform: translateY(-2px);
         }
         
-        /* Profile Grid - Mobile First */
+        /* Profile Grid */
         .profile-grid {
             display: flex;
             flex-direction: column;
@@ -195,23 +195,11 @@
             font-weight: 600;
         }
         
-        @media (min-width: 768px) {
-            .info-group label {
-                font-size: 14px;
-            }
-        }
-        
         .info-group .value {
             font-size: 16px;
             color: #333;
             font-weight: 500;
             word-break: break-word;
-        }
-        
-        @media (min-width: 768px) {
-            .info-group .value {
-                font-size: 18px;
-            }
         }
         
         /* Balance Info */
@@ -222,13 +210,6 @@
             border-radius: 10px;
             text-align: center;
             margin-top: 15px;
-        }
-        
-        @media (min-width: 768px) {
-            .balance-info {
-                padding: 20px;
-                margin-top: 20px;
-            }
         }
         
         .balance-info h3 {
@@ -248,50 +229,6 @@
             }
         }
         
-        /* Subscription Info */
-        .subscription-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            border-left: 4px solid #28a745;
-        }
-        
-        @media (min-width: 768px) {
-            .subscription-info {
-                padding: 20px;
-                margin-top: 20px;
-            }
-        }
-        
-        .subscription-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        
-        @media (min-width: 768px) {
-            .subscription-status {
-                padding: 5px 15px;
-                font-size: 12px;
-                margin-bottom: 10px;
-            }
-        }
-        
-        .status-active {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-expired {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
         /* Edit Card Styles */
         .edit-card h3 {
             color: #333;
@@ -301,22 +238,9 @@
             padding-bottom: 10px;
         }
         
-        @media (min-width: 768px) {
-            .edit-card h3 {
-                font-size: 22px;
-                margin-bottom: 25px;
-            }
-        }
-        
         /* Form Styles */
         .form-group {
             margin-bottom: 15px;
-        }
-        
-        @media (min-width: 768px) {
-            .form-group {
-                margin-bottom: 20px;
-            }
         }
         
         .form-group label {
@@ -334,13 +258,6 @@
             border-radius: 10px;
             font-size: 15px;
             transition: all 0.3s;
-        }
-        
-        @media (min-width: 768px) {
-            .form-control {
-                padding: 12px 15px;
-                font-size: 16px;
-            }
         }
         
         .form-control:focus {
@@ -390,13 +307,6 @@
             flex: 1;
         }
         
-        @media (min-width: 768px) {
-            .btn {
-                padding: 12px 30px;
-                font-size: 16px;
-            }
-        }
-        
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -405,12 +315,6 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        @media (max-width: 767px) {
-            .btn-primary:active {
-                transform: translateY(-1px);
-            }
         }
         
         .btn-secondary {
@@ -438,14 +342,6 @@
             margin-bottom: 15px;
             display: none;
             font-size: 14px;
-        }
-        
-        @media (min-width: 768px) {
-            .alert {
-                padding: 15px;
-                margin-bottom: 20px;
-                font-size: 15px;
-            }
         }
         
         .alert-success {
@@ -478,20 +374,11 @@
         /* Tab Styles */
         .tab-container {
             margin-bottom: 20px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        @media (min-width: 768px) {
-            .tab-container {
-                margin-bottom: 30px;
-            }
         }
         
         .tabs {
             display: flex;
             border-bottom: 2px solid #f0f0f0;
-            min-width: 300px;
         }
         
         .tab {
@@ -502,15 +389,6 @@
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
             margin-bottom: -2px;
-            white-space: nowrap;
-            font-size: 14px;
-        }
-        
-        @media (min-width: 768px) {
-            .tab {
-                padding: 15px 30px;
-                font-size: 16px;
-            }
         }
         
         .tab.active {
@@ -532,31 +410,126 @@
             to { opacity: 1; }
         }
         
-        /* Transaction Styles for Mobile */
+        /* Transaction Styles */
         #transactionsList {
             max-height: 400px;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
         }
         
         .transaction-item {
             padding: 15px;
             border-bottom: 1px solid #f0f0f0;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .icon-credit {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .icon-debit {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .transaction-details {
+            flex: 1;
+        }
+        
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .transaction-meta {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .transaction-date {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        /* Transaction Summary */
+        .summary-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .stat-item h4 {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .text-success { color: #28a745; }
+        .text-danger { color: #dc3545; }
+        .text-primary { color: #007bff; }
+        
+        /* Filter Styles */
+        .filter-row {
+            display: flex;
             gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
         }
         
-        @media (min-width: 480px) {
-            .transaction-item {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-                gap: 0;
-            }
+        .filter-select {
+            padding: 8px 12px;
+            border: 2px solid #e1e5ee;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
         }
         
-        /* Mobile Menu Toggle for Smaller Screens */
+        .refresh-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .refresh-btn:hover {
+            background: #5a6268;
+        }
+        
+        /* Mobile Menu */
         .mobile-menu-toggle {
             display: none;
             background: none;
@@ -592,39 +565,15 @@
                 width: 100%;
                 text-align: center;
             }
-        }
-        
-        /* Touch-friendly improvements */
-        @media (hover: none) and (pointer: coarse) {
-            .btn, .nav-link, .tab {
-                min-height: 44px; /* Minimum touch target size */
-                display: flex;
-                align-items: center;
-                justify-content: center;
+            
+            .summary-stats {
+                grid-template-columns: 1fr;
+                gap: 10px;
             }
             
-            .form-control {
-                font-size: 16px; /* Prevents iOS zoom on focus */
-            }
-            
-            input, select, textarea {
-                font-size: 16px;
-            }
-        }
-        
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            .btn-primary, .nav-link {
-                border: 2px solid black;
-            }
-        }
-        
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -646,6 +595,7 @@
         <div id="alertMessage" class="alert"></div>
         
         <div class="profile-grid">
+            <!-- Profile Card -->
             <div class="profile-card">
                 <div class="profile-header">
                     <div class="profile-avatar" id="userAvatar">
@@ -671,19 +621,11 @@
                     <h3>Current Balance</h3>
                     <div class="balance-amount">৳ <span id="userBalance">0.00</span></div>
                 </div>
-                
-                <div class="subscription-info" id="subscriptionInfo" style="display: none;">
-                    <div class="subscription-status status-active" id="subscriptionStatus">
-                        Active
-                    </div>
-                    <h4>Premium Subscription</h4>
-                    <p>Start Date: <span id="subscriptionStart">--</span></p>
-                    <p>End Date: <span id="subscriptionEnd">--</span></p>
-                    <p>Auto Renew: <span id="subscriptionAutoRenew">--</span></p>
-                </div>
             </div>
             
+            <!-- Edit & Transactions Card -->
             <div class="edit-card">
+                <!-- Tabs -->
                 <div class="tab-container">
                     <div class="tabs">
                         <div class="tab active" data-tab="edit-profile">Edit Profile</div>
@@ -755,22 +697,53 @@
                 <!-- Transaction History Tab -->
                 <div class="tab-content" id="transaction-history">
                     <h3>Recent Transactions</h3>
-                    <div id="transactionsList">
-                        <p style="text-align: center; color: #666; padding: 40px;">
-                            Loading transactions...
-                        </p>
+                    
+                    <!-- Simple Filter -->
+                    <div class="filter-row">
+                        <select id="transactionFilter" class="filter-select" onchange="filterTransactions()">
+                            <option value="all">All Transactions</option>
+                            <option value="credit">Deposits Only</option>
+                            <option value="debit">Spents Only</option>
+                        </select>
+                        <button class="refresh-btn" onclick="loadTransactions()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
                     </div>
-                    <button class="btn btn-secondary" onclick="loadMoreTransactions()" id="loadMoreBtn" style="display: none; margin-top: 15px;">
-                        Load More
-                    </button>
+                    
+                    <!-- Transactions List -->
+                    <div id="transactionsList">
+                        <div style="text-align: center; color: #666; padding: 40px;">
+                            <div class="loading" style="margin: 0 auto; border-top-color: #667eea;"></div>
+                            <div style="margin-top: 10px;">Loading transactions...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Summary -->
+                    <div class="summary-card" id="transactionSummary">
+                        <div class="summary-stats">
+                            <div class="stat-item">
+                                <h4>Total Deposits</h4>
+                                <div class="stat-value text-success">৳ <span id="totalCredit">0</span></div>
+                            </div>
+                            <div class="stat-item">
+                                <h4>Total Withdrawals</h4>
+                                <div class="stat-value text-danger">৳ <span id="totalDebit">0</span></div>
+                            </div>
+                            <div class="stat-item">
+                                <h4>Net Change</h4>
+                                <div class="stat-value text-primary">৳ <span id="netChange">0</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
     <script>
-        let currentPage = 1;
-        let hasMoreTransactions = true;
+        // Data
+        let allTransactions = [];
+        let filteredTransactions = [];
         
         // Mobile menu toggle
         const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -782,14 +755,6 @@
                 mobileMenuToggle.innerHTML = navLinks.classList.contains('active') 
                     ? '<i class="fas fa-times"></i>' 
                     : '<i class="fas fa-bars"></i>';
-            });
-            
-            // Close menu when clicking outside
-            document.addEventListener('click', (event) => {
-                if (!event.target.closest('.header') && navLinks.classList.contains('active')) {
-                    navLinks.classList.remove('active');
-                    mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-                }
             });
         }
         
@@ -824,22 +789,6 @@
                     document.getElementById('editName').value = user.name;
                     document.getElementById('editUsername').value = user.username;
                     document.getElementById('editEmail').value = user.email;
-                    
-                    // Update subscription info
-                    if (user.subscription) {
-                        const sub = user.subscription;
-                        document.getElementById('subscriptionInfo').style.display = 'block';
-                        document.getElementById('subscriptionStatus').textContent = sub.status;
-                        document.getElementById('subscriptionStatus').className = 
-                            `subscription-status status-${sub.status}`;
-                        
-                        document.getElementById('subscriptionStart').textContent = 
-                            new Date(sub.startDate).toLocaleDateString();
-                        document.getElementById('subscriptionEnd').textContent = 
-                            new Date(sub.endDate).toLocaleDateString();
-                        document.getElementById('subscriptionAutoRenew').textContent = 
-                            sub.autoRenew ? 'Yes' : 'No';
-                    }
                 } else {
                     showAlert('Failed to load profile', 'error');
                 }
@@ -849,82 +798,117 @@
             }
         }
         
-        // Load transaction history with mobile-friendly layout
-        async function loadTransactions(page = 1) {
+        // Load transactions
+        async function loadTransactions() {
             try {
-                const response = await fetch(`/api/recharge/history?page=${page}&limit=10`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
+                const response = await fetch('/api/recharge/transactions?limit=20');
                 
                 if (response.ok) {
                     const data = await response.json();
+                    allTransactions = data.transactions;
+                    filteredTransactions = [...allTransactions];
+                    renderTransactions();
+                    updateTransactionSummary();
                     
-                    let transactionsHtml = '';
-                    
-                    if (data.recharges.length === 0) {
-                        if (page === 1) {
-                            transactionsHtml = `
-                                <div style="text-align: center; color: #666; padding: 40px;">
-                                    No transactions found
-                                </div>
-                            `;
-                        }
-                    } else {
-                        data.recharges.forEach(transaction => {
-                            const date = new Date(transaction.createdAt);
-                            const statusClass = transaction.status === 'approved' ? 'status-active' : 
-                                               transaction.status === 'rejected' ? 'status-expired' : '';
-                            
-                            transactionsHtml += `
-                                <div class="transaction-item">
-                                    <div>
-                                        <div style="font-weight: 600; color: #333; font-size: 18px;">
-                                            ৳ ${transaction.amount.toFixed(2)}
-                                        </div>
-                                        <div style="color: #666; font-size: 14px; margin-top: 5px;">
-                                            ${date.toLocaleDateString()}
-                                        </div>
-                                        <div style="color: #888; font-size: 12px; margin-top: 3px;">
-                                            ID: ${transaction.transactionId.substring(0, 8)}...
-                                        </div>
-                                    </div>
-                                    <div style="text-align: left; margin-top: 10px;">
-                                        <div class="subscription-status ${statusClass}" style="display: inline-block;">
-                                            ${transaction.status}
-                                        </div>
-                                        <div style="color: #666; font-size: 14px; margin-top: 8px;">
-                                            ${transaction.bKashNumber}
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        });
+                    // Show summary if there are transactions
+                    if (allTransactions.length > 0) {
+                        document.getElementById('transactionSummary').style.display = 'block';
                     }
-                    
-                    if (page === 1) {
-                        document.getElementById('transactionsList').innerHTML = transactionsHtml;
-                    } else {
-                        document.getElementById('transactionsList').innerHTML += transactionsHtml;
-                    }
-                    
-                    hasMoreTransactions = data.pagination.pages > page;
-                    document.getElementById('loadMoreBtn').style.display = hasMoreTransactions ? 'block' : 'none';
+                } else {
+                    document.getElementById('transactionsList').innerHTML = `
+                        <div style="text-align: center; color: #666; padding: 40px;">
+                            Failed to load transactions
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Failed to load transactions:', error);
                 document.getElementById('transactionsList').innerHTML = `
                     <div style="text-align: center; color: #666; padding: 40px;">
-                        Failed to load transactions
+                        Network error. Please try again.
                     </div>
                 `;
             }
         }
         
-        function loadMoreTransactions() {
-            currentPage++;
-            loadTransactions(currentPage);
+        // Filter transactions
+        function filterTransactions() {
+            const filter = document.getElementById('transactionFilter').value;
+            
+            if (filter === 'all') {
+                filteredTransactions = [...allTransactions];
+            } else {
+                filteredTransactions = allTransactions.filter(t => t.type === filter);
+            }
+            
+            renderTransactions();
+        }
+        
+        // Render transactions list
+        function renderTransactions() {
+            const container = document.getElementById('transactionsList');
+            
+            if (filteredTransactions.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #666; padding: 40px;">
+                        No transactions found
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            filteredTransactions.forEach(transaction => {
+                const date = new Date(transaction.createdAt);
+                const isCredit = transaction.type === 'credit';
+                const iconClass = isCredit ? 'icon-credit' : 'icon-debit';
+                const icon = isCredit ? '<i class="fas fa-arrow-down"></i>' : '<i class="fas fa-arrow-up"></i>';
+                const typeText = isCredit ? 'Deposit' : 'Withdrawal';
+                const amountColor = isCredit ? 'color: #28a745;' : 'color: #dc3545;';
+                const amountSign = isCredit ? '+' : '-';
+                
+                html += `
+                    <div class="transaction-item">
+                        <div class="transaction-icon ${iconClass}">
+                            ${icon}
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-amount" style="${amountColor}">
+                                ${amountSign}৳ ${transaction.amount.toFixed(2)}
+                            </div>
+                            <div class="transaction-meta">
+                                ${typeText} via ${transaction.by}
+                            </div>
+                        </div>
+                        <div class="transaction-date">
+                            ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Update transaction summary
+        function updateTransactionSummary() {
+            let totalCredit = 0;
+            let totalDebit = 0;
+            
+            allTransactions.forEach(transaction => {
+                if (transaction.type === 'credit') {
+                    totalCredit += transaction.amount;
+                } else {
+                    totalDebit += transaction.amount;
+                }
+            });
+            
+            const netChange = totalCredit - totalDebit;
+            
+            document.getElementById('totalCredit').textContent = totalCredit.toFixed(2);
+            document.getElementById('totalDebit').textContent = totalDebit.toFixed(2);
+            document.getElementById('netChange').textContent = netChange.toFixed(2);
         }
         
         // Tab switching
@@ -946,8 +930,7 @@
                 
                 // Load transactions when tab is opened
                 if (tabId === 'transaction-history') {
-                    currentPage = 1;
-                    loadTransactions(1);
+                    loadTransactions();
                 }
                 
                 // Close mobile menu if open
@@ -971,16 +954,6 @@
                 return;
             }
             
-            if (!/^[a-z][a-z0-9_-]*$/.test(username)) {
-                showAlert('Username can only contain lowercase letters, numbers, underscore and hyphen', 'error');
-                return;
-            }
-            
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                showAlert('Please enter a valid email address', 'error');
-                return;
-            }
-            
             const btn = document.getElementById('saveProfileBtn');
             const btnText = document.getElementById('saveProfileText');
             const btnLoading = document.getElementById('saveProfileLoading');
@@ -994,7 +967,6 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
                     body: JSON.stringify({ name, username, email })
                 });
@@ -1003,7 +975,7 @@
                 
                 if (response.ok) {
                     showAlert('Profile updated successfully!', 'success');
-                    loadProfile(); // Reload profile data
+                    loadProfile();
                 } else {
                     showAlert(result.message || 'Update failed', 'error');
                 }
@@ -1040,11 +1012,6 @@
                 return;
             }
             
-            if (newPassword === currentPassword) {
-                showAlert('New password must be different from current password', 'error');
-                return;
-            }
-            
             const btn = document.getElementById('changePasswordBtn');
             const btnText = document.getElementById('changePasswordText');
             const btnLoading = document.getElementById('changePasswordLoading');
@@ -1058,7 +1025,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
                     body: JSON.stringify({ currentPassword, newPassword })
                 });
@@ -1081,6 +1047,7 @@
             }
         });
         
+        // Helper functions
         function resetProfileForm() {
             loadProfile();
         }
@@ -1091,74 +1058,14 @@
             alertDiv.className = `alert alert-${type}`;
             alertDiv.style.display = 'block';
             
-            // Scroll to alert on mobile
-            if (window.innerWidth < 768) {
-                alertDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-            
             setTimeout(() => {
                 alertDiv.style.display = 'none';
             }, 5000);
         }
         
-        // Handle touch gestures for mobile
-        let touchStartX = 0;
-        let touchEndX = 0;
-        
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, false);
-        
-        document.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, false);
-        
-        function handleSwipe() {
-            const swipeThreshold = 50;
-            const swipeDistance = touchEndX - touchStartX;
-            
-            if (Math.abs(swipeDistance) > swipeThreshold) {
-                const tabs = document.querySelectorAll('.tab');
-                const activeTab = document.querySelector('.tab.active');
-                const activeIndex = Array.from(tabs).indexOf(activeTab);
-                
-                if (swipeDistance < 0 && activeIndex < tabs.length - 1) {
-                    // Swipe left - go to next tab
-                    tabs[activeIndex + 1].click();
-                } else if (swipeDistance > 0 && activeIndex > 0) {
-                    // Swipe right - go to previous tab
-                    tabs[activeIndex - 1].click();
-                }
-            }
-        }
-        
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadProfile();
-            
-            // Add touch-friendly improvements
-            document.querySelectorAll('input, button, a').forEach(element => {
-                element.addEventListener('touchstart', function() {
-                    this.style.transform = 'scale(0.98)';
-                });
-                
-                element.addEventListener('touchend', function() {
-                    this.style.transform = '';
-                });
-            });
-        });
-        
-        // Handle orientation changes
-        window.addEventListener('orientationchange', () => {
-            // Add a small delay to allow orientation to complete
-            setTimeout(() => {
-                // Recalculate any layout if needed
-                if (window.innerWidth < 768 && navLinks.classList.contains('active')) {
-                    navLinks.classList.remove('active');
-                    mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-                }
-            }, 300);
         });
     </script>
 </body>
