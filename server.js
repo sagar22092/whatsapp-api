@@ -17,6 +17,7 @@ import subscriptionRouter from "./routers/subscriptionRouter.js";
 import startCrons from "./crons/index.js";
 import { subscriptionMiddleware } from "./middlewares/subscriptionMiddleware.js";
 import rechargeRouter from "./routers/rechargeRouter.js";
+import profileRouter from "./routers/profileRouter.js";
 
 const app = express();
 await connectDB();
@@ -42,6 +43,7 @@ app.use("/api/session", authenticate, sessionRouter);
 app.use("/api/whatsapp", whatsappRouter);
 app.use("/api/subscription", authenticate, subscriptionRouter);
 app.use("/api/recharge", authenticate, rechargeRouter);
+app.use("/api/profile", authenticate, profileRouter);
 
 app.get("/", authenticate, (req, res) => {
   res.sendFile(path.join(__dirname, "views", "index.html"));
