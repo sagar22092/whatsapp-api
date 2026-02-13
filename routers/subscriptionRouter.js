@@ -1,32 +1,28 @@
-import { Router } from "express";
+import express from "express";
 import {
-  getCurrentSubscription,
   getSubscriptionList,
+  getCurrentSubscription,
   purchaseSubscription,
-  updateSubscription,
+  changeSubscription,
   cancelSubscription,
   renewSubscription,
   updateAutoRenew,
   getPaymentHistory,
   addBalance
 } from "../controllers/subscriptionController.js";
-import { authenticate } from "../middlewares/authMiddleware.js";
+import {authenticate as protect} from "../middlewares/authMiddleware.js";
 
-const subscriptionRouter = Router();
+const router = express.Router();
 
-// Public routes
-subscriptionRouter.get("/list", getSubscriptionList);
+// All routes are protected - require authentication
+router.get("/list", protect, getSubscriptionList);
+router.get("/current", protect, getCurrentSubscription);
+router.post("/purchase", protect, purchaseSubscription);
+router.post("/change", protect, changeSubscription);
+router.post("/cancel", protect, cancelSubscription);
+router.post("/renew", protect, renewSubscription);
+router.post("/auto-renew", protect, updateAutoRenew);
+router.get("/payments", protect, getPaymentHistory);
+router.post("/add-balance", protect, addBalance);
 
-// Protected routes (require authentication)
-subscriptionRouter.use(authenticate);
-
-subscriptionRouter.get("/current", getCurrentSubscription);
-subscriptionRouter.get("/payments", getPaymentHistory);
-subscriptionRouter.post("/purchase", purchaseSubscription);
-subscriptionRouter.post("/update", updateSubscription);
-subscriptionRouter.post("/cancel", cancelSubscription);
-subscriptionRouter.post("/renew", renewSubscription);
-subscriptionRouter.post("/auto-renew", updateAutoRenew);
-subscriptionRouter.post("/add-balance", addBalance);
-
-export default subscriptionRouter;
+export default router;

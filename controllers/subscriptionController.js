@@ -16,14 +16,21 @@ export async function getCurrentSubscription(req, res) {
       return res.status(400).json({ error: "User not found" });
     }
 
+    if (!user.subscription) {
+      return res.status(200).json({
+        subscription: null,
+        message: "No active subscription"
+      });
+    }
+
     const subscription = subscriptions.plans.find(
-      (sub) => sub.id === user.subscription?.id,
+      (sub) => sub.id === user.subscription.id
     );
 
     if (!subscription) {
       return res.status(200).json({
         subscription: null,
-        message: "No active subscription",
+        message: "Subscription plan not found"
       });
     }
 
@@ -37,10 +44,10 @@ export async function getCurrentSubscription(req, res) {
         ...subscription,
         startDate: user.subscription.startDate,
         endDate: user.subscription.endDate,
-        autoRenew: user.subscription.autoRenew,
+        autoRenew: user.subscription.autoRenew || false,
         status: user.subscription.status,
-        remainingDays: remainingDays > 0 ? remainingDays : 0,
-      },
+        remainingDays: remainingDays > 0 ? remainingDays : 0
+      }
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -54,11 +61,7 @@ export async function purchaseSubscription(req, res) {
       return res.status(400).json({ error: "User not found" });
     }
 
-    const {
-      subscriptionId,
-      billingCycle = "monthly",
-      autoRenew = true,
-    } = req.body;
+    const { subscriptionId, autoRenew = false } = req.body;
 
     if (!subscriptionId) {
       return res.status(400).json({ error: "Subscription ID is required" });
@@ -69,163 +72,123 @@ export async function purchaseSubscription(req, res) {
       return res.status(400).json({ error: "Subscription plan not found" });
     }
 
-    // Calculate price based on billing cycle
-    let price = plan.price;
-    if (billingCycle === "yearly") {
-      price = Math.round(plan.price * 12 * 0.8); // 20% discount for yearly
-    }
-
     // Check if user has sufficient balance
-    if (user.balance < price) {
+    if (user.balance < plan.price) {
       return res.status(400).json({
         error: "Insufficient balance",
-        required: price,
-        current: user.balance,
+        required: plan.price,
+        current: user.balance
       });
     }
 
     const startDate = new Date();
     const endDate = new Date(startDate);
-
-    if (billingCycle === "yearly") {
-      endDate.setFullYear(endDate.getFullYear() + 1);
-    } else {
-      endDate.setMonth(endDate.getMonth() + 1);
-    }
+    endDate.setMonth(endDate.getMonth() + 1);
 
     // Deduct balance
-    user.balance -= price;
+    user.balance -= plan.price;
 
-    // Update or create subscription
+    // Set new subscription
     user.subscription = {
       id: plan.id,
       startDate,
       endDate,
       autoRenew,
-      billingCycle,
-      status: "active",
-      lastRenewal: startDate,
+      status: "active"
     };
 
     await user.save();
 
-    // Record payment
+    // Record transaction
     const transaction = await Transaction.create({
       user: user._id,
-      amount: price,
+      amount: plan.price,
       type: "debit",
-      by: "subscription",
+      description: `Subscription purchase: ${plan.name}`,
+      by: "subscription"
     });
-    await user.save();
 
     return res.status(200).json({
       message: "Subscription purchased successfully",
       subscription: user.subscription,
       transaction,
-      balance: user.balance,
+      balance: user.balance
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 }
 
-export async function updateSubscription(req, res) {
+export async function changeSubscription(req, res) {
   try {
     const user = req.user;
     if (!user) {
       return res.status(400).json({ error: "User not found" });
     }
 
-    const {
-      subscriptionId,
-      changeType = "upgrade",
-      autoRenew = true,
-    } = req.body;
+    const { subscriptionId, autoRenew = false } = req.body;
 
     if (!subscriptionId) {
       return res.status(400).json({ error: "Subscription ID is required" });
     }
 
-    if (!user.subscription || user.subscription.status !== "active") {
-      return res
-        .status(400)
-        .json({ error: "No active subscription to update" });
+    if (!user.subscription) {
+      return res.status(400).json({ error: "No active subscription" });
     }
 
-    const currentPlan = subscriptions.plans.find(
-      (p) => p.id === user.subscription.id,
-    );
     const newPlan = subscriptions.plans.find((p) => p.id === subscriptionId);
-
-    if (!currentPlan || !newPlan) {
+    if (!newPlan) {
       return res.status(400).json({ error: "Subscription plan not found" });
     }
 
-    // Calculate prorated amount
-    const now = new Date();
-    const endDate = new Date(user.subscription.endDate);
-    const totalDays = Math.ceil(
-      (endDate - user.subscription.startDate) / (1000 * 60 * 60 * 24),
-    );
-    const remainingDays = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-    const dailyRateCurrent = currentPlan.price / 30; // Simplified daily rate
-    const dailyRateNew = newPlan.price / 30;
-    const proratedAmount = Math.round(
-      (dailyRateNew - dailyRateCurrent) * remainingDays,
+    const currentPlan = subscriptions.plans.find(
+      (p) => p.id === user.subscription.id
     );
 
-    let amountToPay = 0;
-    if (changeType === "upgrade" && proratedAmount > 0) {
-      amountToPay = proratedAmount;
-
-      if (user.balance < amountToPay) {
-        return res.status(400).json({
-          error: "Insufficient balance for upgrade",
-          required: amountToPay,
-          current: user.balance,
-        });
-      }
-
-      user.balance -= amountToPay;
+    // Check if user has sufficient balance for the new plan
+    if (user.balance < newPlan.price) {
+      return res.status(400).json({
+        error: "Insufficient balance",
+        required: newPlan.price,
+        current: user.balance
+      });
     }
+
+    // Deduct full price of new plan
+    user.balance -= newPlan.price;
+
+    // Set new subscription - start fresh from today for 1 month
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + 1);
 
     // Update subscription
     user.subscription = {
       id: newPlan.id,
-      startDate: user.subscription.startDate,
-      endDate: user.subscription.endDate, // Keep same end date
+      startDate,
+      endDate,
       autoRenew,
-      billingCycle: user.subscription.billingCycle,
-      status: "active",
-      lastRenewal: user.subscription.lastRenewal,
+      status: "active"
     };
 
     await user.save();
 
-    // Record payment for upgrade
-    if (amountToPay > 0) {
-      const payment = {
-        reference: `UPG-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        date: now,
-        amount: amountToPay,
-        plan: newPlan.name,
-        type: "upgrade",
-        status: "completed",
-        fromPlan: currentPlan.name,
-        toPlan: newPlan.name,
-      };
-
-      if (!user.paymentHistory) user.paymentHistory = [];
-      user.paymentHistory.push(payment);
-      await user.save();
-    }
+    // Record transaction
+    const transaction = await Transaction.create({
+      user: user._id,
+      amount: newPlan.price,
+      type: "debit",
+      description: currentPlan 
+        ? `Subscription change: ${currentPlan.name} → ${newPlan.name}` 
+        : `Subscription: ${newPlan.name}`,
+      by: "subscription"
+    });
 
     return res.status(200).json({
-      message: `Subscription ${changeType}d successfully`,
+      message: "Subscription changed successfully",
       subscription: user.subscription,
-      amountCharged: amountToPay,
-      balance: user.balance,
-      proratedAmount,
+      transaction,
+      balance: user.balance
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -240,9 +203,7 @@ export async function cancelSubscription(req, res) {
     }
 
     if (!user.subscription || user.subscription.status !== "active") {
-      return res
-        .status(400)
-        .json({ error: "No active subscription to cancel" });
+      return res.status(400).json({ error: "No active subscription to cancel" });
     }
 
     user.subscription.autoRenew = false;
@@ -253,7 +214,7 @@ export async function cancelSubscription(req, res) {
     return res.status(200).json({
       message: "Subscription cancelled successfully",
       subscription: user.subscription,
-      willExpire: user.subscription.endDate,
+      willExpire: user.subscription.endDate
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -271,70 +232,60 @@ export async function renewSubscription(req, res) {
       return res.status(400).json({ error: "No subscription found" });
     }
 
+    // Check if subscription is expired or cancelled
+    const now = new Date();
+    const endDate = new Date(user.subscription.endDate);
+    
+    if (endDate > now) {
+      return res.status(400).json({ error: "Subscription is still active" });
+    }
+
     const plan = subscriptions.plans.find((p) => p.id === user.subscription.id);
     if (!plan) {
       return res.status(400).json({ error: "Subscription plan not found" });
     }
 
-    let price = plan.price;
-    if (user.subscription.billingCycle === "yearly") {
-      price = Math.round(plan.price * 12 * 0.8);
-    }
-
-    if (user.balance < price) {
+    if (user.balance < plan.price) {
       return res.status(400).json({
         error: "Insufficient balance",
-        required: price,
-        current: user.balance,
+        required: plan.price,
+        current: user.balance
       });
     }
 
-    const now = new Date();
-    const startDate = new Date(user.subscription.endDate);
-    const endDate = new Date(startDate);
-
-    if (user.subscription.billingCycle === "yearly") {
-      endDate.setFullYear(endDate.getFullYear() + 1);
-    } else {
-      endDate.setMonth(endDate.getMonth() + 1);
-    }
+    // Set new dates
+    const startDate = now;
+    const newEndDate = new Date(startDate);
+    newEndDate.setMonth(newEndDate.getMonth() + 1);
 
     // Deduct balance
-    user.balance -= price;
+    user.balance -= plan.price;
 
     // Update subscription
     user.subscription = {
       id: plan.id,
       startDate,
-      endDate,
-      autoRenew: user.subscription.autoRenew,
-      billingCycle: user.subscription.billingCycle,
-      status: "active",
-      lastRenewal: now,
+      endDate: newEndDate,
+      autoRenew: user.subscription.autoRenew || false,
+      status: "active"
     };
 
     await user.save();
 
-    // Record payment
-    const payment = {
-      reference: `REN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      date: now,
-      amount: price,
-      plan: plan.name,
-      type: "renewal",
-      status: "completed",
-      billingCycle: user.subscription.billingCycle,
-    };
-
-    if (!user.paymentHistory) user.paymentHistory = [];
-    user.paymentHistory.push(payment);
-    await user.save();
+    // Record transaction
+    const transaction = await Transaction.create({
+      user: user._id,
+      amount: plan.price,
+      type: "debit",
+      description: `Subscription renewal: ${plan.name}`,
+      by: "subscription"
+    });
 
     return res.status(200).json({
       message: "Subscription renewed successfully",
       subscription: user.subscription,
-      payment,
-      balance: user.balance,
+      transaction,
+      balance: user.balance
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -363,7 +314,7 @@ export async function updateAutoRenew(req, res) {
 
     return res.status(200).json({
       message: `Auto-renew ${autoRenew ? "enabled" : "disabled"} successfully`,
-      subscription: user.subscription,
+      subscription: user.subscription
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -377,9 +328,13 @@ export async function getPaymentHistory(req, res) {
       return res.status(400).json({ error: "User not found" });
     }
 
+    const transactions = await Transaction.find({ user: user._id })
+      .sort({ createdAt: -1 })
+      .limit(50);
+
     return res.status(200).json({
-      payments: user.paymentHistory || [],
-      total: (user.paymentHistory || []).length,
+      payments: transactions,
+      total: transactions.length
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -393,7 +348,7 @@ export async function addBalance(req, res) {
       return res.status(400).json({ error: "User not found" });
     }
 
-    const { amount, paymentMethod = "manual" } = req.body;
+    const { amount } = req.body;
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ error: "Valid amount is required" });
@@ -403,24 +358,18 @@ export async function addBalance(req, res) {
     await user.save();
 
     // Record transaction
-    const transaction = {
-      reference: `DEP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      date: new Date(),
+    const transaction = await Transaction.create({
+      user: user._id,
       amount,
-      type: "deposit",
-      method: paymentMethod,
-      status: "completed",
-      balanceAfter: user.balance,
-    };
-
-    if (!user.transactions) user.transactions = [];
-    user.transactions.push(transaction);
-    await user.save();
+      type: "credit",
+      description: "Balance added",
+      by: "manual"
+    });
 
     return res.status(200).json({
       message: "Balance added successfully",
       balance: user.balance,
-      transaction,
+      transaction
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

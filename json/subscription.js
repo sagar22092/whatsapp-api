@@ -137,23 +137,6 @@ const subscriptions = {
       popular: false
     }
   ],
-  billingCycles: [
-    {
-      id: "monthly",
-      name: "Monthly",
-      discount: 0
-    },
-    {
-      id: "quarterly",
-      name: "Quarterly",
-      discount: 10
-    },
-    {
-      id: "yearly",
-      name: "Yearly",
-      discount: 20
-    }
-  ],
   features: {
     messaging: [
       "Unlimited Messages",
