@@ -32,10 +32,10 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.use(express.static("public"));
 app.use(cors({ origin: "*" }));
 app.use(morgan("dev"));
+app.use(cookieParser());
 
 /* ───────── API ───────── */
 app.use("/api/auth", authenticate, authRouter);
