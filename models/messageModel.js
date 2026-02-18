@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
-    user: { type: String, required: true },
-    session: { type: String, required: true },
+    user: { type: Types.ObjectId, ref: "User", required: true },
+    session: { type: Types.ObjectId, ref: "Session", required: true },
     message: { type: Object, required: true },
   },
   { timestamps: true },
