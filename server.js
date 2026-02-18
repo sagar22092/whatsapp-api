@@ -88,6 +88,13 @@ app.get("/recharge/history", authenticate, (req, res) => {
     return res.redirect("/login");
   }
 });
+app.get("/message/history", authenticate, (req, res) => {
+  if (req.user) {
+    res.sendFile(path.join(__dirname, "views", "history/message.html"));
+  } else {
+    return res.redirect("/login");
+  }
+});
 app.get("/profile", authenticate, (req, res) => {
   if (req.user) {
     res.sendFile(path.join(__dirname, "views", "profile.html"));

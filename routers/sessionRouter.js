@@ -10,6 +10,7 @@ import {
   getPairCode,
   deleteSession,
   setWebhook,
+  setHistory,
 } from "../controllers/sessionController.js";
 
 const sessionRouter = Router();
@@ -25,5 +26,6 @@ sessionRouter.get("/:sessionId/info", getMyInfo);
 sessionRouter.post("/:sessionId/logout", logoutSession);
 sessionRouter.post("/:sessionId/delete", deleteSession);
 sessionRouter.post("/:sessionId/set-webhook", setWebhook);
+sessionRouter.get("/:sessionId/message-history", setHistory);
 
 export default sessionRouter;

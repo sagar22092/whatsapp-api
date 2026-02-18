@@ -11,6 +11,7 @@ import {
 } from "../lib/whatsapp.js";
 import User from "../models/userModel.js";
 import subscriptions from "../json/subscription.js";
+import Message from "../models/messageModel.js";
 
 /* ───────────────── CREATE SESSION ───────────────── */
 export async function newSession(req, res) {
@@ -298,13 +299,40 @@ export async function setWebhook(req, res) {
   }
   try {
     const userId = req.user._id.toString();
-    const session = await sessionModel.findOne({ _id: sessionId, user: userId });
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
     if (!session) {
       res.status(404).json({ error: "Session not found" });
     }
     const { webhookUrl } = req.body;
     session.webhookUrl = webhookUrl;
     await session.save();
-    res.json({ success: true});
+    res.json({ success: true });
   } catch (error) {}
+}
+
+export async function setHistory(req, res) {
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+  const { sessionId } = req.params;
+  if (!sessionId) {
+    res.status(404).json({ error: "Session not found" });
+  }
+  try {
+    const userId = req.user._id.toString();
+    const session = await sessionModel.findOne({
+      _id: sessionId,
+      user: userId,
+    });
+    if (!session) {
+      res.status(404).json({ error: "Session not found" });
+    }
+    const messages = await Message.find({ session: sessionId })
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ success: true, messages });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
