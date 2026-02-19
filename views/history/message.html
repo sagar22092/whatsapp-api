@@ -278,11 +278,7 @@
             }
 
             // Sort messages by timestamp (oldest first)
-            const sortedMessages = [...messages].sort((a, b) => {
-                const timeA = a.message.messageTimestamp?.low || 0;
-                const timeB = b.message.messageTimestamp?.low || 0;
-                return timeA - timeB;
-            });
+            const sortedMessages = messages
 
             let html = '';
             

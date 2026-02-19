@@ -328,6 +328,9 @@ export async function setHistory(req, res) {
     if (!session) {
       res.status(404).json({ error: "Session not found" });
     }
+    if(session.user.toString() !== userId) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
     const messages = await Message.find({ session: sessionId })
       .sort({ createdAt: -1 })
       .lean();
