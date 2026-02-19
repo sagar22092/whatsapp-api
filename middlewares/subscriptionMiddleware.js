@@ -26,7 +26,7 @@ export async function subscriptionMiddleware(req, res, next) {
     }
 
     if (user.subscription.status !== "active") {
-      return res.status(403).json({ error: "Subscription Expired" });
+      return res.status(403).json({ error: `Subscription is ${user.subscription.status}` });
     }
     next();
   } catch (err) {

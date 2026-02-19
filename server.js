@@ -40,7 +40,7 @@ app.use(cookieParser());
 /* ───────── API ───────── */
 app.use("/api/auth", authenticate, authRouter);
 app.use("/api/session", authenticate, sessionRouter);
-app.use("/api/whatsapp", whatsappRouter);
+app.use("/api/whatsapp", subscriptionMiddleware, whatsappRouter);
 app.use("/api/subscription", authenticate, subscriptionRouter);
 app.use("/api/recharge", authenticate, rechargeRouter);
 app.use("/api/profile", authenticate, profileRouter);
