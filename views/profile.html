@@ -1981,16 +1981,6 @@
         );
       }
 
-      // Initialize
-      document.addEventListener("DOMContentLoaded", () => {
-        loadProfile();
-
-        // Welcome message
-        setTimeout(() => {
-          showAlert("Welcome to your WaFastApi profile!", "info", "Welcome");
-        }, 1000);
-      });
-
       // Handle page visibility
       document.addEventListener("visibilitychange", function () {
         if (!document.hidden) {

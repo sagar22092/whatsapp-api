@@ -1,5 +1,6 @@
 import subscriptions from "../json/subscription.js";
 import Transaction from "../models/transactionModel.js";
+import Session from "../models/sessionModel.js";
 
 export async function getSubscriptionList(req, res) {
   try {
@@ -19,18 +20,18 @@ export async function getCurrentSubscription(req, res) {
     if (!user.subscription) {
       return res.status(200).json({
         subscription: null,
-        message: "No active subscription"
+        message: "No active subscription",
       });
     }
 
     const subscription = subscriptions.plans.find(
-      (sub) => sub.id === user.subscription.id
+      (sub) => sub.id === user.subscription.id,
     );
 
     if (!subscription) {
       return res.status(200).json({
         subscription: null,
-        message: "Subscription plan not found"
+        message: "Subscription plan not found",
       });
     }
 
@@ -46,8 +47,8 @@ export async function getCurrentSubscription(req, res) {
         endDate: user.subscription.endDate,
         autoRenew: user.subscription.autoRenew || false,
         status: user.subscription.status,
-        remainingDays: remainingDays > 0 ? remainingDays : 0
-      }
+        remainingDays: remainingDays > 0 ? remainingDays : 0,
+      },
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -72,12 +73,20 @@ export async function purchaseSubscription(req, res) {
       return res.status(400).json({ error: "Subscription plan not found" });
     }
 
+    const sessions = await Session.find({ user: user._id });
+    if (sessions.length >= plan.sessions) {
+      return res.status(400).json({
+        error: "Session limit exceeded for this subscription plan delete some sessions to purchase this plan",
+        limit: plan.sessions,
+        current: sessions.length,
+      });
+    }
     // Check if user has sufficient balance
     if (user.balance < plan.price) {
       return res.status(400).json({
         error: "Insufficient balance",
         required: plan.price,
-        current: user.balance
+        current: user.balance,
       });
     }
 
@@ -94,7 +103,7 @@ export async function purchaseSubscription(req, res) {
       startDate,
       endDate,
       autoRenew,
-      status: "active"
+      status: "active",
     };
 
     await user.save();
@@ -105,14 +114,14 @@ export async function purchaseSubscription(req, res) {
       amount: plan.price,
       type: "debit",
       description: `Subscription purchase: ${plan.name}`,
-      by: "subscription"
+      by: "subscription",
     });
 
     return res.status(200).json({
       message: "Subscription purchased successfully",
       subscription: user.subscription,
       transaction,
-      balance: user.balance
+      balance: user.balance,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -141,16 +150,12 @@ export async function changeSubscription(req, res) {
       return res.status(400).json({ error: "Subscription plan not found" });
     }
 
-    const currentPlan = subscriptions.plans.find(
-      (p) => p.id === user.subscription.id
-    );
-
     // Check if user has sufficient balance for the new plan
     if (user.balance < newPlan.price) {
       return res.status(400).json({
         error: "Insufficient balance",
         required: newPlan.price,
-        current: user.balance
+        current: user.balance,
       });
     }
 
@@ -168,7 +173,7 @@ export async function changeSubscription(req, res) {
       startDate,
       endDate,
       autoRenew,
-      status: "active"
+      status: "active",
     };
 
     await user.save();
@@ -178,17 +183,14 @@ export async function changeSubscription(req, res) {
       user: user._id,
       amount: newPlan.price,
       type: "debit",
-      description: currentPlan 
-        ? `Subscription change: ${currentPlan.name} → ${newPlan.name}` 
-        : `Subscription: ${newPlan.name}`,
-      by: "subscription"
+      by: "subscription",
     });
 
     return res.status(200).json({
       message: "Subscription changed successfully",
       subscription: user.subscription,
       transaction,
-      balance: user.balance
+      balance: user.balance,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -203,7 +205,9 @@ export async function cancelSubscription(req, res) {
     }
 
     if (!user.subscription || user.subscription.status !== "active") {
-      return res.status(400).json({ error: "No active subscription to cancel" });
+      return res
+        .status(400)
+        .json({ error: "No active subscription to cancel" });
     }
 
     user.subscription.autoRenew = false;
@@ -214,7 +218,7 @@ export async function cancelSubscription(req, res) {
     return res.status(200).json({
       message: "Subscription cancelled successfully",
       subscription: user.subscription,
-      willExpire: user.subscription.endDate
+      willExpire: user.subscription.endDate,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -235,7 +239,7 @@ export async function renewSubscription(req, res) {
     // Check if subscription is expired or cancelled
     const now = new Date();
     const endDate = new Date(user.subscription.endDate);
-    
+
     if (endDate > now) {
       return res.status(400).json({ error: "Subscription is still active" });
     }
@@ -244,12 +248,18 @@ export async function renewSubscription(req, res) {
     if (!plan) {
       return res.status(400).json({ error: "Subscription plan not found" });
     }
+    const sessions = await Session.find({ user: user._id });
+    if (sessions.length >= plan.sessions) {
+      return res.status(400).json({
+        error: "You have reached the maximum number of sessions",
+      });
+    }
 
     if (user.balance < plan.price) {
       return res.status(400).json({
         error: "Insufficient balance",
         required: plan.price,
-        current: user.balance
+        current: user.balance,
       });
     }
 
@@ -267,7 +277,7 @@ export async function renewSubscription(req, res) {
       startDate,
       endDate: newEndDate,
       autoRenew: user.subscription.autoRenew || false,
-      status: "active"
+      status: "active",
     };
 
     await user.save();
@@ -277,15 +287,14 @@ export async function renewSubscription(req, res) {
       user: user._id,
       amount: plan.price,
       type: "debit",
-      description: `Subscription renewal: ${plan.name}`,
-      by: "subscription"
+      by: "subscription",
     });
 
     return res.status(200).json({
       message: "Subscription renewed successfully",
       subscription: user.subscription,
       transaction,
-      balance: user.balance
+      balance: user.balance,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -314,7 +323,7 @@ export async function updateAutoRenew(req, res) {
 
     return res.status(200).json({
       message: `Auto-renew ${autoRenew ? "enabled" : "disabled"} successfully`,
-      subscription: user.subscription
+      subscription: user.subscription,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -334,44 +343,11 @@ export async function getPaymentHistory(req, res) {
 
     return res.status(200).json({
       payments: transactions,
-      total: transactions.length
+      total: transactions.length,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 }
 
-export async function addBalance(req, res) {
-  try {
-    const user = req.user;
-    if (!user) {
-      return res.status(400).json({ error: "User not found" });
-    }
 
-    const { amount } = req.body;
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ error: "Valid amount is required" });
-    }
-
-    user.balance += amount;
-    await user.save();
-
-    // Record transaction
-    const transaction = await Transaction.create({
-      user: user._id,
-      amount,
-      type: "credit",
-      description: "Balance added",
-      by: "manual"
-    });
-
-    return res.status(200).json({
-      message: "Balance added successfully",
-      balance: user.balance,
-      transaction
-    });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-}

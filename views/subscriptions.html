@@ -1,1356 +1,1289 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subscription Management - WhatsApp Manager</title>
+    <!-- Tailwind + Font Awesome -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        :root {
-            --primary-green: #10b981;
-            --dark-bg: #111827;
-            --darker-bg: #0f172a;
+      :root {
+        --primary-green: #10b981;
+        --dark-bg: #111827;
+        --darker-bg: #0f172a;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--darker-bg);
+        color: white;
+      }
+      .feature-list li {
+        position: relative;
+        padding-left: 1.75rem;
+      }
+      .feature-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--primary-green);
+        font-weight: bold;
+      }
+      .loading {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--primary-green);
+        animation: spin 1s ease-in-out infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--darker-bg);
-            color: white;
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, var(--primary-green), #059669);
+      }
+      .yellow-bg {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+      .plan-card {
+        transition: all 0.3s ease;
+        border-width: 2px;
+        position: relative;
+      }
+      .plan-card:hover {
+        transform: translateY(-5px);
+      }
+      .current-plan {
+        border-color: var(--primary-green);
+        background: linear-gradient(
+          145deg,
+          rgba(16, 185, 129, 0.05),
+          transparent
+        );
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background-color: var(--dark-bg);
+        border-radius: 1rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+      }
+      .status-active {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: var(--primary-green);
+      }
+      .status-expired {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+      }
+      .status-cancelled {
+        background-color: rgba(107, 114, 128, 0.2);
+        color: #9ca3af;
+      }
+      .tab {
+        padding: 0.75rem 1.5rem;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      .tab.active {
+        color: var(--primary-green);
+        border-bottom-color: var(--primary-green);
+        background-color: rgba(16, 185, 129, 0.05);
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #374151;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+      input:checked + .toggle-slider {
+        background-color: var(--primary-green);
+      }
+      input:checked + .toggle-slider:before {
+        transform: translateX(30px);
+      }
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .toast-success {
+        background-color: var(--primary-green);
+      }
+      .toast-error {
+        background-color: #ef4444;
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
         }
-        
-        .feature-list li {
-            position: relative;
-            padding-left: 1.75rem;
+        to {
+          transform: translateX(0);
+          opacity: 1;
         }
-        
-        .feature-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: var(--primary-green);
-            font-weight: bold;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255,255,255,.1);
-            border-radius: 50%;
-            border-top-color: var(--primary-green);
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, var(--primary-green), #059669);
-        }
-        
-        .blue-bg {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-        }
-        
-        .yellow-bg {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-        
-        .plan-card {
-            transition: all 0.3s ease;
-            border-width: 2px;
-            position: relative;
-        }
-        
-        .plan-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .current-plan {
-            border-color: var(--primary-green);
-            background: linear-gradient(145deg, rgba(16, 185, 129, 0.05), transparent);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background-color: var(--dark-bg);
-            border-radius: 1rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .status-active {
-            background-color: rgba(16, 185, 129, 0.2);
-            color: var(--primary-green);
-        }
-        
-        .status-expired {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-        }
-        
-        .status-cancelled {
-            background-color: rgba(107, 114, 128, 0.2);
-            color: #9ca3af;
-        }
-        
-        .tab {
-            padding: 0.75rem 1.5rem;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        
-        .tab.active {
-            color: var(--primary-green);
-            border-bottom-color: var(--primary-green);
-            background-color: rgba(16, 185, 129, 0.05);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-        }
-        
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #374151;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .toggle-slider {
-            background-color: var(--primary-green);
-        }
-        
-        input:checked + .toggle-slider:before {
-            transform: translateX(30px);
-        }
-        
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .toast-success {
-            background-color: var(--primary-green);
-        }
-        
-        .toast-error {
-            background-color: #ef4444;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .amount-option {
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .amount-option:hover {
-            transform: scale(1.05);
-        }
-        
-        .amount-option.border-green-500 {
-            border-color: var(--primary-green);
-        }
+      }
     </style>
-</head>
-<body class="text-white">
+  </head>
+  <body class="text-white">
     <!-- Navigation -->
     <nav class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center">
-                        <span class="text-green-500 text-2xl mr-2"><i class="fab fa-whatsapp"></i></span>
-                        <span class="text-xl font-bold">WhatsApp Manager</span>
-                    </a>
-                </div>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="/sessions" class="text-gray-300 hover:text-white transition"><i class="fas fa-th-large mr-2"></i>Sessions</a>
-                    <a href="/subscriptions" class="text-green-500 font-medium"><i class="fas fa-crown mr-2"></i>Subscriptions</a>
-                    <div class="relative group">
-                        <button class="flex items-center text-gray-300 hover:text-white">
-                            <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=10b981&color=fff" alt="User" class="w-8 h-8 rounded-full mr-2">
-                            <span id="user-name">Loading...</span>
-                            <i class="fas fa-chevron-down ml-2 text-sm"></i>
-                        </button>
-                        <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl py-2 hidden group-hover:block">
-                            <a href="/profile" class="block px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700"><i class="fas fa-user mr-2"></i>Profile</a>
-                            <a href="/settings" class="block px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700"><i class="fas fa-cog mr-2"></i>Settings</a>
-                            <div class="border-t border-gray-700 my-2"></div>
-                            <a href="/logout" class="block px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <a href="/" class="flex items-center">
+              <span class="text-green-500 text-2xl mr-2"
+                ><i class="fab fa-whatsapp"></i
+              ></span>
+              <span class="text-xl font-bold">WhatsApp Manager</span>
+            </a>
+          </div>
+          <div class="hidden md:flex items-center space-x-6">
+            <a
+              href="/sessions"
+              class="text-gray-300 hover:text-white transition"
+              ><i class="fas fa-th-large mr-2"></i>Sessions</a
+            >
+            <a href="/subscriptions" class="text-green-500 font-medium"
+              ><i class="fas fa-crown mr-2"></i>Subscriptions</a
+            >
+            <a
+              href="/profile"
+              class="block px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700"
+              ><i class="fas fa-user mr-2"></i>Profile</a
+            >
+          </div>
         </div>
+      </div>
     </nav>
 
     <!-- Main Content -->
     <div class="min-h-screen bg-darker-bg">
-        <div class="max-w-7xl mx-auto px-4 py-8">
-            <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-3xl md:text-4xl font-bold mb-2">Subscription Management</h1>
-                <p class="text-gray-400">Manage your WhatsApp Manager subscription plans</p>
-            </div>
-            
-            <!-- Tabs -->
-            <div class="flex border-b border-gray-800 mb-8 overflow-x-auto">
-                <div class="tab active" data-tab="current">Current Plan</div>
-                <div class="tab" data-tab="plans">All Plans</div>
-                <div class="tab" data-tab="billing">Payment History</div>
-            </div>
-            
-            <!-- Current Plan Tab -->
-            <div id="current-tab" class="tab-content active">
-                <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                        <div>
-                            <h2 class="text-2xl font-bold mb-2">Your Current Subscription</h2>
-                            <div id="current-plan-loading" class="flex items-center">
-                                <div class="loading mr-3"></div>
-                                <span>Loading your current plan...</span>
-                            </div>
-                            <div id="current-plan-info" class="hidden"></div>
-                        </div>
-                    </div>
-                    
-                    <div id="subscription-details" class="hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                            <div class="bg-gray-800 p-5 rounded-lg">
-                                <div class="text-gray-400 mb-2"><i class="fas fa-calendar-alt mr-2"></i>Billing Cycle</div>
-                                <div class="text-xl font-bold">Monthly</div>
-                            </div>
-                            <div class="bg-gray-800 p-5 rounded-lg">
-                                <div class="text-gray-400 mb-2"><i class="fas fa-phone-alt mr-2"></i>WhatsApp Numbers</div>
-                                <div class="text-xl font-bold"><span id="current-sessions">0</span></div>
-                            </div>
-                            <div class="bg-gray-800 p-5 rounded-lg">
-                                <div class="text-gray-400 mb-2"><i class="fas fa-clock mr-2"></i>Expires On</div>
-                                <div class="text-xl font-bold" id="subscription-end">N/A</div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-8">
-                            <h3 class="text-lg font-semibold mb-4">Plan Features</h3>
-                            <div id="current-plan-features" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-                        </div>
-                        
-                        <div class="mt-8 pt-8 border-t border-gray-800">
-                            <h3 class="text-lg font-semibold mb-4">Subscription Settings</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-gray-800 p-4 rounded-lg">
-                                    <div class="text-gray-400 mb-1">Auto Renew</div>
-                                    <div class="flex items-center justify-between">
-                                        <span id="auto-renew-status-text">Disabled</span>
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" id="auto-renew-toggle">
-                                            <span class="toggle-slider"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-800 p-4 rounded-lg">
-                                    <div class="text-gray-400 mb-1">Started On</div>
-                                    <div id="subscription-start">N/A</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-8 pt-8 border-t border-gray-800">
-                            <button class="px-5 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition" id="cancel-subscription-btn">
-                                <i class="fas fa-ban mr-2"></i>Cancel Subscription
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="no-subscription-actions" class="hidden mt-6">
-                        <button onclick="document.querySelector('[data-tab=plans]').click()" class="gradient-bg hover:opacity-90 text-white px-6 py-3 rounded-lg font-medium transition">
-                            <i class="fas fa-play mr-2"></i>Subscribe Now
-                        </button>
-                    </div>
-                    
-                    <div id="expired-subscription-actions" class="hidden mt-6">
-                        <button id="renew-subscription-btn" class="yellow-bg hover:opacity-90 text-white px-6 py-3 rounded-lg font-medium transition">
-                            <i class="fas fa-redo mr-2"></i>Renew Subscription
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Account Balance -->
-                <div class="mt-6 bg-gray-900 rounded-xl p-6 border border-gray-800">
-                    <h3 class="text-lg font-semibold mb-4">Account Balance</h3>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-3xl font-bold text-green-400" id="account-balance">৳0</div>
-                            <div class="text-sm text-gray-400 mt-1">Available for subscription payments</div>
-                        </div>
-                        <button onclick="openAddBalanceModal()" class="gradient-bg hover:opacity-90 text-white px-6 py-2.5 rounded-lg font-medium transition">
-                            <i class="fas fa-plus-circle mr-2"></i>Add Balance
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- All Plans Tab -->
-            <div id="plans-tab" class="tab-content">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold mb-2">Subscription Plans</h2>
-                    <p class="text-gray-400">Choose a plan that fits your needs. All plans are monthly.</p>
-                </div>
-                
-                <div id="plans-loading" class="text-center py-12">
-                    <div class="inline-block loading mr-3"></div>
-                    <span class="text-gray-300">Loading available plans...</span>
-                </div>
-                
-                <div id="plans-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden"></div>
-                
-                <div id="plans-error" class="text-center py-12 hidden">
-                    <div class="bg-red-900/30 border border-red-700 rounded-xl p-8 max-w-md mx-auto">
-                        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
-                        <h3 class="text-xl font-bold mb-2">Unable to Load Plans</h3>
-                        <p class="text-gray-300 mb-4" id="plans-error-message">Please try again.</p>
-                        <button onclick="loadAvailablePlans()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg transition font-medium">
-                            <i class="fas fa-redo mr-2"></i>Try Again
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Payment History Tab -->
-            <div id="billing-tab" class="tab-content">
-                <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
-                    <h2 class="text-2xl font-bold mb-6">Payment History</h2>
-                    
-                    <div id="billing-loading" class="text-center py-12">
-                        <div class="inline-block loading mr-3"></div>
-                        <span class="text-gray-300">Loading payment history...</span>
-                    </div>
-                    
-                    <div id="billing-history" class="hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-800">
-                                <thead>
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Date</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Description</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Amount</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="billing-table-body" class="divide-y divide-gray-800"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div id="no-billing-history" class="text-center py-12 hidden">
-                        <i class="fas fa-receipt text-4xl text-gray-600 mb-4"></i>
-                        <h3 class="text-xl font-bold mb-2">No Payment History</h3>
-                        <p class="text-gray-400">You haven't made any payments yet.</p>
-                    </div>
-                </div>
-            </div>
+      <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+          <h1 class="text-3xl md:text-4xl font-bold mb-2">
+            Subscription Management
+          </h1>
+          <p class="text-gray-400">
+            Manage your WhatsApp Manager subscription plans
+          </p>
         </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-800 mb-8 overflow-x-auto">
+          <div class="tab active" data-tab="current">Current Plan</div>
+          <div class="tab" data-tab="plans">All Plans</div>
+          <div class="tab" data-tab="billing">Payment History</div>
+        </div>
+
+        <!-- ========== CURRENT PLAN TAB ========== -->
+        <div id="current-tab" class="tab-content active">
+          <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <div
+              class="flex flex-col md:flex-row md:items-center justify-between mb-6"
+            >
+              <div>
+                <h2 class="text-2xl font-bold mb-2">
+                  Your Current Subscription
+                </h2>
+                <div id="current-plan-loading" class="flex items-center">
+                  <div class="loading mr-3"></div>
+                  <span>Loading your current plan...</span>
+                </div>
+                <div id="current-plan-info" class="hidden"></div>
+              </div>
+            </div>
+
+            <!-- details shown only when active subscription exists -->
+            <div id="subscription-details" class="hidden">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="bg-gray-800 p-5 rounded-lg">
+                  <div class="text-gray-400 mb-2">
+                    <i class="fas fa-calendar-alt mr-2"></i>Billing Cycle
+                  </div>
+                  <div class="text-xl font-bold">Monthly</div>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-lg">
+                  <div class="text-gray-400 mb-2">
+                    <i class="fas fa-phone-alt mr-2"></i>WhatsApp Numbers
+                  </div>
+                  <div class="text-xl font-bold">
+                    <span id="current-sessions">0</span>
+                  </div>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-lg">
+                  <div class="text-gray-400 mb-2">
+                    <i class="fas fa-clock mr-2"></i>Expires On
+                  </div>
+                  <div class="text-xl font-bold" id="subscription-end">N/A</div>
+                </div>
+              </div>
+
+              <div class="mt-8">
+                <h3 class="text-lg font-semibold mb-4">Plan Features</h3>
+                <div
+                  id="current-plan-features"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-3"
+                ></div>
+              </div>
+
+              <div class="mt-8 pt-8 border-t border-gray-800">
+                <h3 class="text-lg font-semibold mb-4">
+                  Subscription Settings
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="text-gray-400 mb-1">Auto Renew</div>
+                    <div class="flex items-center justify-between">
+                      <span id="auto-renew-status-text">Disabled</span>
+                      <label class="toggle-switch">
+                        <input type="checkbox" id="auto-renew-toggle" />
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="text-gray-400 mb-1">Started On</div>
+                    <div id="subscription-start">N/A</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-8 pt-8 border-t border-gray-800">
+                <button
+                  class="px-5 py-2.5 bg-red-600 hover:bg-red-700 rounded-lg font-medium transition"
+                  id="cancel-subscription-btn"
+                >
+                  <i class="fas fa-ban mr-2"></i>Cancel Subscription
+                </button>
+              </div>
+            </div>
+
+            <!-- No active subscription (or expired) messages -->
+            <div id="no-subscription-actions" class="hidden mt-6">
+              <button
+                onclick="document.querySelector('[data-tab=plans]').click()"
+                class="gradient-bg hover:opacity-90 text-white px-6 py-3 rounded-lg font-medium transition"
+              >
+                <i class="fas fa-play mr-2"></i>Subscribe Now
+              </button>
+            </div>
+
+            <div id="expired-subscription-actions" class="hidden mt-6">
+              <button
+                id="renew-subscription-btn"
+                class="yellow-bg hover:opacity-90 text-white px-6 py-3 rounded-lg font-medium transition"
+              >
+                <i class="fas fa-redo mr-2"></i>Renew Subscription
+              </button>
+            </div>
+          </div>
+
+          <!-- Account Balance (fully backed: user.balance) -->
+          <div class="mt-6 bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <h3 class="text-lg font-semibold mb-4">Account Balance</h3>
+            <div class="flex items-center justify-between">
+              <div>
+                <div
+                  class="text-3xl font-bold text-green-400"
+                  id="account-balance"
+                >
+                  ৳0
+                </div>
+                <div class="text-sm text-gray-400 mt-1">
+                  Available for subscription payments
+                </div>
+              </div>
+              <button
+                onclick="window.location.href = '/recharge'"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition"
+              >
+                <i class="fas fa-plus mr-2"></i>Add Balance
+              </button>
+              <!-- No frontend-only add balance: button removed (no backend route) -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== ALL PLANS TAB ========== -->
+        <div id="plans-tab" class="tab-content">
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold mb-2">Subscription Plans</h2>
+            <p class="text-gray-400">
+              Choose a plan that fits your needs. All plans are monthly.
+            </p>
+          </div>
+
+          <div id="plans-loading" class="text-center py-12">
+            <div class="inline-block loading mr-3"></div>
+            <span class="text-gray-300">Loading available plans...</span>
+          </div>
+
+          <div
+            id="plans-container"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden"
+          ></div>
+
+          <div id="plans-error" class="text-center py-12 hidden">
+            <div
+              class="bg-red-900/30 border border-red-700 rounded-xl p-8 max-w-md mx-auto"
+            >
+              <i
+                class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"
+              ></i>
+              <h3 class="text-xl font-bold mb-2">Unable to Load Plans</h3>
+              <p class="text-gray-300 mb-4" id="plans-error-message">
+                Please try again.
+              </p>
+              <button
+                onclick="loadAvailablePlans()"
+                class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg transition font-medium"
+              >
+                <i class="fas fa-redo mr-2"></i>Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== PAYMENT HISTORY TAB ========== -->
+        <div id="billing-tab" class="tab-content">
+          <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <h2 class="text-2xl font-bold mb-6">Payment History</h2>
+
+            <div id="billing-loading" class="text-center py-12">
+              <div class="inline-block loading mr-3"></div>
+              <span class="text-gray-300">Loading payment history...</span>
+            </div>
+
+            <div id="billing-history" class="hidden">
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-800">
+                  <thead>
+                    <tr>
+                      <th
+                        class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"
+                      >
+                        Date
+                      </th>
+                      <th
+                        class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"
+                      >
+                        Description
+                      </th>
+                      <th
+                        class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"
+                      >
+                        Amount
+                      </th>
+                      <th
+                        class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"
+                      >
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="billing-table-body"
+                    class="divide-y divide-gray-800"
+                  ></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="no-billing-history" class="text-center py-12 hidden">
+              <i class="fas fa-receipt text-4xl text-gray-600 mb-4"></i>
+              <h3 class="text-xl font-bold mb-2">No Payment History</h3>
+              <p class="text-gray-400">You haven't made any payments yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
+    <!-- MODALS (all strictly from backend) -->
+
     <!-- Purchase Modal -->
     <div id="purchase-modal" class="modal">
-        <div class="modal-content p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Confirm Subscription</h3>
-                <button class="text-gray-400 hover:text-white text-2xl" onclick="closeModal('purchase-modal')">&times;</button>
-            </div>
-            
-            <div class="mb-6 p-4 bg-gray-800 rounded-lg">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="font-medium" id="purchase-plan-name">Plan Name</span>
-                    <span class="text-xl font-bold" id="purchase-plan-price">৳0</span>
-                </div>
-                <p class="text-gray-400 text-sm" id="purchase-plan-description"></p>
-                <div class="mt-2 text-sm text-gray-400">
-                    <i class="fas fa-calendar-alt mr-2"></i>1 month access from today
-                </div>
-            </div>
-            
-            <div class="mb-6">
-                <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
-                    <div>
-                        <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
-                        <p class="text-gray-400 text-sm">Automatically renew every month</p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="modal-auto-renew-toggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-            
-            <div class="mb-6 p-4 bg-gray-800 rounded-lg">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="font-medium">Your Balance</div>
-                    <div class="text-xl font-bold text-green-400" id="user-balance">৳0</div>
-                </div>
-                <div id="balance-info" class="text-sm"></div>
-            </div>
-            
-            <div class="flex gap-4">
-                <button onclick="closeModal('purchase-modal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
-                    Cancel
-                </button>
-                <button id="confirm-purchase-btn" class="flex-1 gradient-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition">
-                    <i class="fas fa-check-circle mr-2"></i>Confirm Purchase
-                </button>
-            </div>
+      <div class="modal-content p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold">Confirm Subscription</h3>
+          <button
+            class="text-gray-400 hover:text-white text-2xl"
+            onclick="closeModal('purchase-modal')"
+          >
+            &times;
+          </button>
         </div>
+        <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-medium" id="purchase-plan-name">Plan Name</span>
+            <span class="text-xl font-bold" id="purchase-plan-price">৳0</span>
+          </div>
+          <p class="text-gray-400 text-sm" id="purchase-plan-description"></p>
+          <div class="mt-2 text-sm text-gray-400">
+            <i class="fas fa-calendar-alt mr-2"></i>1 month access from today
+          </div>
+        </div>
+        <div class="mb-6">
+          <div
+            class="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
+          >
+            <div>
+              <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
+              <p class="text-gray-400 text-sm">
+                Automatically renew every month
+              </p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="modal-auto-renew-toggle" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+          <div class="flex items-center justify-between mb-3">
+            <div class="font-medium">Your Balance</div>
+            <div class="text-xl font-bold text-green-400" id="user-balance">
+              ৳0
+            </div>
+          </div>
+          <div id="balance-info" class="text-sm"></div>
+        </div>
+        <div class="flex gap-4">
+          <button
+            onclick="closeModal('purchase-modal')"
+            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirm-purchase-btn"
+            class="flex-1 gradient-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition"
+          >
+            <i class="fas fa-check-circle mr-2"></i>Confirm Purchase
+          </button>
+        </div>
+      </div>
     </div>
-    
-    <!-- Change Plan Modal (Upgrade/Downgrade) -->
+
+    <!-- Change Plan Modal -->
     <div id="change-modal" class="modal">
-        <div class="modal-content p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold" id="change-modal-title">Change Plan</h3>
-                <button class="text-gray-400 hover:text-white text-2xl" onclick="closeModal('change-modal')">&times;</button>
-            </div>
-            
-            <div class="mb-6 p-4 bg-gray-800 rounded-lg">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="font-medium">Current Plan</span>
-                    <span class="font-bold" id="change-current-plan">Pro</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="font-medium">New Plan</span>
-                    <span class="font-bold text-blue-400" id="change-new-plan">Business</span>
-                </div>
-            </div>
-            
-            <div class="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
-                <div class="flex justify-between items-center mb-2">
-                    <div>
-                        <h4 class="font-medium">New Subscription</h4>
-                        <p class="text-gray-400 text-sm">Your new plan starts today for 1 month</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-2xl font-bold text-blue-400" id="change-plan-price">৳0</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mb-6">
-                <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
-                    <div>
-                        <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
-                        <p class="text-gray-400 text-sm">Automatically renew every month</p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="change-auto-renew-toggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-            
-            <div class="flex gap-4">
-                <button onclick="closeModal('change-modal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
-                    Cancel
-                </button>
-                <button id="confirm-change-btn" class="flex-1 gradient-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition">
-                    <i class="fas fa-check-circle mr-2"></i>Confirm Change
-                </button>
-            </div>
+      <div class="modal-content p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold" id="change-modal-title">
+            Change Plan
+          </h3>
+          <button
+            class="text-gray-400 hover:text-white text-2xl"
+            onclick="closeModal('change-modal')"
+          >
+            &times;
+          </button>
         </div>
+        <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-medium">Current Plan</span>
+            <span class="font-bold" id="change-current-plan">Pro</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-medium">New Plan</span>
+            <span class="font-bold text-blue-400" id="change-new-plan"
+              >Business</span
+            >
+          </div>
+        </div>
+        <div class="mb-6 p-4 bg-blue-900/20 border border-blue-800 rounded-lg">
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <h4 class="font-medium">New Subscription</h4>
+              <p class="text-gray-400 text-sm">
+                Your new plan starts today for 1 month
+              </p>
+            </div>
+            <div class="text-right">
+              <div
+                class="text-2xl font-bold text-blue-400"
+                id="change-plan-price"
+              >
+                ৳0
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mb-6">
+          <div
+            class="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
+          >
+            <div>
+              <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
+              <p class="text-gray-400 text-sm">
+                Automatically renew every month
+              </p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="change-auto-renew-toggle" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <button
+            onclick="closeModal('change-modal')"
+            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirm-change-btn"
+            class="flex-1 gradient-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition"
+          >
+            <i class="fas fa-check-circle mr-2"></i>Confirm Change
+          </button>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Cancel Modal -->
     <div id="cancel-modal" class="modal">
-        <div class="modal-content p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Cancel Subscription</h3>
-                <button class="text-gray-400 hover:text-white text-2xl" onclick="closeModal('cancel-modal')">&times;</button>
-            </div>
-            
-            <div class="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg">
-                <div class="flex items-center mb-3">
-                    <i class="fas fa-exclamation-triangle text-red-400 mr-3 text-xl"></i>
-                    <h4 class="font-medium">Important Notice</h4>
-                </div>
-                <p class="text-gray-300 text-sm">
-                    Cancelling will stop auto-renewal. You'll have access until <span id="cancel-end-date" class="font-bold"></span>.
-                    After that, you can subscribe to a new plan anytime.
-                </p>
-            </div>
-            
-            <div class="flex gap-4">
-                <button onclick="closeModal('cancel-modal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
-                    Keep Subscription
-                </button>
-                <button id="confirm-cancel-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-lg transition">
-                    <i class="fas fa-ban mr-2"></i>Confirm Cancellation
-                </button>
-            </div>
+      <div class="modal-content p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold">Cancel Subscription</h3>
+          <button
+            class="text-gray-400 hover:text-white text-2xl"
+            onclick="closeModal('cancel-modal')"
+          >
+            &times;
+          </button>
         </div>
+        <div class="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-lg">
+          <div class="flex items-center mb-3">
+            <i
+              class="fas fa-exclamation-triangle text-red-400 mr-3 text-xl"
+            ></i>
+            <h4 class="font-medium">Important Notice</h4>
+          </div>
+          <p class="text-gray-300 text-sm">
+            Cancelling will stop auto-renewal. You'll have access until
+            <span id="cancel-end-date" class="font-bold"></span>. After that,
+            you can subscribe to a new plan anytime.
+          </p>
+        </div>
+        <div class="flex gap-4">
+          <button
+            onclick="closeModal('cancel-modal')"
+            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition"
+          >
+            Keep Subscription
+          </button>
+          <button
+            id="confirm-cancel-btn"
+            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-lg transition"
+          >
+            <i class="fas fa-ban mr-2"></i>Confirm Cancellation
+          </button>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Renew Modal -->
     <div id="renew-modal" class="modal">
-        <div class="modal-content p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Renew Subscription</h3>
-                <button class="text-gray-400 hover:text-white text-2xl" onclick="closeModal('renew-modal')">&times;</button>
-            </div>
-            
-            <div class="mb-6 p-4 bg-gray-800 rounded-lg">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="font-medium" id="renew-plan-name">Pro Plan</span>
-                    <span class="text-xl font-bold" id="renew-plan-price">৳1,800</span>
-                </div>
-                <p class="text-gray-400 text-sm" id="renew-plan-description"></p>
-                <div class="mt-2 text-sm text-gray-400">
-                    <i class="fas fa-calendar-alt mr-2"></i>New period: 1 month from today
-                </div>
-            </div>
-            
-            <div class="mb-6 p-4 bg-gray-800 rounded-lg">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="font-medium">Your Balance</div>
-                    <div class="text-xl font-bold text-green-400" id="renew-user-balance">৳0</div>
-                </div>
-            </div>
-            
-            <div class="mb-6">
-                <div class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
-                    <div>
-                        <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
-                        <p class="text-gray-400 text-sm">Automatically renew every month</p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="renew-auto-renew-toggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-            
-            <div class="flex gap-4">
-                <button onclick="closeModal('renew-modal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
-                    Cancel
-                </button>
-                <button id="confirm-renew-btn" class="flex-1 yellow-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition">
-                    <i class="fas fa-redo mr-2"></i>Renew Now
-                </button>
-            </div>
+      <div class="modal-content p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold">Renew Subscription</h3>
+          <button
+            class="text-gray-400 hover:text-white text-2xl"
+            onclick="closeModal('renew-modal')"
+          >
+            &times;
+          </button>
         </div>
-    </div>
-    
-    <!-- Add Balance Modal -->
-    <div id="add-balance-modal" class="modal">
-        <div class="modal-content p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Add Balance</h3>
-                <button class="text-gray-400 hover:text-white text-2xl" onclick="closeModal('add-balance-modal')">&times;</button>
-            </div>
-            
-            <div class="mb-6">
-                <div class="grid grid-cols-3 gap-4 mb-4">
-                    <button onclick="setAmount(500, event)" class="amount-option bg-gray-800 p-4 rounded-lg border-2 border-green-500 transition text-center">
-                        <div class="text-xl font-bold">৳500</div>
-                    </button>
-                    <button onclick="setAmount(1000, event)" class="amount-option bg-gray-800 p-4 rounded-lg border-2 border-gray-700 hover:border-green-500 transition text-center">
-                        <div class="text-xl font-bold">৳1,000</div>
-                    </button>
-                    <button onclick="setAmount(5000, event)" class="amount-option bg-gray-800 p-4 rounded-lg border-2 border-gray-700 hover:border-green-500 transition text-center">
-                        <div class="text-xl font-bold">৳5,000</div>
-                    </button>
-                </div>
-                
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">৳</span>
-                    <input type="number" id="custom-amount-input" 
-                           class="w-full bg-gray-800 border-2 border-gray-700 rounded-lg pl-10 pr-4 py-4 text-xl focus:outline-none focus:border-green-500" 
-                           placeholder="Enter amount" min="100" step="100" value="500">
-                </div>
-                <p class="text-gray-400 text-sm mt-2">Minimum amount: ৳100</p>
-            </div>
-            
-            <div class="flex gap-4">
-                <button onclick="closeModal('add-balance-modal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition">
-                    Cancel
-                </button>
-                <button onclick="processAddBalance()" class="flex-1 gradient-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition">
-                    <i class="fas fa-plus-circle mr-2"></i>Add Balance
-                </button>
-            </div>
+        <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-medium" id="renew-plan-name">Pro Plan</span>
+            <span class="text-xl font-bold" id="renew-plan-price">৳1,800</span>
+          </div>
+          <p class="text-gray-400 text-sm" id="renew-plan-description"></p>
+          <div class="mt-2 text-sm text-gray-400">
+            <i class="fas fa-calendar-alt mr-2"></i>New period: 1 month from
+            today
+          </div>
         </div>
+        <div class="mb-6 p-4 bg-gray-800 rounded-lg">
+          <div class="flex items-center justify-between mb-3">
+            <div class="font-medium">Your Balance</div>
+            <div
+              class="text-xl font-bold text-green-400"
+              id="renew-user-balance"
+            >
+              ৳0
+            </div>
+          </div>
+        </div>
+        <div class="mb-6">
+          <div
+            class="flex items-center justify-between p-4 bg-gray-800 rounded-lg"
+          >
+            <div>
+              <h4 class="font-medium mb-1">Auto-renew Subscription</h4>
+              <p class="text-gray-400 text-sm">
+                Automatically renew every month
+              </p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="renew-auto-renew-toggle" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <button
+            onclick="closeModal('renew-modal')"
+            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3.5 rounded-lg font-medium transition"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirm-renew-btn"
+            class="flex-1 yellow-bg hover:opacity-90 text-white font-bold py-3.5 rounded-lg transition"
+          >
+            <i class="fas fa-redo mr-2"></i>Renew Now
+          </button>
+        </div>
+      </div>
     </div>
-    
+
     <!-- Success Modal -->
     <div id="success-modal" class="modal">
-        <div class="modal-content p-8 text-center">
-            <div class="w-20 h-20 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-check text-4xl text-green-500"></i>
-            </div>
-            <h3 class="text-2xl font-bold mb-3" id="success-title">Success!</h3>
-            <p class="text-gray-400 mb-6" id="success-message">Operation completed successfully.</p>
-            <button onclick="closeModal('success-modal')" class="w-full gradient-bg hover:opacity-90 text-white py-3 rounded-lg font-medium transition">
-                Close
-            </button>
+      <div class="modal-content p-8 text-center">
+        <div
+          class="w-20 h-20 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6"
+        >
+          <i class="fas fa-check text-4xl text-green-500"></i>
         </div>
+        <h3 class="text-2xl font-bold mb-3" id="success-title">Success!</h3>
+        <p class="text-gray-400 mb-6" id="success-message">
+          Operation completed successfully.
+        </p>
+        <button
+          onclick="closeModal('success-modal')"
+          class="w-full gradient-bg hover:opacity-90 text-white py-3 rounded-lg font-medium transition"
+        >
+          Close
+        </button>
+      </div>
     </div>
 
     <script>
-        // API Configuration
-        const API_BASE_URL = '/api';
-        const SUBSCRIPTION_API = `${API_BASE_URL}/subscription/list`;
-        const CURRENT_SUBSCRIPTION_API = `${API_BASE_URL}/subscription/current`;
-        const PURCHASE_API = `${API_BASE_URL}/subscription/purchase`;
-        const CHANGE_API = `${API_BASE_URL}/subscription/change`;
-        const CANCEL_API = `${API_BASE_URL}/subscription/cancel`;
-        const RENEW_API = `${API_BASE_URL}/subscription/renew`;
-        const PROFILE_API = `${API_BASE_URL}/auth/profile`;
-        const UPDATE_AUTO_RENEW_API = `${API_BASE_URL}/subscription/auto-renew`;
-        const PAYMENT_HISTORY_API = `${API_BASE_URL}/subscription/payments`;
-        const ADD_BALANCE_API = `${API_BASE_URL}/subscription/add-balance`;
-        
-        // Global variables
-        let currentSubscription = null;
-        let availablePlans = [];
-        let userProfile = null;
-        let selectedPlan = null;
-        let changePlan = null;
-        let autoRenew = true;
-        let selectedAmount = 500;
-        
-        // Currency
-        const currency = 'BDT';
-        
-        // DOM Elements
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        // Tab switching
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabId = tab.getAttribute('data-tab');
-                
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === `${tabId}-tab`) {
-                        content.classList.add('active');
-                    }
-                });
-                
-                if (tabId === 'plans' && availablePlans.length === 0) {
-                    loadAvailablePlans();
-                } else if (tabId === 'billing') {
-                    loadPaymentHistory();
-                }
-            });
+      // ========== API CONFIG (strictly from backend) ==========
+      const API_BASE_URL = "/api";
+      const SUBSCRIPTION_API = `${API_BASE_URL}/subscription/list`; // GET -> { subscriptions: { plans } }
+      const CURRENT_SUBSCRIPTION_API = `${API_BASE_URL}/subscription/current`; // GET -> subscription object (may be null)
+      const PURCHASE_API = `${API_BASE_URL}/subscription/purchase`; // POST
+      const CHANGE_API = `${API_BASE_URL}/subscription/change`; // POST
+      const CANCEL_API = `${API_BASE_URL}/subscription/cancel`; // POST
+      const RENEW_API = `${API_BASE_URL}/subscription/renew`; // POST
+      const PROFILE_API = `${API_BASE_URL}/auth/profile`; // GET user (includes balance & subscription)
+      const UPDATE_AUTO_RENEW_API = `${API_BASE_URL}/subscription/auto-renew`; // POST
+      const PAYMENT_HISTORY_API = `${API_BASE_URL}/subscription/payments`; // GET
+
+      // Global state
+      let currentSubscription = null; // from /current
+      let availablePlans = [];
+      let userProfile = null;
+      let selectedPlan = null;
+      let changePlan = null;
+
+      // DOM
+      const tabs = document.querySelectorAll(".tab");
+      const tabContents = document.querySelectorAll(".tab-content");
+
+      // Tab switching
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const tabId = tab.getAttribute("data-tab");
+          tabs.forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          tabContents.forEach((content) => {
+            content.classList.remove("active");
+            if (content.id === `${tabId}-tab`) content.classList.add("active");
+          });
+          if (tabId === "plans" && availablePlans.length === 0)
+            loadAvailablePlans();
+          else if (tabId === "billing") loadPaymentHistory();
         });
-        
-        // Format currency
-        function formatCurrency(amount) {
-            return `৳${amount.toLocaleString()}`;
+      });
+
+      function formatCurrency(amount) {
+        return `৳${amount.toLocaleString()}`;
+      }
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      function showToast(message, type = "success") {
+        const existing = document.getElementById("toast-notification");
+        if (existing) existing.remove();
+        const toast = document.createElement("div");
+        toast.id = "toast-notification";
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `<i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-triangle"}"></i><span>${message}</span>`;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transform = "translateX(100%)";
+          setTimeout(() => toast.remove(), 300);
+        }, 5000);
+      }
+
+      // Load user profile (balance, name, embedded subscription)
+      async function loadUserProfile() {
+        try {
+          const res = await fetch(PROFILE_API);
+          if (res.ok) {
+            const data = await res.json();
+            userProfile = data.user || data;
+            document.getElementById("user-name").textContent =
+              userProfile.name ||
+              userProfile.username ||
+              userProfile.email?.split("@")[0] ||
+              "User";
+            const bal = userProfile.balance || 0;
+            document.getElementById("account-balance").textContent =
+              formatCurrency(bal);
+            document.getElementById("user-balance").textContent =
+              formatCurrency(bal);
+            document.getElementById("renew-user-balance").textContent =
+              formatCurrency(bal);
+          }
+        } catch (err) {
+          console.error("profile load error:", err);
         }
-        
-        // Close modal
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+      }
+
+      // Load current subscription (from /current)
+      async function loadCurrentSubscription() {
+        try {
+          document
+            .getElementById("current-plan-loading")
+            .classList.remove("hidden");
+          const res = await fetch(CURRENT_SUBSCRIPTION_API);
+          if (res.ok) {
+            const data = await res.json();
+            currentSubscription = data; // shape { subscription: { ... } } or null
+            if (data.subscription) {
+              const now = new Date();
+              const end = new Date(data.subscription.endDate);
+              const expired = end < now;
+              if (expired) showExpiredSubscription(data.subscription);
+              else showActiveSubscription(data.subscription);
+            } else {
+              showNoSubscription();
+            }
+          } else {
+            showNoSubscription();
+          }
+          document
+            .getElementById("current-plan-loading")
+            .classList.add("hidden");
+        } catch (error) {
+          document.getElementById("current-plan-loading").innerHTML =
+            '<span class="text-red-400">Failed to load</span>';
         }
-        
-        // Show toast
-        function showToast(message, type = 'success') {
-            const existingToast = document.getElementById('toast-notification');
-            if (existingToast) existingToast.remove();
-            
-            const toast = document.createElement('div');
-            toast.id = 'toast-notification';
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
-                <span>${message}</span>
+      }
+
+      function showActiveSubscription(sub) {
+        document.getElementById("current-plan-info").classList.remove("hidden");
+        document
+          .getElementById("subscription-details")
+          .classList.remove("hidden");
+        document
+          .getElementById("no-subscription-actions")
+          .classList.add("hidden");
+        document
+          .getElementById("expired-subscription-actions")
+          .classList.add("hidden");
+        document.getElementById("current-plan-info").innerHTML = `
+                <div class="flex items-center"><span class="text-3xl font-bold mr-3">${sub.name}</span><span class="status-badge status-active">Active</span></div>
+                <p class="text-gray-400 mt-2">${sub.description || ""}</p>
             `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
+        document.getElementById("current-sessions").textContent =
+          sub.sessions || 1;
+        document.getElementById("subscription-end").textContent = new Date(
+          sub.endDate,
+        ).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+        document.getElementById("subscription-start").textContent = new Date(
+          sub.startDate,
+        ).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+        const features = document.getElementById("current-plan-features");
+        if (sub.features?.length) {
+          features.innerHTML = sub.features
+            .slice(0, 6)
+            .map(
+              (f) =>
+                `<div class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-3"></i><span>${f}</span></div>`,
+            )
+            .join("");
         }
-        
-        // Load user profile
-        async function loadUserProfile() {
-            try {
-                const response = await fetch(PROFILE_API);
-                if (response.ok) {
-                    const data = await response.json();
-                    userProfile = data.user || data;
-                    
-                    document.getElementById('user-name').textContent = 
-                        userProfile.name || userProfile.username || userProfile.email?.split('@')[0] || 'User';
-                    
-                    const balance = userProfile.balance || 0;
-                    document.getElementById('account-balance').textContent = formatCurrency(balance);
-                    document.getElementById('user-balance').textContent = formatCurrency(balance);
-                    document.getElementById('renew-user-balance').textContent = formatCurrency(balance);
-                }
-            } catch (error) {
-                console.error('Error loading user profile:', error);
-            }
-        }
-        
-        // Load current subscription
-        async function loadCurrentSubscription() {
-            try {
-                document.getElementById('current-plan-loading').classList.remove('hidden');
-                
-                const response = await fetch(CURRENT_SUBSCRIPTION_API);
-                if (response.ok) {
-                    const data = await response.json();
-                    currentSubscription = data;
-                    
-                    if (data.subscription) {
-                        // Check if expired
-                        const now = new Date();
-                        const endDate = new Date(data.subscription.endDate);
-                        const isExpired = endDate < now;
-                        
-                        if (isExpired) {
-                            showExpiredSubscription(data.subscription);
-                        } else {
-                            showActiveSubscription(data.subscription);
-                        }
-                    } else {
-                        showNoSubscription();
-                    }
-                } else {
-                    showNoSubscription();
-                }
-                
-                document.getElementById('current-plan-loading').classList.add('hidden');
-            } catch (error) {
-                console.error('Error loading subscription:', error);
-                document.getElementById('current-plan-loading').innerHTML = 
-                    '<span class="text-red-400">Failed to load subscription</span>';
-            }
-        }
-        
-        // Show active subscription
-        function showActiveSubscription(subscription) {
-            document.getElementById('current-plan-info').classList.remove('hidden');
-            document.getElementById('subscription-details').classList.remove('hidden');
-            document.getElementById('no-subscription-actions').classList.add('hidden');
-            document.getElementById('expired-subscription-actions').classList.add('hidden');
-            
-            document.getElementById('current-plan-info').innerHTML = `
-                <div class="flex items-center">
-                    <span class="text-3xl font-bold mr-3">${subscription.name}</span>
-                    <span class="status-badge status-active">Active</span>
-                </div>
-                <p class="text-gray-400 mt-2">${subscription.description}</p>
-            `;
-            
-            document.getElementById('current-sessions').textContent = subscription.sessions || 1;
-            document.getElementById('subscription-end').textContent = 
-                new Date(subscription.endDate).toLocaleDateString('en-US', { 
-                    month: 'short', day: 'numeric', year: 'numeric' 
-                });
-            document.getElementById('subscription-start').textContent = 
-                new Date(subscription.startDate).toLocaleDateString('en-US', { 
-                    month: 'short', day: 'numeric', year: 'numeric' 
-                });
-            
-            // Features
-            const featuresContainer = document.getElementById('current-plan-features');
-            if (subscription.features && subscription.features.length > 0) {
-                featuresContainer.innerHTML = subscription.features.slice(0, 6).map(feature => 
-                    `<div class="flex items-start">
-                        <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
-                        <span>${feature}</span>
-                    </div>`
-                ).join('');
-            }
-            
-            // Auto-renew
-            const autoRenewToggle = document.getElementById('auto-renew-toggle');
-            const userAutoRenew = userProfile?.subscription?.autoRenew || false;
-            autoRenewToggle.checked = userAutoRenew;
-            document.getElementById('auto-renew-status-text').textContent = 
-                userAutoRenew ? 'Enabled' : 'Disabled';
-            
-            // Cancel modal date
-            document.getElementById('cancel-end-date').textContent = 
-                new Date(subscription.endDate).toLocaleDateString('en-US', { 
-                    month: 'short', day: 'numeric', year: 'numeric' 
-                });
-        }
-        
-        // Show expired subscription
-        function showExpiredSubscription(subscription) {
-            document.getElementById('current-plan-info').classList.remove('hidden');
-            document.getElementById('subscription-details').classList.add('hidden');
-            document.getElementById('no-subscription-actions').classList.add('hidden');
-            document.getElementById('expired-subscription-actions').classList.remove('hidden');
-            
-            document.getElementById('current-plan-info').innerHTML = `
-                <div class="flex items-center">
-                    <span class="text-3xl font-bold mr-3">${subscription.name}</span>
-                    <span class="status-badge status-expired">Expired</span>
-                </div>
+        // autoRenew from user.subscription (inside userProfile)
+        const autoRenewVal = userProfile?.subscription?.autoRenew || false;
+        document.getElementById("auto-renew-toggle").checked = autoRenewVal;
+        document.getElementById("auto-renew-status-text").textContent =
+          autoRenewVal ? "Enabled" : "Disabled";
+        document.getElementById("cancel-end-date").textContent = new Date(
+          sub.endDate,
+        ).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      }
+
+      function showExpiredSubscription(sub) {
+        document.getElementById("current-plan-info").classList.remove("hidden");
+        document.getElementById("subscription-details").classList.add("hidden");
+        document
+          .getElementById("no-subscription-actions")
+          .classList.add("hidden");
+        document
+          .getElementById("expired-subscription-actions")
+          .classList.remove("hidden");
+        document.getElementById("current-plan-info").innerHTML = `
+                <div class="flex items-center"><span class="text-3xl font-bold mr-3">${sub.name}</span><span class="status-badge status-expired">Expired</span></div>
                 <p class="text-gray-400 mt-2">Your subscription has expired. Renew to continue.</p>
             `;
-            
-            // Setup renew button
-            const renewBtn = document.getElementById('renew-subscription-btn');
-            renewBtn.onclick = () => openRenewModal(subscription);
-        }
-        
-        // Show no subscription
-        function showNoSubscription() {
-            document.getElementById('current-plan-info').classList.remove('hidden');
-            document.getElementById('subscription-details').classList.add('hidden');
-            document.getElementById('no-subscription-actions').classList.remove('hidden');
-            document.getElementById('expired-subscription-actions').classList.add('hidden');
-            
-            document.getElementById('current-plan-info').innerHTML = `
-                <div class="flex items-center">
-                    <span class="text-3xl font-bold mr-3">No Active Plan</span>
-                    <span class="status-badge status-expired">Inactive</span>
-                </div>
+        document.getElementById("renew-subscription-btn").onclick = () =>
+          openRenewModal(sub);
+      }
+
+      function showNoSubscription() {
+        document.getElementById("current-plan-info").classList.remove("hidden");
+        document.getElementById("subscription-details").classList.add("hidden");
+        document
+          .getElementById("no-subscription-actions")
+          .classList.remove("hidden");
+        document
+          .getElementById("expired-subscription-actions")
+          .classList.add("hidden");
+        document.getElementById("current-plan-info").innerHTML = `
+                <div class="flex items-center"><span class="text-3xl font-bold mr-3">No Active Plan</span><span class="status-badge status-expired">Inactive</span></div>
                 <p class="text-gray-400 mt-2">You don't have an active subscription.</p>
             `;
+      }
+
+      // Load available plans from /list
+      async function loadAvailablePlans() {
+        try {
+          document.getElementById("plans-loading").classList.remove("hidden");
+          document.getElementById("plans-container").classList.add("hidden");
+          document.getElementById("plans-error").classList.add("hidden");
+          const res = await fetch(SUBSCRIPTION_API);
+          if (!res.ok) throw new Error("Failed to load plans");
+          const data = await res.json();
+          availablePlans = data.subscriptions.plans; // array
+          renderPlans();
+          document.getElementById("plans-loading").classList.add("hidden");
+          document.getElementById("plans-container").classList.remove("hidden");
+        } catch (err) {
+          document.getElementById("plans-error-message").textContent =
+            err.message;
+          document.getElementById("plans-loading").classList.add("hidden");
+          document.getElementById("plans-error").classList.remove("hidden");
         }
-        
-        // Load available plans
-        async function loadAvailablePlans() {
-            try {
-                document.getElementById('plans-loading').classList.remove('hidden');
-                document.getElementById('plans-container').classList.add('hidden');
-                document.getElementById('plans-error').classList.add('hidden');
-                
-                const response = await fetch(SUBSCRIPTION_API);
-                if (!response.ok) throw new Error('Failed to load plans');
-                
-                const data = await response.json();
-                availablePlans = data.subscriptions.plans;
-                
-                renderPlans();
-                
-                document.getElementById('plans-loading').classList.add('hidden');
-                document.getElementById('plans-container').classList.remove('hidden');
-            } catch (error) {
-                console.error('Error loading plans:', error);
-                document.getElementById('plans-error-message').textContent = error.message;
-                document.getElementById('plans-loading').classList.add('hidden');
-                document.getElementById('plans-error').classList.remove('hidden');
-            }
-        }
-        
-        // Render plans
-        function renderPlans() {
-            const container = document.getElementById('plans-container');
-            const currentPlanId = currentSubscription?.subscription?.id;
-            
-            const sortedPlans = [...availablePlans].sort((a, b) => a.price - b.price);
-            
-            container.innerHTML = sortedPlans.map(plan => {
-                const isCurrentPlan = currentPlanId === plan.id;
-                
-                return `
-                    <div class="plan-card bg-gray-900 rounded-xl p-6 border-2 ${plan.highlighted ? 'border-green-500 highlighted-plan' : 'border-gray-700'} ${isCurrentPlan ? 'current-plan' : ''}">
-                        ${isCurrentPlan ? `
-                            <div class="absolute top-4 right-4">
-                                <span class="status-badge status-active">Current</span>
-                            </div>
-                        ` : ''}
-                        
-                        ${plan.popular ? `
-                            <div class="absolute top-4 left-4">
-                                <span class="status-badge bg-purple-900 text-purple-300">Popular</span>
-                            </div>
-                        ` : ''}
-                        
+      }
+
+      function renderPlans() {
+        const container = document.getElementById("plans-container");
+        const currentPlanId = currentSubscription?.subscription?.id;
+        const sorted = [...availablePlans].sort((a, b) => a.price - b.price);
+        container.innerHTML = sorted
+          .map((plan) => {
+            const isCurrent = currentPlanId === plan.id;
+            return `
+                    <div class="plan-card bg-gray-900 rounded-xl p-6 border-2 ${plan.highlighted ? "border-green-500" : "border-gray-700"} ${isCurrent ? "current-plan" : ""}">
+                        ${isCurrent ? '<div class="absolute top-4 right-4"><span class="status-badge status-active">Current</span></div>' : ""}
+                        ${plan.popular ? '<div class="absolute top-4 left-4"><span class="status-badge bg-purple-900 text-purple-300">Popular</span></div>' : ""}
                         <div class="mb-6">
                             <h3 class="text-2xl font-bold mb-2">${plan.name}</h3>
                             <p class="text-gray-400 text-sm mb-4">${plan.description}</p>
-                            
                             <div class="mb-4">
-                                <div class="flex items-baseline">
-                                    <span class="text-3xl md:text-4xl font-bold">${formatCurrency(plan.price)}</span>
-                                    <span class="text-gray-400 ml-2">/month</span>
-                                </div>
-                                <div class="text-gray-400 text-sm mt-1">
-                                    ${plan.sessions} WhatsApp Number${plan.sessions !== 1 ? 's' : ''}
-                                </div>
+                                <div class="flex items-baseline"><span class="text-3xl md:text-4xl font-bold">${formatCurrency(plan.price)}</span><span class="text-gray-400 ml-2">/month</span></div>
+                                <div class="text-gray-400 text-sm mt-1">${plan.sessions} WhatsApp Number${plan.sessions !== 1 ? "s" : ""}</div>
                             </div>
-                            
-                            <ul class="feature-list space-y-2">
-                                ${plan.features.slice(0, 4).map(feature => 
-                                    `<li class="text-sm text-gray-300">${feature}</li>`
-                                ).join('')}
-                                ${plan.features.length > 4 ? 
-                                    `<li class="text-sm text-gray-300">+${plan.features.length - 4} more features</li>` : ''
-                                }
-                            </ul>
+                            <ul class="feature-list space-y-2">${plan.features
+                              .slice(0, 4)
+                              .map(
+                                (f) =>
+                                  `<li class="text-sm text-gray-300">${f}</li>`,
+                              )
+                              .join(
+                                "",
+                              )}${plan.features.length > 4 ? `<li class="text-sm text-gray-300">+${plan.features.length - 4} more features</li>` : ""}</ul>
                         </div>
-                        
-                        ${isCurrentPlan ? 
-                            `<button class="w-full bg-gray-700 cursor-default text-white font-bold py-3 rounded-lg" disabled>Current Plan</button>` :
-                            currentPlanId ?
-                                `<button onclick="openChangeModal('${plan.id}')" class="w-full gradient-bg hover:opacity-90 text-white font-bold py-3 rounded-lg transition">
-                                    <i class="fas fa-exchange-alt mr-2"></i>Change to ${plan.name}
-                                </button>` :
-                                `<button onclick="openPurchaseModal('${plan.id}')" class="w-full gradient-bg hover:opacity-90 text-white font-bold py-3 rounded-lg transition">
-                                    Subscribe
-                                </button>`
+                        ${
+                          isCurrent
+                            ? '<button class="w-full bg-gray-700 cursor-default text-white font-bold py-3 rounded-lg" disabled>Current Plan</button>'
+                            : currentPlanId
+                              ? `<button onclick="openChangeModal('${plan.id}')" class="w-full gradient-bg hover:opacity-90 text-white font-bold py-3 rounded-lg transition"><i class="fas fa-exchange-alt mr-2"></i>Change to ${plan.name}</button>`
+                              : `<button onclick="openPurchaseModal('${plan.id}')" class="w-full gradient-bg hover:opacity-90 text-white font-bold py-3 rounded-lg transition">Subscribe</button>`
                         }
                     </div>
                 `;
-            }).join('');
-        }
-        
-        // Auto-renew toggle
-        document.getElementById('auto-renew-toggle')?.addEventListener('change', async function() {
-            try {
-                const response = await fetch(UPDATE_AUTO_RENEW_API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ autoRenew: this.checked })
-                });
-                
-                if (response.ok) {
-                    document.getElementById('auto-renew-status-text').textContent = 
-                        this.checked ? 'Enabled' : 'Disabled';
-                    showToast(`Auto-renew ${this.checked ? 'enabled' : 'disabled'}`, 'success');
-                } else {
-                    this.checked = !this.checked;
-                    showToast('Failed to update auto-renew', 'error');
-                }
-            } catch (error) {
-                this.checked = !this.checked;
-                showToast('Failed to update auto-renew', 'error');
-            }
-        });
-        
-        // Open purchase modal
-        async function openPurchaseModal(planId) {
-            selectedPlan = availablePlans.find(p => p.id === planId);
-            if (!selectedPlan) return;
-            
-            document.getElementById('purchase-plan-name').textContent = selectedPlan.name;
-            document.getElementById('purchase-plan-price').textContent = formatCurrency(selectedPlan.price);
-            document.getElementById('purchase-plan-description').textContent = selectedPlan.description;
-            
-            const balance = userProfile?.balance || 0;
-            const balanceInfo = document.getElementById('balance-info');
-            
-            if (balance >= selectedPlan.price) {
-                balanceInfo.innerHTML = `
-                    <div class="flex items-center text-green-400">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        Sufficient balance
-                    </div>
-                `;
+          })
+          .join("");
+      }
+
+      // Auto-renew toggle (calls backend)
+      document
+        .getElementById("auto-renew-toggle")
+        ?.addEventListener("change", async function () {
+          try {
+            const res = await fetch(UPDATE_AUTO_RENEW_API, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ autoRenew: this.checked }),
+            });
+            if (res.ok) {
+              document.getElementById("auto-renew-status-text").textContent =
+                this.checked ? "Enabled" : "Disabled";
+              showToast(`Auto-renew ${this.checked ? "enabled" : "disabled"}`);
             } else {
-                balanceInfo.innerHTML = `
-                    <div class="flex items-center text-red-400">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        Need ${formatCurrency(selectedPlan.price - balance)} more
-                    </div>
-                `;
+              this.checked = !this.checked;
+              showToast("Failed to update auto-renew", "error");
             }
-            
-            document.getElementById('purchase-modal').style.display = 'flex';
-        }
-        
-        // Open change modal (upgrade/downgrade)
-        async function openChangeModal(planId) {
-            changePlan = availablePlans.find(p => p.id === planId);
-            if (!changePlan || !currentSubscription?.subscription) return;
-            
-            const currentPlan = currentSubscription.subscription;
-            
-            document.getElementById('change-modal-title').textContent = 
-                changePlan.price > currentPlan.price ? 'Upgrade Plan' : 'Downgrade Plan';
-            document.getElementById('change-current-plan').textContent = currentPlan.name;
-            document.getElementById('change-new-plan').textContent = changePlan.name;
-            document.getElementById('change-plan-price').textContent = formatCurrency(changePlan.price);
-            
-            document.getElementById('change-modal').style.display = 'flex';
-        }
-        
-        // Open cancel modal
-        document.getElementById('cancel-subscription-btn')?.addEventListener('click', () => {
-            document.getElementById('cancel-modal').style.display = 'flex';
+          } catch {
+            this.checked = !this.checked;
+            showToast("Error", "error");
+          }
         });
-        
-        // Open renew modal
-        function openRenewModal(subscription) {
-            document.getElementById('renew-plan-name').textContent = subscription.name;
-            document.getElementById('renew-plan-price').textContent = formatCurrency(subscription.price);
-            document.getElementById('renew-plan-description').textContent = subscription.description;
-            
-            document.getElementById('renew-modal').style.display = 'flex';
-        }
-        
-        // Open add balance modal
-        function openAddBalanceModal() {
-            window.location.href = '/recharge';
-        }
-        
-        // Set amount
-        function setAmount(amount, event) {
-            selectedAmount = amount;
-            document.getElementById('custom-amount-input').value = amount;
-            
-            document.querySelectorAll('.amount-option').forEach(opt => {
-                opt.classList.remove('border-green-500');
-                opt.classList.add('border-gray-700');
+
+      // Modal openers
+      function openPurchaseModal(planId) {
+        selectedPlan = availablePlans.find((p) => p.id === planId);
+        if (!selectedPlan) return;
+        document.getElementById("purchase-plan-name").textContent =
+          selectedPlan.name;
+        document.getElementById("purchase-plan-price").textContent =
+          formatCurrency(selectedPlan.price);
+        document.getElementById("purchase-plan-description").textContent =
+          selectedPlan.description;
+        const bal = userProfile?.balance || 0;
+        const info = document.getElementById("balance-info");
+        info.innerHTML =
+          bal >= selectedPlan.price
+            ? '<div class="flex items-center text-green-400"><i class="fas fa-check-circle mr-2"></i>Sufficient balance</div>'
+            : `<div class="flex items-center text-red-400"><i class="fas fa-exclamation-triangle mr-2"></i>Need ${formatCurrency(selectedPlan.price - bal)} more</div>`;
+        document.getElementById("purchase-modal").style.display = "flex";
+      }
+
+      function openChangeModal(planId) {
+        changePlan = availablePlans.find((p) => p.id === planId);
+        if (!changePlan || !currentSubscription?.subscription) return;
+        const current = currentSubscription.subscription;
+        document.getElementById("change-modal-title").textContent =
+          changePlan.price > current.price ? "Upgrade Plan" : "Downgrade Plan";
+        document.getElementById("change-current-plan").textContent =
+          current.name;
+        document.getElementById("change-new-plan").textContent =
+          changePlan.name;
+        document.getElementById("change-plan-price").textContent =
+          formatCurrency(changePlan.price);
+        document.getElementById("change-modal").style.display = "flex";
+      }
+
+      document
+        .getElementById("cancel-subscription-btn")
+        ?.addEventListener("click", () => {
+          document.getElementById("cancel-modal").style.display = "flex";
+        });
+
+      function openRenewModal(sub) {
+        document.getElementById("renew-plan-name").textContent = sub.name;
+        document.getElementById("renew-plan-price").textContent =
+          formatCurrency(sub.price);
+        document.getElementById("renew-plan-description").textContent =
+          sub.description;
+        document.getElementById("renew-modal").style.display = "flex";
+      }
+
+      // Confirm actions
+      document
+        .getElementById("confirm-purchase-btn")
+        .addEventListener("click", async () => {
+          if (!selectedPlan) return;
+          const btn = document.getElementById("confirm-purchase-btn");
+          btn.disabled = true;
+          btn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+          try {
+            const res = await fetch(PURCHASE_API, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                subscriptionId: selectedPlan.id,
+                autoRenew: document.getElementById("modal-auto-renew-toggle")
+                  .checked,
+              }),
             });
-            
-            if (event && event.currentTarget) {
-                event.currentTarget.classList.remove('border-gray-700');
-                event.currentTarget.classList.add('border-green-500');
+            if (res.ok) {
+              closeModal("purchase-modal");
+              showToast("Purchased!");
+              await Promise.all([
+                loadUserProfile(),
+                loadCurrentSubscription(),
+                loadAvailablePlans(),
+              ]);
+              document.getElementById("success-message").textContent =
+                `${selectedPlan.name} activated.`;
+              document.getElementById("success-modal").style.display = "flex";
+              document.querySelector('[data-tab="current"]').click();
+            } else {
+              const err = await res.json();
+              showToast(err.error || "Purchase failed", "error");
             }
-        }
-        
-        // Confirm purchase
-        document.getElementById('confirm-purchase-btn').addEventListener('click', async () => {
-            if (!selectedPlan) return;
-            
-            const btn = document.getElementById('confirm-purchase-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-            
-            try {
-                const response = await fetch(PURCHASE_API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subscriptionId: selectedPlan.id,
-                        autoRenew: document.getElementById('modal-auto-renew-toggle').checked
-                    })
-                });
-                
-                if (response.ok) {
-                    closeModal('purchase-modal');
-                    showToast('Subscription purchased successfully!', 'success');
-                    
-                    await Promise.all([loadUserProfile(), loadCurrentSubscription(), loadAvailablePlans()]);
-                    
-                    document.getElementById('success-message').textContent = 
-                        `Your ${selectedPlan.name} plan has been activated for 1 month.`;
-                    document.getElementById('success-modal').style.display = 'flex';
-                    
-                    // Switch to current plan tab
-                    document.querySelector('[data-tab="current"]').click();
-                } else {
-                    const error = await response.json();
-                    showToast(error.error || 'Purchase failed', 'error');
-                }
-            } catch (error) {
-                showToast('Failed to process purchase', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Confirm Purchase';
-            }
+          } catch {
+            showToast("Request failed", "error");
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML =
+              '<i class="fas fa-check-circle mr-2"></i>Confirm Purchase';
+          }
         });
-        
-        // Confirm change (upgrade/downgrade)
-        document.getElementById('confirm-change-btn').addEventListener('click', async () => {
-            if (!changePlan) return;
-            
-            const btn = document.getElementById('confirm-change-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-            
-            try {
-                const response = await fetch(CHANGE_API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subscriptionId: changePlan.id,
-                        autoRenew: document.getElementById('change-auto-renew-toggle').checked
-                    })
-                });
-                
-                if (response.ok) {
-                    closeModal('change-modal');
-                    showToast(`Plan changed to ${changePlan.name} successfully!`, 'success');
-                    
-                    await Promise.all([loadUserProfile(), loadCurrentSubscription(), loadAvailablePlans()]);
-                    
-                    const action = changePlan.price > currentSubscription?.subscription?.price ? 'upgraded' : 'downgraded';
-                    document.getElementById('success-message').textContent = 
-                        `Your plan has been ${action} to ${changePlan.name}. New subscription valid for 1 month.`;
-                    document.getElementById('success-modal').style.display = 'flex';
-                    
-                    // Switch to current plan tab
-                    document.querySelector('[data-tab="current"]').click();
-                } else {
-                    const error = await response.json();
-                    showToast(error.error || 'Change failed', 'error');
-                }
-            } catch (error) {
-                showToast('Failed to change plan', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Confirm Change';
-            }
-        });
-        
-        // Confirm cancel
-        document.getElementById('confirm-cancel-btn').addEventListener('click', async () => {
-            const btn = document.getElementById('confirm-cancel-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-            
-            try {
-                const response = await fetch(CANCEL_API, { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (response.ok) {
-                    closeModal('cancel-modal');
-                    showToast('Subscription cancelled successfully', 'success');
-                    await loadCurrentSubscription();
-                    
-                    document.getElementById('success-message').textContent = 
-                        'Your subscription has been cancelled. You have access until the end date.';
-                    document.getElementById('success-modal').style.display = 'flex';
-                } else {
-                    const error = await response.json();
-                    showToast(error.error || 'Cancellation failed', 'error');
-                }
-            } catch (error) {
-                showToast('Failed to cancel subscription', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-ban mr-2"></i>Confirm Cancellation';
-            }
-        });
-        
-        // Confirm renew
-        document.getElementById('confirm-renew-btn').addEventListener('click', async () => {
-            const btn = document.getElementById('confirm-renew-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-            
-            try {
-                const response = await fetch(RENEW_API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        autoRenew: document.getElementById('renew-auto-renew-toggle').checked
-                    })
-                });
-                
-                if (response.ok) {
-                    closeModal('renew-modal');
-                    showToast('Subscription renewed successfully!', 'success');
-                    
-                    await Promise.all([loadUserProfile(), loadCurrentSubscription()]);
-                    
-                    document.getElementById('success-message').textContent = 
-                        'Your subscription has been renewed for 1 month.';
-                    document.getElementById('success-modal').style.display = 'flex';
-                    
-                    // Switch to current plan tab
-                    document.querySelector('[data-tab="current"]').click();
-                } else {
-                    const error = await response.json();
-                    showToast(error.error || 'Renewal failed', 'error');
-                }
-            } catch (error) {
-                showToast('Failed to renew subscription', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-redo mr-2"></i>Renew Now';
-            }
-        });
-        
-        // Process add balance
-        async function processAddBalance() {
-            const amount = parseInt(document.getElementById('custom-amount-input').value);
-            
-            if (!amount || amount < 100) {
-                showToast('Please enter a valid amount (minimum ৳100)', 'error');
-                return;
-            }
-            
-            const btn = event.currentTarget;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-            
-            try {
-                const response = await fetch(ADD_BALANCE_API, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount })
-                });
-                
-                if (response.ok) {
-                    closeModal('add-balance-modal');
-                    showToast(`৳${amount.toLocaleString()} added to balance`, 'success');
-                    await loadUserProfile();
-                } else {
-                    const error = await response.json();
-                    showToast(error.error || 'Failed to add balance', 'error');
-                }
-            } catch (error) {
-                showToast('Failed to add balance', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-plus-circle mr-2"></i>Add Balance';
-            }
-        }
-        
-        // Load payment history
-        async function loadPaymentHistory() {
-            try {
-                document.getElementById('billing-loading').classList.remove('hidden');
-                document.getElementById('billing-history').classList.add('hidden');
-                document.getElementById('no-billing-history').classList.add('hidden');
-                
-                const response = await fetch(PAYMENT_HISTORY_API);
-                const data = await response.json();
-                
-                document.getElementById('billing-loading').classList.add('hidden');
-                
-                if (data.payments && data.payments.length > 0) {
-                    document.getElementById('billing-history').classList.remove('hidden');
-                    
-                    const tbody = document.getElementById('billing-table-body');
-                    tbody.innerHTML = data.payments.map(payment => {
-                        const date = new Date(payment.createdAt);
-                        return `
-                            <tr>
-                                <td class="px-4 py-3">
-                                    ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                </td>
-                                <td class="px-4 py-3">${payment.description || 'Subscription payment'}</td>
-                                <td class="px-4 py-3 font-bold">${formatCurrency(payment.amount)}</td>
-                                <td class="px-4 py-3">
-                                    <span class="status-badge status-active">Completed</span>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
-                } else {
-                    document.getElementById('no-billing-history').classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Error loading payment history:', error);
-                document.getElementById('billing-loading').classList.add('hidden');
-                document.getElementById('no-billing-history').classList.remove('hidden');
-            }
-        }
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadUserProfile();
-            await loadCurrentSubscription();
-            await loadAvailablePlans();
-            
-            // Close modals when clicking outside
-            window.addEventListener('click', (event) => {
-                if (event.target.classList.contains('modal')) {
-                    event.target.style.display = 'none';
-                }
+
+      document
+        .getElementById("confirm-change-btn")
+        .addEventListener("click", async () => {
+          if (!changePlan) return;
+          const btn = document.getElementById("confirm-change-btn");
+          btn.disabled = true;
+          btn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+          try {
+            const res = await fetch(CHANGE_API, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                subscriptionId: changePlan.id,
+                autoRenew: document.getElementById("change-auto-renew-toggle")
+                  .checked,
+              }),
             });
-            
-            // Set default amount highlight
-            setTimeout(() => {
-                const defaultAmount = document.querySelector('.amount-option');
-                if (defaultAmount) {
-                    defaultAmount.classList.remove('border-gray-700');
-                    defaultAmount.classList.add('border-green-500');
-                }
-            }, 100);
+            if (res.ok) {
+              closeModal("change-modal");
+              showToast(`Changed to ${changePlan.name}`);
+              await Promise.all([
+                loadUserProfile(),
+                loadCurrentSubscription(),
+                loadAvailablePlans(),
+              ]);
+              document.getElementById("success-message").textContent =
+                `Plan changed to ${changePlan.name}.`;
+              document.getElementById("success-modal").style.display = "flex";
+              document.querySelector('[data-tab="current"]').click();
+            } else {
+              const err = await res.json();
+              showToast(err.error || "Change failed", "error");
+            }
+          } catch {
+            showToast("Request failed", "error");
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML =
+              '<i class="fas fa-check-circle mr-2"></i>Confirm Change';
+          }
         });
+
+      document
+        .getElementById("confirm-cancel-btn")
+        .addEventListener("click", async () => {
+          const btn = document.getElementById("confirm-cancel-btn");
+          btn.disabled = true;
+          btn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+          try {
+            const res = await fetch(CANCEL_API, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+            });
+            if (res.ok) {
+              closeModal("cancel-modal");
+              showToast("Subscription cancelled");
+              await loadCurrentSubscription();
+              document.getElementById("success-message").textContent =
+                "Cancelled successfully.";
+              document.getElementById("success-modal").style.display = "flex";
+            } else {
+              const err = await res.json();
+              showToast(err.error || "Cancel failed", "error");
+            }
+          } catch {
+            showToast("Request failed", "error");
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML =
+              '<i class="fas fa-ban mr-2"></i>Confirm Cancellation';
+          }
+        });
+
+      document
+        .getElementById("confirm-renew-btn")
+        .addEventListener("click", async () => {
+          const btn = document.getElementById("confirm-renew-btn");
+          btn.disabled = true;
+          btn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+          try {
+            const res = await fetch(RENEW_API, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                autoRenew: document.getElementById("renew-auto-renew-toggle")
+                  .checked,
+              }),
+            });
+            if (res.ok) {
+              closeModal("renew-modal");
+              showToast("Renewed successfully");
+              await Promise.all([loadUserProfile(), loadCurrentSubscription()]);
+              document.getElementById("success-message").textContent =
+                "Renewed for 1 month.";
+              document.getElementById("success-modal").style.display = "flex";
+              document.querySelector('[data-tab="current"]').click();
+            } else {
+              const err = await res.json();
+              showToast(err.error || "Renew failed", "error");
+            }
+          } catch {
+            showToast("Request failed", "error");
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-redo mr-2"></i>Renew Now';
+          }
+        });
+
+      // Payment history
+      async function loadPaymentHistory() {
+        try {
+          document.getElementById("billing-loading").classList.remove("hidden");
+          document.getElementById("billing-history").classList.add("hidden");
+          document.getElementById("no-billing-history").classList.add("hidden");
+          const res = await fetch(PAYMENT_HISTORY_API);
+          const data = await res.json();
+          document.getElementById("billing-loading").classList.add("hidden");
+          if (data.payments?.length) {
+            document
+              .getElementById("billing-history")
+              .classList.remove("hidden");
+            const tbody = document.getElementById("billing-table-body");
+            tbody.innerHTML = data.payments
+              .map((p) => {
+                const d = new Date(p.createdAt);
+                return `<tr><td class="px-4 py-3">${d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td><td class="px-4 py-3">${p.description || "Subscription payment"}</td><td class="px-4 py-3 font-bold">${formatCurrency(p.amount)}</td><td class="px-4 py-3"><span class="status-badge status-active">Completed</span></td></tr>`;
+              })
+              .join("");
+          } else {
+            document
+              .getElementById("no-billing-history")
+              .classList.remove("hidden");
+          }
+        } catch (err) {
+          document.getElementById("billing-loading").classList.add("hidden");
+          document
+            .getElementById("no-billing-history")
+            .classList.remove("hidden");
+        }
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadUserProfile();
+        await loadCurrentSubscription();
+        await loadAvailablePlans();
+        window.addEventListener("click", (e) => {
+          if (e.target.classList.contains("modal"))
+            e.target.style.display = "none";
+        });
+      });
     </script>
-</body>
+  </body>
 </html>
