@@ -32,6 +32,7 @@ import startCrons from "./crons/index.js";
 import { subscriptionMiddleware } from "./middlewares/subscriptionMiddleware.js";
 import rechargeRouter from "./routers/rechargeRouter.js";
 import profileRouter from "./routers/profileRouter.js";
+import { getSubscriptionList } from "./controllers/subscriptionController.js";
 import Session from "./models/sessionModel.js";
 import { startCampaignQueue } from "./lib/campaignQueue.js";
 import { initSession } from "./lib/whatsapp.js";
@@ -89,6 +90,9 @@ app.use("/api/session", authenticate, sessionRouter);
 app.use("/api/whatsapp", subscriptionMiddleware, whatsappRouter);
 app.use("/api/autoreply", authenticate, autoReplyRouter);
 app.use("/api/campaign", authenticate, campaignRouter);
+// Public: plan list visible on landing page without login
+app.get("/api/subscription/list", getSubscriptionList);
+// Protected: all other subscription routes
 app.use("/api/subscription", authenticate, subscriptionRouter);
 app.use("/api/recharge", authenticate, rechargeRouter);
 app.use("/api/profile", authenticate, profileRouter);

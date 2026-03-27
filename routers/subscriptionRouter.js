@@ -13,8 +13,8 @@ import {authenticate as protect} from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// All routes are protected - require authentication
-router.get("/list", protect, getSubscriptionList);
+// Public route — landing page pricing visible without login
+router.get("/list", getSubscriptionList);
 router.get("/current", protect, getCurrentSubscription);
 router.post("/purchase", protect, purchaseSubscription);
 router.post("/change", protect, changeSubscription);
