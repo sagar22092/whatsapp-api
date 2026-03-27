@@ -46,6 +46,7 @@
                 <!-- Left Details / Instructions Panel -->
                 <div class="md:col-span-2 bg-gray-800/30 p-8 border-r border-gray-800 flex flex-col justify-between hidden md:flex">
                     
+                    <!-- Balance Card -->
                     <div class="w-full bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-center border border-gray-700 relative overflow-hidden shadow-lg mb-8">
                         <div class="absolute -right-10 -top-10 w-32 h-32 bg-pink-500/10 rounded-full blur-2xl"></div>
                         <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-2 flex items-center justify-center gap-2"><i class="fas fa-coins text-yellow-500"></i> Available Balance</p>
@@ -53,41 +54,78 @@
                         <p id="balanceTimestamp" class="text-[10px] text-gray-500">Syncing...</p>
                     </div>
 
-                    <div class="flex-1">
+                    <!-- Automated Gateway Info (shown when automated) -->
+                    <div id="leftAutoPanel" class="flex-1 hidden">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/30">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold tracking-tight">Automated bKash PGW</h4>
+                                <p class="text-xs text-emerald-400 font-semibold">🟢 Live & Secure</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-start gap-3 bg-gray-800/50 rounded-xl p-3">
+                                <div class="w-6 h-6 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</div>
+                                <p class="text-xs text-gray-300">Enter the amount you want to add to your wallet.</p>
+                            </div>
+                            <div class="flex items-start gap-3 bg-gray-800/50 rounded-xl p-3">
+                                <div class="w-6 h-6 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</div>
+                                <p class="text-xs text-gray-300">Click <strong class="text-white">Pay with bKash</strong> — you will be redirected to bKash secure checkout.</p>
+                            </div>
+                            <div class="flex items-start gap-3 bg-gray-800/50 rounded-xl p-3">
+                                <div class="w-6 h-6 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</div>
+                                <p class="text-xs text-gray-300">Enter your bKash number & PIN on bKash's secure page.</p>
+                            </div>
+                            <div class="flex items-start gap-3 bg-gray-800/50 rounded-xl p-3">
+                                <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">✓</div>
+                                <p class="text-xs text-gray-300">Balance is updated <strong class="text-emerald-400">instantly</strong> after successful payment.</p>
+                            </div>
+                        </div>
+
+                        <!-- Security badges -->
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1"><i class="fas fa-shield-alt text-[10px]"></i> SSL Secured</span>
+                            <span class="text-xs bg-pink-500/10 text-pink-400 border border-pink-500/20 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1"><i class="fas fa-bolt text-[10px]"></i> Instant Credit</span>
+                            <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1"><i class="fab fa-buromobelexperte text-[10px]"></i> bKash PGW</span>
+                        </div>
+                    </div>
+
+                    <!-- Manual Gateway Info (shown when manual/no API key) -->
+                    <div id="leftManualPanel" class="flex-1">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white"><i class="fas fa-mobile-alt"></i></div>
                             <div>
-                                <h4 class="text-white font-bold tracking-tight">bKash Merchant Data</h4>
-                                <p class="text-xs text-gray-400">bKash Send Money Automated</p>
+                                <h4 class="text-white font-bold tracking-tight">bKash Payment Info</h4>
+                                <p class="text-xs text-gray-400">Send Money to the number below</p>
                             </div>
                         </div>
 
                         <div class="space-y-4 mb-8">
                             <div class="flex justify-between items-center text-sm border-b border-gray-700/50 pb-2">
-                                <span class="text-gray-500">Merchant Number (Payment)</span>
+                                <span class="text-gray-500">bKash Number</span>
                                 <span class="text-white font-mono font-semibold" id="bkashNumberDisplay1">Loading...</span>
                             </div>
                             <div class="flex justify-between items-center text-sm border-b border-gray-700/50 pb-2">
-                                <span class="text-gray-500">Personal Number (Send Money)</span>
-                                <span class="text-white font-mono font-semibold" id="bkashNumberDisplay2">Loading...</span>
-                            </div>
-                            <div class="flex justify-between items-center text-sm border-b border-gray-700/50 pb-2">
-                                <span class="text-gray-500">Transaction</span>
-                                <span class="text-white font-semibold flex items-center gap-1"><i class="fas fa-bolt text-xs text-yellow-400"></i> Automated bKash</span>
+                                <span class="text-gray-500">Method</span>
+                                <span class="text-white font-semibold flex items-center gap-1"><i class="fas fa-mobile-alt text-pink-400 text-xs"></i> Send Money / Payment</span>
                             </div>
                         </div>
 
                         <div class="bg-yellow-900/10 border border-yellow-700/30 rounded-xl p-4">
-                            <h5 class="text-yellow-500 text-sm font-bold flex items-center gap-2 mb-3"><i class="fas fa-info-circle"></i> Rapid Guide</h5>
+                            <h5 class="text-yellow-500 text-sm font-bold flex items-center gap-2 mb-3"><i class="fas fa-info-circle"></i> How to Pay</h5>
                             <ol class="text-xs text-gray-400 space-y-2 list-decimal list-inside marker:text-yellow-600/50">
-                                <li>Go to bKash App or dial <strong>*247#</strong>.</li>
-                                <li><strong>Payment</strong> or <strong>Send Money</strong> to <strong id="bkashNumberDisplay3">Loading...</strong>.</li>
-                                <li>Input the exact Recharge Amount.</li>
-                                <li>Enter PIN & Save the <strong>TrxID</strong>.</li>
+                                <li>Open bKash App or dial <strong>*247#</strong>.</li>
+                                <li><strong>Send Money</strong> to <strong id="bkashNumberDisplay3">Loading...</strong>.</li>
+                                <li>Enter the exact amount.</li>
+                                <li>Save the <strong>TrxID</strong> and enter it below.</li>
                             </ol>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Right Form Panel -->
                 <div class="md:col-span-3 p-8 md:p-10 relative">
@@ -250,6 +288,9 @@
                     document.getElementById('automatedBadge').classList.add('flex');
                     document.getElementById('btnText').textContent = "Pay with bKash";
                     document.getElementById('btnIcon').className = "fas fa-bolt";
+                    // Switch left panel
+                    document.getElementById('leftAutoPanel').classList.remove('hidden');
+                    document.getElementById('leftManualPanel').classList.add('hidden');
                 } else {
                     // Manual mode (gateway active but no API key)
                     IS_AUTOMATED = false;
