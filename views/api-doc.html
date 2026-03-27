@@ -132,7 +132,7 @@
         font-size: 20px;
         cursor: pointer;
         position: fixed;
-        top: 20px;
+        top: 80px;
         left: 20px;
         z-index: 101;
         box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
@@ -807,13 +807,80 @@
           font-size: 22px;
         }
       }
+
+        /* Glass nav */
+        .glass-nav {
+            background: rgba(2, 8, 21, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 40%, #6ee7b7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white; border-radius: 50px;
+            font-weight: 700; transition: all 0.2s;
+            box-shadow: 0 4px 24px rgba(16,185,129,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 32px rgba(16,185,129,0.4);
+        }
+        #mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        #mobile-menu.open { max-height: 400px; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
   <body>
 
+    <!-- ═══ NAVBAR (Guest) ═══ -->
+    <nav class="glass-nav fixed top-0 w-full z-50 transition-all">
+        <div class="max-w-7xl mx-auto px-5 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-2.5 flex-shrink-0" style="text-decoration:none">
+                    <div class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                        <i class="fab fa-whatsapp text-white text-lg"></i>
+                    </div>
+                    <span class="text-lg font-black tracking-tight text-white">Wa<span class="text-gradient">Fast</span>Api</span>
+                </a>
 
+                <!-- Desktop Links -->
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="/#features" style="text-decoration:none" class="text-gray-400 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Features</a>
+                    <a href="/#pricing" style="text-decoration:none" class="text-gray-400 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/5">Pricing</a>
+                    <a href="/doc" style="text-decoration:none" class="text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">API Docs</a>
+                </div>
 
+                <!-- CTA -->
+                <div class="hidden md:flex items-center gap-3">
+                    <a href="/login" style="text-decoration:none" class="text-gray-300 hover:text-white text-sm font-medium transition-colors px-4 py-2">Sign In</a>
+                    <a href="/register" style="text-decoration:none" class="btn-primary text-sm px-5 py-2.5 inline-block">Get Started Free</a>
+                </div>
+
+                <!-- Mobile burger -->
+                <button id="burger" class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-gray-400" onclick="document.getElementById('mobile-menu').classList.toggle('open')">
+                    <i class="fas fa-bars text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden border-t border-white/5 bg-[#020815]">
+            <div class="px-5 py-4 space-y-1">
+                <a href="/#features" style="text-decoration:none" class="flex items-center gap-2 text-gray-300 hover:text-white px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm font-medium transition-colors"><i class="fas fa-rocket w-4"></i> Features</a>
+                <a href="/#pricing" style="text-decoration:none" class="flex items-center gap-2 text-gray-300 hover:text-white px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm font-medium transition-colors"><i class="fas fa-tag w-4"></i> Pricing</a>
+                <a href="/doc" style="text-decoration:none" class="flex items-center gap-2 text-white px-3 py-2.5 rounded-lg bg-white/5 text-sm font-medium transition-colors"><i class="fas fa-code w-4"></i> API Docs</a>
+                <hr class="border-white/5 my-2">
+                <a href="/login" style="text-decoration:none" class="flex items-center gap-2 text-gray-300 hover:text-white px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm font-medium transition-colors"><i class="fas fa-sign-in-alt w-4"></i> Sign In</a>
+                <a href="/register" style="text-decoration:none" class="btn-primary text-sm px-5 py-3 text-center block rounded-xl mt-2">Get Started Free</a>
+            </div>
+        </div>
+    </nav>
     <!-- Sidebar Toggle -->
     <button class="sidebar-toggle" id="sidebarToggle">
       <i class="fas fa-bars"></i>
@@ -2772,6 +2839,8 @@
           if (res.ok) {
             const data = await res.json();
             if (data && data.user) {
+              const guestNav = document.querySelector('.glass-nav');
+              if (guestNav) guestNav.style.display = 'none';
               const script = document.createElement('script');
               script.src = '/js/nav.js';
               script.onload = () => {
