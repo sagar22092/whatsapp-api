@@ -635,7 +635,29 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadPlans);
+        async function checkAuthStatus() {
+            try {
+                const res = await fetch('/api/auth/profile');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.user) {
+                        // User is logged in, hide guest nav and show dashboard nav
+                        const guestNav = document.querySelector('.glass-nav');
+                        if (guestNav) guestNav.style.display = 'none';
+
+                        const script = document.createElement('script');
+                        script.src = '/js/nav.js';
+                        script.onload = () => injectNav(''); // Empty key
+                        document.body.appendChild(script);
+                    }
+                }
+            } catch(e) { /* ignore */ }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthStatus();
+            loadPlans();
+        });
     </script>
 </body>
 </html>

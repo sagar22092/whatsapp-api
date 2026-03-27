@@ -2802,6 +2802,32 @@
 
       // Update URLs if window location changes
       window.addEventListener("popstate", updateAllUrls);
+
+      // Check if user is logged in to inject dashboard nav
+      async function checkAuthStatus() {
+        try {
+          const res = await fetch('/api/auth/profile');
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.user) {
+              const script = document.createElement('script');
+              script.src = '/js/nav.js';
+              script.onload = () => {
+                injectNav('docs');
+                // Adjust layout for injected header
+                document.querySelector('.sidebar').style.top = '60px';
+                document.querySelector('.sidebar').style.height = 'calc(100vh - 60px)';
+                
+                const toggle = document.querySelector('.sidebar-toggle');
+                if(toggle) toggle.style.top = '80px';
+              };
+              document.body.appendChild(script);
+            }
+          }
+        } catch(e) { /* ignore */ }
+      }
+
+      checkAuthStatus();
     </script>
   </body>
 </html>
