@@ -1,6 +1,7 @@
 import { generateToken } from "../lib/jwtToken.js";
 import sessionModel from "../models/sessionModel.js";
 import User from "../models/userModel.js";
+import Settings from "../models/settingsModel.js";
 
 export async function register(req, res) {
   if (req.user) {
@@ -97,7 +98,19 @@ export async function me(req, res) {
   }
 
   const sessions = await sessionModel.find({ user: req.user._id }).lean();
-  return res.status(200).json({ user: req.user, activeSessions: sessions.length });
+  
+  // Expose safe public settings
+  let settings = await Settings.findOne().lean();
+  let safeSettings = {
+    paymentGateway: {
+      bKash: {
+        isActive: settings?.paymentGateway?.bKash?.isActive || false,
+        username: settings?.paymentGateway?.bKash?.username || "",
+      }
+    }
+  };
+
+  return res.status(200).json({ user: req.user, activeSessions: sessions.length, settings: safeSettings });
 }
 
 export async function logout(req, res) {

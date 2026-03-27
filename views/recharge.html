@@ -65,11 +65,11 @@
                         <div class="space-y-4 mb-8">
                             <div class="flex justify-between items-center text-sm border-b border-gray-700/50 pb-2">
                                 <span class="text-gray-500">Merchant Number (Payment)</span>
-                                <span class="text-white font-mono font-semibold">01785273102</span>
+                                <span class="text-white font-mono font-semibold" id="bkashNumberDisplay1">Loading...</span>
                             </div>
                             <div class="flex justify-between items-center text-sm border-b border-gray-700/50 pb-2">
                                 <span class="text-gray-500">Personal Number (Send Money)</span>
-                                <span class="text-white font-mono font-semibold">01627399126</span>
+                                <span class="text-white font-mono font-semibold" id="bkashNumberDisplay2">Loading...</span>
                             </div>
                             <div class="flex justify-between items-center text-sm border-b border-gray-700/50 pb-2">
                                 <span class="text-gray-500">Transaction</span>
@@ -81,7 +81,7 @@
                             <h5 class="text-yellow-500 text-sm font-bold flex items-center gap-2 mb-3"><i class="fas fa-info-circle"></i> Rapid Guide</h5>
                             <ol class="text-xs text-gray-400 space-y-2 list-decimal list-inside marker:text-yellow-600/50">
                                 <li>Go to bKash App or dial <strong>*247#</strong>.</li>
-                                <li><strong>Payment</strong> to 01785273102 OR <strong>Send Money</strong> to 01627399126.</li>
+                                <li><strong>Payment</strong> or <strong>Send Money</strong> to <strong id="bkashNumberDisplay3">Loading...</strong>.</li>
                                 <li>Input the exact Recharge Amount.</li>
                                 <li>Enter PIN & Save the <strong>TrxID</strong>.</li>
                             </ol>
@@ -212,8 +212,27 @@
             const balNode = document.getElementById("currentBalance");
             balNode.parentElement.classList.add("success-pulse");
             setTimeout(() => balNode.parentElement.classList.remove("success-pulse"), 500);
+
+            // Fetch settings for bKash gateway
+            if (data.settings && data.settings.paymentGateway && data.settings.paymentGateway.bKash) {
+                const bkash = data.settings.paymentGateway.bKash;
+                const bkashNum = bkash.username || "Not Configured";
+                document.getElementById('bkashNumberDisplay1').textContent = bkashNum;
+                document.getElementById('bkashNumberDisplay2').textContent = bkashNum;
+                document.getElementById('bkashNumberDisplay3').textContent = bkashNum;
+
+                if (!bkash.isActive) {
+                    const sb = document.getElementById('submitBtn');
+                    sb.disabled = true;
+                    document.getElementById('btnText').textContent = "bKash Gateway Disabled";
+                    sb.classList.replace('from-pink-600', 'from-gray-600');
+                    sb.classList.replace('to-rose-600', 'to-gray-700');
+                    showAlert("bKash payment gateway is currently disabled by administrators.", "info");
+                }
+            }
+
             return true;
-          } else if (res.status === 401) { window.location.href = "/login"; return false; } 
+          } else if (res.status === 401) { window.location.href = "/login"; return false; }  
           return false;
         } catch (error) { return false; }
       }
