@@ -1,721 +1,249 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WhatsApp Multi-Session Manager</title>
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaFastApi | Premium WhatsApp Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="icon" href="favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      .feature-list li {
-        position: relative;
-        padding-left: 1.75rem;
-      }
-      .feature-list li:before {
-        content: "✓";
-        position: absolute;
-        left: 0;
-        color: #10b981;
-        font-weight: bold;
-      }
-
-      .loading {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: #10b981;
-        animation: spin 1s ease-in-out infinite;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
+        body { font-family: 'Inter', sans-serif; background-color: #030712; color: #f3f4f6; overflow-x: hidden; }
+        .glass-panel {
+            background: rgba(3, 7, 18, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-      }
-
-      /* Mobile optimizations */
-      @media (max-width: 640px) {
-        .hero-title {
-          font-size: 2.5rem;
-          line-height: 1.2;
+        .hero-glow {
+            position: absolute; width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(16,185,129,0.15) 0%, rgba(0,0,0,0) 70%);
+            top: -300px; left: 50%; transform: translateX(-50%); z-index: -1; pointer-events: none;
         }
-        .hero-subtitle {
-          font-size: 1rem;
-          padding: 0 1rem;
+        .feature-card {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
         }
-        .section-padding {
-          padding-left: 1rem;
-          padding-right: 1rem;
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(16,185,129,0.3);
+            box-shadow: 0 20px 40px -10px rgba(16,185,129,0.15);
         }
-        .plan-card {
-          margin-bottom: 1.5rem;
+        .gradient-text {
+            background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .mobile-stack {
-          display: flex;
-          flex-direction: column;
-        }
-      }
     </style>
-  </head>
-  <body class="bg-gray-900 text-white font-sans">
+</head>
+<body class="antialiased selection:bg-emerald-500/30">
+    <div class="hero-glow"></div>
+
     <!-- Navigation -->
-    <nav class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 flex items-center">
-              <i class="fas fa-bolt"></i>
-              <span class="text-xl font-bold ml-2">WaFastApi</span>
+    <nav class="fixed w-full z-50 glass-panel transition-all">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer">
+                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <i class="fab fa-whatsapp text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight text-white">WaFastApi</span>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-400 hover:text-white transition-colors text-sm font-medium">Features</a>
+                    <a href="#pricing" class="text-gray-400 hover:text-white transition-colors text-sm font-medium">Pricing</a>
+                    <a href="/doc" class="text-gray-400 hover:text-white transition-colors text-sm font-medium">API Docs</a>
+                    <div class="w-px h-5 bg-gray-800"></div>
+                    <a href="/login" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Sign In</a>
+                    <a href="/register" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:from-emerald-400 hover:to-green-500 transition-all shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95">Get Started</a>
+                </div>
             </div>
-          </div>
-          <div class="hidden md:block">
-            <div class="ml-10 flex items-baseline space-x-6">
-              <a
-                href="#features"
-                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition"
-                >Features</a
-              >
-              <a
-                href="#pricing"
-                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition"
-                >Pricing</a
-              >
-              <a
-                href="#how-it-works"
-                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition"
-                >How It Works</a
-              >
-              <a
-                href="/doc"
-                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
-                >Doc</a
-              >
-              <a
-                href="/sessions"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
-                >Dashboard</a
-              >
-            </div>
-          </div>
-          <!-- Mobile menu button -->
-          <div class="md:hidden">
-            <button
-              id="mobile-menu-button"
-              class="text-gray-400 hover:text-white focus:outline-none"
-            >
-              <svg
-                class="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                ></path>
-              </svg>
-            </button>
-          </div>
         </div>
-      </div>
-      <!-- Mobile menu -->
-      <div id="mobile-menu" class="md:hidden hidden bg-gray-800">
-        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <a
-            href="#features"
-            class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition"
-            >Features</a
-          >
-          <a
-            href="#pricing"
-            class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition"
-            >Pricing</a
-          >
-          <a
-            href="#how-it-works"
-            class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition"
-            >How It Works</a
-          >
-          <a
-            href="/doc"
-            class="bg-red-600 hover:bg-red-700 text-white block px-3 py-2 rounded-md text-base font-medium transition mt-2"
-            >Doc</a
-          >
-          <a
-            href="/sessions"
-            class="bg-green-600 hover:bg-green-700 text-white block px-3 py-2 rounded-md text-base font-medium transition mt-2"
-            >Dashboard</a
-          >
-        </div>
-      </div>
     </nav>
 
     <!-- Hero Section -->
-    <section
-      class="bg-gradient-to-r from-green-600 to-green-400 py-20 md:py-32 text-center px-4"
-    >
-      <div class="max-w-4xl mx-auto">
-        <h1 class="hero-title text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-          📱 WhatsApp Multi-Session Manager
-        </h1>
-        <p class="hero-subtitle text-lg md:text-xl mb-8 text-gray-900">
-          Manage multiple WhatsApp accounts simultaneously, send messages, check
-          status, and control all sessions from a single dashboard.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="/subscriptions"
-            class="bg-white text-green-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition shadow-lg"
-          >
-            View Plans & Pricing
-          </a>
-          <a
-            href="/sessions"
-            class="bg-gray-900 bg-opacity-50 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition border-2 border-white border-opacity-30"
-          >
-            Go to Dashboard
-          </a>
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-8">
+                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
+                v2.0 Multi-Device API is Live
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
+                Scale Your Business with <br/>
+                <span class="gradient-text">WhatsApp API Engine</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Connect multiple sessions, send automated webhooks, parse bulk media, and integrate rich conversational bots seamlessly into your enterprise architecture.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a href="/sessions" class="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 rounded-full font-semibold hover:bg-gray-100 transition-all shadow-xl hover:scale-105">View Dashboard</a>
+                <a href="/doc" class="w-full sm:w-auto px-8 py-4 bg-gray-900 border border-gray-700 text-white rounded-full font-semibold hover:bg-gray-800 transition-all">Read Documentation</a>
+            </div>
         </div>
-      </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-16 md:py-20 section-padding">
-      <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-12 md:mb-16 px-4">
-          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            🚀 Powerful Features
-          </h2>
-          <p class="text-gray-300 text-lg max-w-3xl mx-auto">
-            Everything you need to manage multiple WhatsApp accounts efficiently
-          </p>
+    <section id="features" class="py-24 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Enterprise Grade Infrastructure</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Built for high-volume message processing with absolute zero latency drops.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="feature-card p-8 rounded-3xl">
+                    <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-layer-group text-emerald-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Multi-Session Hosting</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Run unlimited concurrent Baileys connections. Link individual webhooks to different isolated worker numbers instantly.</p>
+                </div>
+
+                <div class="feature-card p-8 rounded-3xl">
+                    <div class="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-bolt text-purple-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Instant Webhooks</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Receive instant callbacks for Delivery Receipts, Read Tickets, Rich Media downloads, and user Emoji Reactions.</p>
+                </div>
+
+                <div class="feature-card p-8 rounded-3xl">
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-file-code text-blue-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Advanced Media</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Natively parse and decrypt Document, Audio, Sticker, Location, and Video payloads straight to your static server nodes.</p>
+                </div>
+
+            </div>
         </div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-        >
-          <div
-            class="bg-gray-800 p-6 md:p-8 rounded-xl hover:scale-[1.02] transition-transform duration-300 border border-gray-700"
-          >
-            <div
-              class="w-12 h-12 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-4"
-            >
-              <span class="text-2xl">🔗</span>
-            </div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">
-              Multi-Session Support
-            </h3>
-            <p class="text-gray-300">
-              Connect and manage multiple WhatsApp accounts simultaneously with
-              real-time status tracking and individual session control.
-            </p>
-          </div>
-          <div
-            class="bg-gray-800 p-6 md:p-8 rounded-xl hover:scale-[1.02] transition-transform duration-300 border border-gray-700"
-          >
-            <div
-              class="w-12 h-12 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-4"
-            >
-              <span class="text-2xl">📱</span>
-            </div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">
-              Real-Time QR Connect
-            </h3>
-            <p class="text-gray-300">
-              Generate QR codes instantly and connect WhatsApp accounts in
-              seconds. Real-time connection status updates.
-            </p>
-          </div>
-          <div
-            class="bg-gray-800 p-6 md:p-8 rounded-xl hover:scale-[1.02] transition-transform duration-300 border border-gray-700"
-          >
-            <div
-              class="w-12 h-12 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-4"
-            >
-              <span class="text-2xl">⚡</span>
-            </div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">Powerful API</h3>
-            <p class="text-gray-300">
-              Send messages programmatically via REST API. Support for text,
-              images, videos, documents, and more.
-            </p>
-          </div>
-          <div
-            class="bg-gray-800 p-6 md:p-8 rounded-xl hover:scale-[1.02] transition-transform duration-300 border border-gray-700"
-          >
-            <div
-              class="w-12 h-12 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-4"
-            >
-              <span class="text-2xl">👤</span>
-            </div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">
-              Account Management
-            </h3>
-            <p class="text-gray-300">
-              Access user profiles, status, and chat information for each
-              connected session in a clean interface.
-            </p>
-          </div>
-          <div
-            class="bg-gray-800 p-6 md:p-8 rounded-xl hover:scale-[1.02] transition-transform duration-300 border border-gray-700"
-          >
-            <div
-              class="w-12 h-12 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-4"
-            >
-              <span class="text-2xl">🔄</span>
-            </div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">
-              Session Control
-            </h3>
-            <p class="text-gray-300">
-              Create, logout, and monitor all sessions from one dashboard. Get
-              instant alerts for disconnections.
-            </p>
-          </div>
-          <div
-            class="bg-gray-800 p-6 md:p-8 rounded-xl hover:scale-[1.02] transition-transform duration-300 border border-gray-700"
-          >
-            <div
-              class="w-12 h-12 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-4"
-            >
-              <span class="text-2xl">🔒</span>
-            </div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">
-              Secure & Private
-            </h3>
-            <p class="text-gray-300">
-              All sessions stored securely on your server. No third-party access
-              ensures complete privacy and reliability.
-            </p>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- Pricing Section -->
-    <section id="pricing" class="py-16 md:py-20 bg-gray-800 section-padding">
-      <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-12 md:mb-16 px-4">
-          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            💰 Transparent Pricing
-          </h2>
-          <p class="text-gray-300 text-lg max-w-3xl mx-auto">
-            Choose the perfect plan for your needs. All plans include unlimited
-            messages and priority support.
-          </p>
-          <div
-            id="currencyDisplay"
-            class="mt-6 md:mt-8 inline-flex flex-col sm:flex-row items-center gap-2 bg-gray-700 rounded-lg p-2"
-          >
-            <span
-              id="billingType"
-              class="px-4 py-2 rounded-lg bg-green-600 text-sm font-medium"
-              >Loading...</span
-            >
-            <span id="currencyType" class="px-4 py-2 text-gray-300 text-sm"
-              >Currency: Loading...</span
-            >
-          </div>
-        </div>
+    <section id="pricing" class="py-24 relative border-t border-gray-800/50 bg-gray-900/20">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Transparent Scaling Rates</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto mb-8">Pay purely for the compute resources you reserve.</p>
+                
+                <div class="inline-flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-full p-1.5 shadow-inner">
+                    <span id="billingType" class="px-5 py-2 rounded-full bg-emerald-600 text-white text-sm font-semibold tracking-wide">Loading...</span>
+                </div>
+            </div>
 
-        <!-- Loading State -->
-        <div id="loadingPlans" class="text-center py-12">
-          <div class="inline-block loading mr-3"></div>
-          <span class="text-gray-300">Loading subscription plans...</span>
-        </div>
+            <!-- Loading Spinner -->
+            <div id="loadingPlans" class="flex flex-col items-center justify-center py-12">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-emerald-500 mb-4"></i>
+                <p class="text-gray-400">Syncing live endpoints...</p>
+            </div>
 
-        <!-- Plans Container -->
-        <div
-          id="plansContainer"
-          class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8 hidden"
-        >
-          <!-- Plans will be dynamically inserted here -->
-        </div>
+            <!-- Dynamic Pricing Grid -->
+            <div id="plansContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
 
-        <!-- Error State -->
-        <div id="errorState" class="text-center py-12 hidden">
-          <div
-            class="bg-red-900/30 border border-red-700 rounded-xl p-6 md:p-8 max-w-md mx-auto"
-          >
-            <svg
-              class="w-12 h-12 text-red-500 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
-            </svg>
-            <h3 class="text-xl font-bold mb-2">Unable to Load Plans</h3>
-            <p class="text-gray-300 mb-4" id="errorMessage">
-              Please check your connection and try again.
-            </p>
-            <button
-              onclick="loadSubscriptionPlans()"
-              class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg transition font-medium"
-            >
-              Try Again
-            </button>
-          </div>
+            <!-- Error -->
+            <div id="errorState" class="hidden text-center py-12">
+                <div class="bg-red-900/10 border border-red-500/20 rounded-2xl p-8 max-w-md mx-auto">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-500 mb-4"></i>
+                    <p id="errorMessage" class="text-red-400 mb-6">Unable to sync pricing routes.</p>
+                    <button onclick="loadSubscriptionPlans()" class="px-6 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-full text-sm font-medium transition-colors">Retry Connection</button>
+                </div>
+            </div>
         </div>
-      </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section
-      id="how-it-works"
-      class="py-16 md:py-20 bg-gray-900 section-padding"
-    >
-      <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-12 md:mb-16 px-4">
-          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            📖 Simple Setup
-          </h2>
-          <p class="text-gray-300 text-lg max-w-3xl mx-auto">
-            Get started in just 3 easy steps
-          </p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          <div class="bg-gray-800 p-6 md:p-8 rounded-xl border border-gray-700">
-            <div class="text-4xl mb-4">1️⃣</div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">
-              Create Session
-            </h3>
-            <p class="text-gray-300">
-              Click "New Session" in your dashboard. A new WhatsApp session
-              appears instantly with 'CREATED' status.
-            </p>
-          </div>
-          <div class="bg-gray-800 p-6 md:p-8 rounded-xl border border-gray-700">
-            <div class="text-4xl mb-4">2️⃣</div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">
-              Connect via QR
-            </h3>
-            <p class="text-gray-300">
-              Click "Connect" to generate QR code. Scan it with your WhatsApp
-              mobile app to link your account instantly.
-            </p>
-          </div>
-          <div class="bg-gray-800 p-6 md:p-8 rounded-xl border border-gray-700">
-            <div class="text-4xl mb-4">3️⃣</div>
-            <h3 class="text-xl md:text-2xl font-semibold mb-3">
-              Start Managing
-            </h3>
-            <p class="text-gray-300">
-              Send messages, view chats, check account info, or logout
-              sessions—all in real-time from your dashboard.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section
-      class="bg-gradient-to-r from-green-600 to-green-400 py-16 md:py-20 text-center px-4"
-    >
-      <div class="max-w-4xl mx-auto">
-        <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-          Ready to Supercharge Your WhatsApp?
-        </h2>
-        <p class="text-lg md:text-xl mb-8 text-gray-900 font-medium">
-          Join thousands of businesses managing their WhatsApp communications
-          efficiently
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="/subscriptions"
-            class="bg-white text-green-700 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition text-lg shadow-lg hover:shadow-xl"
-          >
-            View Pricing Plans
-          </a>
-        </div>
-        <p class="text-gray-900 mt-6 text-sm">
-          By using WhatsApp Manager, you agree to our
-          <a href="/privacy-policy" class="underline">Privacy Policy</a>
-        </p>
-      </div>
     </section>
 
     <!-- Footer -->
-    <footer
-      class="bg-gray-900 text-gray-400 py-8 md:py-12 border-t border-gray-800"
-    >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-          <div class="mb-6 md:mb-0">
-            <div class="flex items-center">
-              <i class="fas fa-bolt"></i>
-              <span class="text-xl font-bold text-white">WaFastApi</span>
+    <footer class="border-t border-gray-800/60 bg-gray-950 pt-16 pb-8 text-center md:text-left">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center justify-center md:justify-start gap-3 mb-4">
+                    <i class="fab fa-whatsapp text-emerald-500 text-2xl"></i>
+                    <span class="text-xl font-bold text-white">WaFastApi</span>
+                </div>
+                <p class="text-gray-500 max-w-sm mx-auto md:mx-0 text-sm leading-relaxed">The premier un-official cloud API provider for massive scale WhatsApp Business architectures.</p>
             </div>
-            <p class="mt-2 text-sm">
-              © 2026 WhatsApp Multi-Session Manager. All rights reserved.
-            </p>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 text-sm">
-            <a href="#features" class="hover:text-white transition">Features</a>
-            <a href="#pricing" class="hover:text-white transition">Pricing</a>
-            <a href="#how-it-works" class="hover:text-white transition"
-              >How It Works</a
-            >
-            <a href="#" class="hover:text-white transition">Privacy Policy</a>
-            <a href="#" class="hover:text-white transition">Terms of Service</a>
-            <a
-              href="mailto:support@whatsappmanager.com"
-              class="hover:text-white transition"
-              >Contact Support</a
-            >
-          </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Resources</h4>
+                <ul class="space-y-2 text-sm text-gray-500">
+                    <li><a href="/doc" class="hover:text-emerald-400 transition-colors">Documentation</a></li>
+                    <li><a href="/login" class="hover:text-emerald-400 transition-colors">API Dashboard</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Legal</h4>
+                <ul class="space-y-2 text-sm text-gray-500">
+                    <li><a href="#" class="hover:text-emerald-400 transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-emerald-400 transition-colors">Terms of Service</a></li>
+                </ul>
+            </div>
         </div>
-        <div class="mt-8 pt-8 border-t border-gray-800 text-center text-sm">
-          <p>
-            This is an independent tool and is not affiliated with, endorsed by,
-            or connected to WhatsApp LLC or Meta Platforms, Inc.
-          </p>
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 border-t border-gray-800/60 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
+            <p>&copy; 2026 WaFastApi Solutions. All rights reserved.</p>
+            <p class="mt-4 md:mt-0">Not affiliated with WhatsApp LLC.</p>
         </div>
-      </div>
     </footer>
 
     <script>
-      // API Configuration
-      const API_BASE_URL = "/api";
-      const SUBSCRIPTION_API = `${API_BASE_URL}/subscription/list`;
+        const API_BASE_URL = "/api";
+        const SUBSCRIPTION_API = `${API_BASE_URL}/subscription/list`;
+        const currencySymbols = { BDT: "৳", USD: "$", EUR: "€", GBP: "£", INR: "₹", AUD: "A$", CAD: "C$" };
 
-      // DOM Elements
-      const loadingElement = document.getElementById("loadingPlans");
-      const plansContainer = document.getElementById("plansContainer");
-      const errorState = document.getElementById("errorState");
-      const errorMessage = document.getElementById("errorMessage");
-      const billingTypeElement = document.getElementById("billingType");
-      const currencyTypeElement = document.getElementById("currencyType");
-      const mobileMenuButton = document.getElementById("mobile-menu-button");
-      const mobileMenu = document.getElementById("mobile-menu");
-
-      // Mobile menu toggle
-      mobileMenuButton.addEventListener("click", () => {
-        mobileMenu.classList.toggle("hidden");
-      });
-
-      // Close mobile menu when clicking outside
-      document.addEventListener("click", (event) => {
-        if (
-          !mobileMenu.contains(event.target) &&
-          !mobileMenuButton.contains(event.target)
-        ) {
-          mobileMenu.classList.add("hidden");
+        function formatCurrency(amount, currency) {
+            return `${currencySymbols[currency] || currency}${amount.toLocaleString()}`;
         }
-      });
 
-      // Smooth scrolling for anchor links
-      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-        anchor.addEventListener("click", function (e) {
-          if (this.getAttribute("href") === "#") return;
-
-          e.preventDefault();
-          const targetId = this.getAttribute("href");
-          if (targetId === "#") return;
-
-          const targetElement = document.querySelector(targetId);
-          if (targetElement) {
-            // Close mobile menu if open
-            mobileMenu.classList.add("hidden");
-
-            // Smooth scroll
-            window.scrollTo({
-              top: targetElement.offsetTop - 80,
-              behavior: "smooth",
-            });
-          }
-        });
-      });
-
-      // Currency symbol mapping
-      const currencySymbols = {
-        BDT: "৳",
-        USD: "$",
-        EUR: "€",
-        GBP: "£",
-        INR: "₹",
-        AUD: "A$",
-        CAD: "C$",
-      };
-
-      // Format currency
-      function formatCurrency(amount, currency) {
-        const symbol = currencySymbols[currency] || currency;
-        if (["USD", "EUR", "GBP", "AUD", "CAD"].includes(currency)) {
-          return `${symbol}${amount.toLocaleString()}`;
+        function createPlanCard(plan, currency, billing) {
+            const isPro = plan.highlighted;
+            const cardBg = isPro ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-emerald-500/50' : 'bg-gray-900 border-gray-800 hover:border-gray-700';
+            const btnBg = isPro ? 'bg-emerald-500 text-white hover:bg-emerald-400 shadow-lg shadow-emerald-500/20' : 'bg-gray-800 text-white hover:bg-gray-700';
+            
+            return `
+                <div class="relative p-8 rounded-3xl border ${cardBg} transition-all flex flex-col h-full group">
+                    ${isPro ? '<div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-bold rounded-full lowercase tracking-wider">Most Popular</div>' : ''}
+                    <h3 class="text-xl font-bold text-white mb-2">${plan.name}</h3>
+                    <p class="text-sm text-gray-400 mb-6 h-10">${plan.description}</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-extrabold text-white">${formatCurrency(plan.price, currency)}</span>
+                        <span class="text-sm text-gray-500 ml-1">/${billing}</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        ${plan.features.map(f => `
+                            <li class="flex items-center gap-3 text-sm text-gray-300">
+                                <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i> <span>${f}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <a href="/register" class="w-full block text-center py-3 rounded-xl font-semibold transition-all ${btnBg}">Get Instance</a>
+                </div>
+            `;
         }
-        return `${symbol}${amount.toLocaleString()}`;
-      }
 
-      // Format billing type
-      function formatBillingType(billing) {
-        return billing.charAt(0).toUpperCase() + billing.slice(1);
-      }
+        async function loadSubscriptionPlans() {
+            const loading = document.getElementById('loadingPlans');
+            const container = document.getElementById('plansContainer');
+            const errState = document.getElementById('errorState');
+            
+            loading.classList.remove('hidden'); container.classList.add('hidden'); errState.classList.add('hidden');
 
-      // Get button text based on plan
-      function getButtonText(plan) {
-        if (plan.tag === "Current") return "Current Plan";
-        if (plan.highlighted) return "Get Started";
-        return "Choose Plan";
-      }
-
-      // Create plan card HTML
-      function createPlanCard(plan, currency, billing) {
-        const isHighlighted = plan.highlighted || false;
-        const hasTag = plan.tag && plan.tag !== "";
-        const buttonText = getButtonText(plan);
-        const buttonClass = isHighlighted
-          ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-          : "bg-gray-700 hover:bg-gray-600";
-
-        return `
-          <div class="plan-card bg-gray-900 rounded-xl p-6 md:p-8 border-2 ${isHighlighted ? "border-green-500" : "border-gray-700"} relative h-full flex flex-col">
-            ${
-              hasTag
-                ? `
-              <div class="absolute top-4 right-4">
-                <span class="${plan.tag === "Current" ? "bg-green-600" : plan.tag === "Popular" ? "bg-orange-500" : "bg-blue-500"} text-white px-3 py-1 rounded-full text-xs font-semibold">
-                  ${plan.tag}
-                </span>
-              </div>
-            `
-                : ""
+            try {
+                const res = await fetch(SUBSCRIPTION_API, { signal: AbortSignal.timeout(10000) });
+                if(!res.ok) throw new Error("fetch fail");
+                const data = await res.json();
+                
+                const { currency, billing, plans } = data.subscriptions;
+                document.getElementById('billingType').textContent = billing.toUpperCase() + " BILLING PLAN";
+                
+                container.innerHTML = plans.map(p => createPlanCard(p, currency, billing)).join('');
+                loading.classList.add('hidden');
+                container.classList.remove('hidden');
+            } catch(e) {
+                loading.classList.add('hidden');
+                errState.classList.remove('hidden');
             }
-            
-            <div class="mb-6 flex-grow">
-              <h3 class="text-2xl md:text-3xl font-bold mb-3">${plan.name}</h3>
-              <p class="text-gray-400 mb-6 text-sm md:text-base">
-                ${plan.description}
-              </p>
-              
-              <div class="mb-6">
-                <div class="flex items-baseline mb-2">
-                  <span class="text-3xl md:text-4xl font-bold">${formatCurrency(plan.price, currency)}</span>
-                  <span class="text-gray-400 ml-2">/${billing}</span>
-                </div>
-                <div class="text-gray-400 text-sm">
-                  <div class="flex items-center mb-1">
-                    <span>${formatCurrency(plan.pricePerSession, currency)} per session</span>
-                  </div>
-                  <div class="flex items-center">
-                    <span>${plan.sessions} WhatsApp Number${plan.sessions !== 1 ? "s" : ""}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="mt-6">
-                <h4 class="font-semibold mb-3 text-gray-300">Includes:</h4>
-                <ul class="feature-list space-y-2.5">
-                  ${plan.features.map((feature) => `<li class="text-sm md:text-base text-gray-300">${feature}</li>`).join("")}
-                </ul>
-              </div>
-            </div>
-            
-            <button class="w-full ${buttonClass} text-white font-bold py-3.5 rounded-lg transition duration-300 mt-6 text-lg shadow-lg hover:shadow-xl">
-              ${buttonText}
-            </button>
-          </div>
-        `;
-      }
-
-      // Fetch subscription plans from API
-      async function loadSubscriptionPlans() {
-        try {
-          // Show loading state
-          loadingElement.classList.remove("hidden");
-          plansContainer.classList.add("hidden");
-          errorState.classList.add("hidden");
-
-          // Fetch data from API
-          const response = await fetch(SUBSCRIPTION_API, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            // Add timeout
-            signal: AbortSignal.timeout(10000),
-          });
-
-          if (!response.ok) {
-            throw new Error(`Failed to load plans (${response.status})`);
-          }
-
-          const data = await response.json();
-
-          if (!data.subscriptions || !Array.isArray(data.subscriptions.plans)) {
-            throw new Error("Invalid data received from server");
-          }
-
-          // Update currency and billing info
-          const { currency, billing, plans } = data.subscriptions;
-
-          billingTypeElement.textContent = formatBillingType(billing);
-          currencyTypeElement.textContent = `Currency: ${currency}`;
-
-          // Generate and insert plan cards
-          const plansHTML = plans
-            .map((plan) => createPlanCard(plan, currency, billing))
-            .join("");
-          plansContainer.innerHTML = plansHTML;
-
-          // Add click handlers to plan buttons
-          plansContainer.querySelectorAll("button").forEach((button, index) => {
-            button.addEventListener("click", () => {
-              const plan = plans[index];
-              window.location.href = "/subscriptions";
-            });
-          });
-
-          // Show plans
-          loadingElement.classList.add("hidden");
-          plansContainer.classList.remove("hidden");
-        } catch (error) {
-          console.error("Error loading plans:", error);
-
-          // Show error state
-          loadingElement.classList.add("hidden");
-          errorMessage.textContent =
-            error.name === "TimeoutError"
-              ? "Request timeout. Please check your connection."
-              : "Unable to load pricing plans. Please try again.";
-          errorState.classList.remove("hidden");
         }
-      }
-
-      // Load plans when page loads
-      document.addEventListener("DOMContentLoaded", loadSubscriptionPlans);
-
-      // Optional: Refresh plans every 10 minutes
-      setInterval(loadSubscriptionPlans, 10 * 60 * 1000);
-
-      // Add AbortSignal.timeout polyfill if needed
-      if (!AbortSignal.timeout) {
-        AbortSignal.timeout = function (ms) {
-          const controller = new AbortController();
-          setTimeout(
-            () =>
-              controller.abort(
-                new DOMException("TimeoutError", "TimeoutError"),
-              ),
-            ms,
-          );
-          return controller.signal;
-        };
-      }
+        
+        document.addEventListener('DOMContentLoaded', loadSubscriptionPlans);
     </script>
-  </body>
+</body>
 </html>

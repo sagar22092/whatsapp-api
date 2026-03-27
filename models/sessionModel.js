@@ -17,6 +17,26 @@ const sessionModel = new mongoose.Schema(
     webhookUrl: {
       type: String,
     },
+    fallbackEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    fallbackMessage: {
+      type: String,
+      default: "",
+    },
+    aiEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    openAiKey: {
+      type: String,
+      default: "",
+    },
+    aiPrompt: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true },
 );

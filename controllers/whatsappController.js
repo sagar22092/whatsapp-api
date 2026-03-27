@@ -1,5 +1,6 @@
 import { sendMessage, getGroupList } from "../lib/whatsapp.js";
 import sessionModel from "../models/sessionModel.js";
+import fs from "fs/promises";
 
 /**
  * Send a text message via API key
@@ -112,37 +113,35 @@ export async function sendPhoto(req, res) {
     const jid = number || group;
     const isGroup = Boolean(group);
 
-    const results = [];
-
-    // send all images
-
-    for (const file of req.files) {
-      //check if the file is an image
-      if (!file.mimetype.startsWith("image/")) {
-        return res.status(400).json({ error: "File is not an image" });
+    const processUploads = async () => {
+      for (const file of req.files) {
+        try {
+          if (!file.mimetype.startsWith("image/")) continue;
+          await sendMessage(
+            session.user,
+            session._id,
+            jid,
+            {
+              image: { url: file.path },
+              caption: caption || "",
+              viewOnce,
+            },
+            isGroup,
+          );
+        } catch (err) {
+          console.error("Error sending photo in background:", err);
+        } finally {
+          try { await fs.unlink(file.path); } catch (e) {}
+        }
+        await new Promise((r) => setTimeout(r, 500));
       }
-      const result = await sendMessage(
-        session.user,
-        session._id,
-        jid,
-        {
-          image: file.buffer,
-          caption: caption || "",
-          viewOnce,
-        },
-        isGroup,
-      );
-
-      results.push(result);
-
-      // small delay to avoid WhatsApp rate limits / bans
-      await new Promise((r) => setTimeout(r, 500));
-    }
+    };
+    processUploads();
 
     return res.json({
       success: true,
-      sent: req.files.length,
-      messages: results,
+      message: "Processing media uploads in background",
+      queued: req.files.length,
     });
   } catch (error) {
     console.error(error);
@@ -173,35 +172,36 @@ export async function sendVideo(req, res) {
 
     const jid = number || group;
     const isGroup = Boolean(group);
-    const results = [];
-
-    for (const file of req.files) {
-      // Optional: validate video mimetype
-      if (!file.mimetype.startsWith("video/")) continue;
-
-      const result = await sendMessage(
-        session.user,
-        session._id,
-        jid,
-        {
-          video: file.buffer,
-          caption: caption || "",
-          gifPlayback: gif, // true if you want to send as GIF
-          viewOnce,
-        },
-        isGroup,
-      );
-
-      results.push(result);
-
-      // anti-ban delay
-      await new Promise((r) => setTimeout(r, 500));
-    }
+    const processUploads = async () => {
+      for (const file of req.files) {
+        try {
+          if (!file.mimetype.startsWith("video/")) continue;
+          await sendMessage(
+            session.user,
+            session._id,
+            jid,
+            {
+              video: { url: file.path },
+              caption: caption || "",
+              gifPlayback: gif,
+              viewOnce,
+            },
+            isGroup,
+          );
+        } catch (err) {
+          console.error("Error sending video in background:", err);
+        } finally {
+          try { await fs.unlink(file.path); } catch (e) {}
+        }
+        await new Promise((r) => setTimeout(r, 500));
+      }
+    };
+    processUploads();
 
     return res.json({
       success: true,
-      sent: results.length,
-      messages: results,
+      message: "Processing video uploads in background",
+      queued: req.files.length,
     });
   } catch (error) {
     console.error(error);
@@ -232,34 +232,35 @@ export async function sendAudio(req, res) {
 
     const jid = number || group;
     const isGroup = Boolean(group);
-    const results = [];
-
-    for (const file of req.files) {
-      // optional: validate audio MIME type
-      if (!file.mimetype.startsWith("audio/")) continue;
-
-      const result = await sendMessage(
-        session.user,
-        session._id,
-        jid,
-        {
-          audio: file.buffer,
-          mimetype: file.mimetype,
-          ptt: voice === true, // true = WhatsApp voice note
-        },
-        isGroup,
-      );
-
-      results.push(result);
-
-      // small delay to avoid WhatsApp temporary ban
-      await new Promise((r) => setTimeout(r, 500));
-    }
+    const processUploads = async () => {
+      for (const file of req.files) {
+        try {
+          if (!file.mimetype.startsWith("audio/")) continue;
+          await sendMessage(
+            session.user,
+            session._id,
+            jid,
+            {
+              audio: { url: file.path },
+              mimetype: file.mimetype,
+              ptt: voice === true,
+            },
+            isGroup,
+          );
+        } catch (err) {
+          console.error("Error sending audio in background:", err);
+        } finally {
+          try { await fs.unlink(file.path); } catch (e) {}
+        }
+        await new Promise((r) => setTimeout(r, 500));
+      }
+    };
+    processUploads();
 
     return res.json({
       success: true,
-      sent: results.length,
-      messages: results,
+      message: "Processing audio uploads in background",
+      queued: req.files.length,
     });
   } catch (error) {
     console.error(error);
@@ -290,32 +291,35 @@ export async function sendFile(req, res) {
 
     const jid = number || group;
     const isGroup = Boolean(group);
-    const results = [];
-
-    for (const file of req.files) {
-      const result = await sendMessage(
-        session.user,
-        session._id,
-        jid,
-        {
-          document: file.buffer, // send any file
-          mimetype: file.mimetype, // MIME type
-          fileName: file.originalname, // original filename
-          caption: caption || "",
-        },
-        isGroup,
-      );
-
-      results.push(result);
-
-      // small delay to avoid WhatsApp temporary ban
-      await new Promise((r) => setTimeout(r, 500));
-    }
+    const processUploads = async () => {
+      for (const file of req.files) {
+        try {
+          await sendMessage(
+            session.user,
+            session._id,
+            jid,
+            {
+              document: { url: file.path },
+              mimetype: file.mimetype,
+              fileName: file.originalname,
+              caption: caption || "",
+            },
+            isGroup,
+          );
+        } catch (err) {
+          console.error("Error sending file in background:", err);
+        } finally {
+          try { await fs.unlink(file.path); } catch (e) {}
+        }
+        await new Promise((r) => setTimeout(r, 500));
+      }
+    };
+    processUploads();
 
     return res.json({
       success: true,
-      sent: results.length,
-      messages: results,
+      message: "Processing file uploads in background",
+      queued: req.files.length,
     });
   } catch (error) {
     console.error(error);

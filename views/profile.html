@@ -1,1993 +1,376 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Profile - WaFastApi</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaFastApi | Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family:
-          "Inter",
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Tahoma,
-          Geneva,
-          Verdana,
-          sans-serif;
-      }
-
-      :root {
-        --primary: #6366f1;
-        --primary-dark: #4f46e5;
-        --primary-light: #818cf8;
-        --secondary: #f43f5e;
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --dark: #1f2937;
-        --light: #f8fafc;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-300: #d1d5db;
-        --gray-400: #9ca3af;
-        --gray-500: #6b7280;
-        --gray-600: #4b5563;
-        --shadow:
-          0 10px 25px -5px rgba(0, 0, 0, 0.1),
-          0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        --shadow-sm:
-          0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        --radius: 12px;
-        --radius-sm: 8px;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      body {
-        background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
-        min-height: 100vh;
-        padding: 16px;
-        color: var(--dark);
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        width: 100%;
-      }
-
-      /* Header Styles */
-      .header {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin-bottom: 24px;
-        padding: 20px 24px;
-        background: white;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        position: relative;
-      }
-
-      @media (min-width: 768px) {
-        .header {
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px 32px;
-        }
-      }
-
-      .logo {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .logo-icon {
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(
-          135deg,
-          var(--primary) 0%,
-          var(--primary-dark) 100%
-        );
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 18px;
-      }
-
-      .logo-text {
-        font-size: 22px;
-        font-weight: 700;
-        background: linear-gradient(
-          135deg,
-          var(--primary) 0%,
-          var(--primary-dark) 100%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .nav-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
-      }
-
-      @media (min-width: 768px) {
-        .nav-links {
-          justify-content: flex-end;
-          gap: 12px;
-        }
-      }
-
-      .nav-link {
-        padding: 10px 18px;
-        background: var(--primary);
-        color: white;
-        text-decoration: none;
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: 14px;
-        transition: var(--transition);
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .nav-link:hover {
-        background: var(--primary-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-      }
-
-      .nav-link.logout {
-        background: var(--danger);
-      }
-
-      .nav-link.logout:hover {
-        background: #dc2626;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-      }
-
-      /* Alert Container */
-      .alert-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        width: 90%;
-        max-width: 400px;
-      }
-
-      @media (max-width: 640px) {
-        .alert-container {
-          left: 50%;
-          transform: translateX(-50%);
-          width: 95%;
-        }
-      }
-
-      /* Alert Styles */
-      .alert {
-        padding: 16px 20px;
-        border-radius: var(--radius);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        animation: slideIn 0.3s ease-out;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-      }
-
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateX(100%);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
-
-      @keyframes slideOut {
-        from {
-          opacity: 1;
-          transform: translateX(0);
-        }
-        to {
-          opacity: 0;
-          transform: translateX(100%);
-        }
-      }
-
-      .alert.hiding {
-        animation: slideOut 0.3s ease-out forwards;
-      }
-
-      .alert-success {
-        background: linear-gradient(
-          135deg,
-          rgba(16, 185, 129, 0.95) 0%,
-          rgba(5, 150, 105, 0.95) 100%
-        );
-        color: white;
-      }
-
-      .alert-error {
-        background: linear-gradient(
-          135deg,
-          rgba(239, 68, 68, 0.95) 0%,
-          rgba(220, 38, 38, 0.95) 100%
-        );
-        color: white;
-      }
-
-      .alert-info {
-        background: linear-gradient(
-          135deg,
-          rgba(59, 130, 246, 0.95) 0%,
-          rgba(37, 99, 235, 0.95) 100%
-        );
-        color: white;
-      }
-
-      .alert-warning {
-        background: linear-gradient(
-          135deg,
-          rgba(245, 158, 11, 0.95) 0%,
-          rgba(217, 119, 6, 0.95) 100%
-        );
-        color: white;
-      }
-
-      .alert-icon {
-        font-size: 20px;
-        margin-top: 2px;
-      }
-
-      .alert-content {
-        flex: 1;
-      }
-
-      .alert-title {
-        font-weight: 600;
-        margin-bottom: 4px;
-        font-size: 15px;
-      }
-
-      .alert-message {
-        font-size: 14px;
-        opacity: 0.9;
-      }
-
-      .alert-close {
-        background: none;
-        border: none;
-        color: inherit;
-        font-size: 18px;
-        cursor: pointer;
-        opacity: 0.8;
-        transition: opacity 0.2s;
-        padding: 0;
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .alert-close:hover {
-        opacity: 1;
-      }
-
-      /* Profile Grid */
-      .profile-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-      }
-
-      @media (min-width: 768px) {
-        .profile-grid {
-          display: grid;
-          grid-template-columns: 1fr 2fr;
-          gap: 32px;
-        }
-      }
-
-      .profile-card,
-      .edit-card {
-        background: white;
-        border-radius: var(--radius);
-        padding: 24px;
-        box-shadow: var(--shadow);
-        width: 100%;
-      }
-
-      /* Profile Header */
-      .profile-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 28px;
-        flex-direction: column;
-        text-align: center;
-        gap: 16px;
-      }
-
-      @media (min-width: 480px) {
-        .profile-header {
-          flex-direction: row;
-          text-align: left;
-          gap: 20px;
-        }
-      }
-
-      .profile-avatar {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(
-          135deg,
-          var(--primary) 0%,
-          var(--primary-dark) 100%
-        );
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 32px;
-        font-weight: 600;
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
-      }
-
-      .profile-info h2 {
-        color: var(--dark);
-        margin-bottom: 6px;
-        font-size: 22px;
-      }
-
-      .profile-info p {
-        color: var(--gray-500);
-        font-size: 14px;
-      }
-
-      /* Info Groups */
-      .info-group {
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--gray-100);
-      }
-
-      .info-group:last-child {
-        border-bottom: none;
-      }
-
-      .info-group label {
-        display: block;
-        color: var(--gray-500);
-        font-size: 12px;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-      }
-
-      .info-group .value {
-        font-size: 16px;
-        color: var(--dark);
-        font-weight: 500;
-        word-break: break-word;
-      }
-
-      /* Balance Info */
-      .balance-info {
-        background: linear-gradient(
-          135deg,
-          var(--primary) 0%,
-          var(--primary-dark) 100%
-        );
-        color: white;
-        padding: 20px;
-        border-radius: var(--radius);
-        text-align: center;
-        margin-top: 20px;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
-      }
-
-      .balance-info h3 {
-        margin-bottom: 8px;
-        opacity: 0.9;
-        font-size: 14px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      .balance-amount {
-        font-size: 36px;
-        font-weight: 700;
-      }
-
-      /* Edit Card Styles */
-      .edit-card h3 {
-        color: var(--dark);
-        margin-bottom: 24px;
-        font-size: 20px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid var(--gray-100);
-      }
-
-      /* Form Styles */
-      .form-group {
-        margin-bottom: 20px;
-        position: relative;
-      }
-
-      .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: var(--gray-600);
-        font-weight: 600;
-        font-size: 14px;
-      }
-
-      .form-control {
-        width: 100%;
-        padding: 14px 16px;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-sm);
-        font-size: 15px;
-        transition: var(--transition);
-        background: var(--gray-100);
-        color: var(--dark);
-      }
-
-      .form-control:focus {
-        outline: none;
-        border-color: var(--primary);
-        background: white;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-      }
-
-      .form-control.error {
-        border-color: var(--danger);
-        background: rgba(239, 68, 68, 0.05);
-      }
-
-      .form-control.success {
-        border-color: var(--success);
-        background: rgba(16, 185, 129, 0.05);
-      }
-
-      .password-wrapper {
-        position: relative;
-      }
-
-      .toggle-password {
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: var(--gray-400);
-        cursor: pointer;
-        font-size: 18px;
-        transition: color 0.2s;
-        padding: 4px;
-      }
-
-      .toggle-password:hover {
-        color: var(--primary);
-      }
-
-      .form-row {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      @media (min-width: 768px) {
-        .form-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-        }
-      }
-
-      .btn-group {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 24px;
-      }
-
-      @media (min-width: 768px) {
-        .btn-group {
-          flex-direction: row;
-          gap: 16px;
-          margin-top: 32px;
-        }
-      }
-
-      .btn {
-        padding: 14px 24px;
-        border: none;
-        border-radius: var(--radius-sm);
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: var(--transition);
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-
-      .btn-primary {
-        background: linear-gradient(
-          135deg,
-          var(--primary) 0%,
-          var(--primary-dark) 100%
-        );
-        color: white;
-        flex: 1;
-      }
-
-      .btn-primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
-      }
-
-      .btn-secondary {
-        background: white;
-        color: var(--primary);
-        border: 2px solid var(--primary);
-        flex: 1;
-      }
-
-      .btn-secondary:hover:not(:disabled) {
-        background: var(--primary);
-        color: white;
-      }
-
-      .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none !important;
-        box-shadow: none !important;
-      }
-
-      /* Loading Spinner */
-      .loading {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 1s ease-in-out infinite;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* Tab Styles */
-      .tab-container {
-        margin-bottom: 24px;
-      }
-
-      .tabs {
-        display: flex;
-        border-bottom: 2px solid var(--gray-100);
-        overflow-x: auto;
-      }
-
-      .tab {
-        padding: 14px 24px;
-        cursor: pointer;
-        font-weight: 600;
-        color: var(--gray-500);
-        transition: var(--transition);
-        border-bottom: 3px solid transparent;
-        margin-bottom: -2px;
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .tab:hover {
-        color: var(--primary);
-      }
-
-      .tab.active {
-        color: var(--primary);
-        border-bottom-color: var(--primary);
-      }
-
-      .tab-content {
-        display: none;
-        animation: fadeIn 0.5s;
-      }
-
-      .tab-content.active {
-        display: block;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Transaction Styles */
-      #transactionsList {
-        max-height: 400px;
-        overflow-y: auto;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--gray-200);
-      }
-
-      .transaction-item {
-        padding: 16px;
-        border-bottom: 1px solid var(--gray-100);
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        transition: background-color 0.2s;
-      }
-
-      .transaction-item:hover {
-        background: var(--gray-50);
-      }
-
-      .transaction-item:last-child {
-        border-bottom: none;
-      }
-
-      .transaction-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        flex-shrink: 0;
-      }
-
-      .icon-credit {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--success);
-      }
-
-      .icon-debit {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger);
-      }
-
-      .transaction-details {
-        flex: 1;
-        min-width: 0;
-      }
-
-      .transaction-amount {
-        font-weight: 700;
-        font-size: 16px;
-      }
-
-      .transaction-meta {
-        font-size: 13px;
-        color: var(--gray-500);
-        margin-top: 4px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .transaction-date {
-        font-size: 12px;
-        color: var(--gray-400);
-        flex-shrink: 0;
-      }
-
-      /* Transaction Summary */
-      .summary-card {
-        background: linear-gradient(135deg, var(--gray-100) 0%, #e5e7eb 100%);
-        padding: 20px;
-        border-radius: var(--radius);
-        margin-top: 24px;
-        display: none;
-        border: 1px solid var(--gray-200);
-      }
-
-      .summary-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        text-align: center;
-      }
-
-      @media (max-width: 640px) {
-        .summary-stats {
-          grid-template-columns: 1fr;
-          gap: 16px;
-        }
-      }
-
-      .stat-item {
-        padding: 12px;
-        background: white;
-        border-radius: var(--radius-sm);
-        box-shadow: var(--shadow-sm);
-      }
-
-      .stat-item h4 {
-        font-size: 12px;
-        color: var(--gray-500);
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .stat-value {
-        font-size: 20px;
-        font-weight: 700;
-      }
-
-      .text-success {
-        color: var(--success);
-      }
-      .text-danger {
-        color: var(--danger);
-      }
-      .text-primary {
-        color: var(--primary);
-      }
-
-      /* Filter Styles */
-      .filter-row {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 20px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      .filter-select {
-        padding: 10px 14px;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-sm);
-        background: white;
-        font-size: 14px;
-        color: var(--dark);
-        cursor: pointer;
-        transition: var(--transition);
-        flex: 1;
-        min-width: 200px;
-      }
-
-      .filter-select:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-      }
-
-      .refresh-btn {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 10px 18px;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        transition: var(--transition);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .refresh-btn:hover {
-        background: var(--primary-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-      }
-
-      /* Mobile Menu */
-      .mobile-menu-toggle {
-        display: none;
-        background: none;
-        border: none;
-        font-size: 24px;
-        color: var(--primary);
-        cursor: pointer;
-        padding: 8px;
-        position: absolute;
-        top: 20px;
-        right: 20px;
-      }
-
-      @media (max-width: 767px) {
-        .mobile-menu-toggle {
-          display: block;
-        }
-
-        .nav-links {
-          flex-direction: column;
-          max-height: 0;
-          overflow: hidden;
-          transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          width: 100%;
-          position: absolute;
-          top: 100%;
-          left: 0;
-          background: white;
-          border-radius: var(--radius);
-          box-shadow: var(--shadow);
-          z-index: 10;
-          padding: 0;
-        }
-
-        .nav-links.active {
-          max-height: 400px;
-          padding: 16px;
-          margin-top: 12px;
-        }
-
-        .nav-link {
-          width: 100%;
-          text-align: center;
-          justify-content: center;
-        }
-
-        .header {
-          padding-bottom: 16px;
-        }
-      }
-
-      /* Empty State */
-      .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        color: var(--gray-400);
-      }
-
-      .empty-state i {
-        font-size: 48px;
-        margin-bottom: 16px;
-        opacity: 0.5;
-      }
-
-      .empty-state h4 {
-        font-size: 18px;
-        margin-bottom: 8px;
-        color: var(--gray-500);
-      }
-
-      /* Loading State */
-      .loading-state {
-        text-align: center;
-        padding: 40px 20px;
-      }
-
-      .loading-spinner {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        border: 4px solid var(--gray-200);
-        border-top-color: var(--primary);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 16px;
-      }
-
-      /* Validation Error */
-      .validation-error {
-        color: var(--danger);
-        font-size: 12px;
-        margin-top: 6px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        animation: fadeIn 0.3s;
-      }
-
-      /* Responsive adjustments */
-      @media (max-width: 480px) {
-        .profile-card,
-        .edit-card {
-          padding: 20px;
-        }
-
-        .balance-amount {
-          font-size: 28px;
-        }
-
-        .tabs {
-          justify-content: space-between;
-        }
-
-        .tab {
-          padding: 12px 16px;
-          font-size: 14px;
-        }
-      }
-
-      /* Smooth scrolling */
-      html {
-        scroll-behavior: smooth;
-      }
-
-      /* Focus styles for accessibility */
-      :focus-visible {
-        outline: 3px solid var(--primary);
-        outline-offset: 2px;
-      }
+        body { font-family: 'Inter', sans-serif; background-color: #030712; color: #f3f4f6; overflow-x: hidden; }
+        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .alert-container { position: fixed; top: 20px; right: 20px; z-index: 1000; width: 90%; max-width: 400px; }
+        .alert { padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; gap: 12px; backdrop-filter: blur(10px); color: white; }
+        .alert-success { background: rgba(16,185,129,0.9); border: 1px solid #10b981; }
+        .alert-error { background: rgba(239,68,68,0.9); border: 1px solid #ef4444; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
-  </head>
-  <body>
-    <div class="container">
-      <!-- Alert Container -->
-      <div class="alert-container" id="alertContainer"></div>
+</head>
+<body class="antialiased selection:bg-emerald-500/30">
 
-      <!-- Header -->
-      <div class="header">
-        <div class="logo">
-          <i class="fas fa-bolt logo-icon"></i>
-          <div class="logo-text">WaFastApi</div>
-        </div>
-        <button
-          class="mobile-menu-toggle"
-          id="mobileMenuToggle"
-          aria-label="Toggle menu"
-        >
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="nav-links" id="navLinks">
-          <a href="/sessions" class="nav-link">
-            <i class="fas fa-tachometer-alt"></i>
-            Dashboard
-          </a>
-          <a href="/subscriptions" class="nav-link">
-            <i class="fas fa-calendar-alt"></i>
-            Subscriptions
-          </a>
-          <a href="/recharge" class="nav-link">
-            <i class="fas fa-wallet"></i>
-            Recharge
-          </a>
-          <button onclick="logout()" class="nav-link logout">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-          </button>
-        </div>
-      </div>
+    <div class="alert-container" id="alertContainer"></div>
 
-      <!-- Profile Grid -->
-      <div class="profile-grid">
-        <!-- Profile Card -->
-        <div class="profile-card">
-          <div class="profile-header">
-            <div class="profile-avatar" id="userAvatar">
-              <!-- Initial will be inserted by JS -->
-            </div>
-            <div class="profile-info">
-              <h2 id="userName">Loading...</h2>
-              <p id="userEmail">Loading...</p>
-            </div>
-          </div>
+    <!-- Navigation injected by /js/nav.js -->
+    <script src="/js/nav.js"></script>
 
-          <div class="info-group">
-            <label>Username</label>
-            <div class="value" id="userUsername">Loading...</div>
-          </div>
-
-          <div class="info-group">
-            <label>Account Created</label>
-            <div class="value" id="userCreatedAt">Loading...</div>
-          </div>
-
-          <div class="balance-info">
-            <h3>Current Balance</h3>
-            <div class="balance-amount">
-              ৳ <span id="userBalance">0.00</span>
-            </div>
-          </div>
+    <!-- Main Content -->
+    <div class="pb-12 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <script>injectNav('profile');</script>
+        
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Profile Settings</h1>
+            <p class="text-gray-400 text-sm">Manage your account identity and billing history.</p>
         </div>
 
-        <!-- Edit & Transactions Card -->
-        <div class="edit-card">
-          <!-- Tabs -->
-          <div class="tab-container">
-            <div class="tabs">
-              <div class="tab active" data-tab="edit-profile">
-                <i class="fas fa-user-edit"></i>
-                Edit Profile
-              </div>
-              <div class="tab" data-tab="change-password">
-                <i class="fas fa-key"></i>
-                Change Password
-              </div>
-              <div class="tab" data-tab="transaction-history">
-                <i class="fas fa-history"></i>
-                Transactions
-              </div>
-            </div>
-          </div>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Info Panel -->
+            <div class="w-full lg:w-1/3 space-y-6">
+                <div class="bg-gray-900 border border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center shadow-xl">
+                    <div id="userAvatar" class="w-24 h-24 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-emerald-500/20 mb-4 ring-4 ring-gray-900 ring-offset-4 ring-offset-emerald-500/10">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <h2 id="userName" class="text-xl font-bold text-white mb-1 tracking-tight">Loading...</h2>
+                    <p id="userEmail" class="text-gray-400 text-sm mb-6">Loading...</p>
 
-          <!-- Edit Profile Tab -->
-          <div class="tab-content active" id="edit-profile">
-            <h3>Edit Profile Information</h3>
-            <form id="editProfileForm">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="editName">Full Name</label>
-                  <input
-                    type="text"
-                    id="editName"
-                    class="form-control"
-                    required
-                  />
-                  <div
-                    class="validation-error"
-                    id="nameError"
-                    style="display: none"
-                  ></div>
+                    <div class="w-full bg-gray-800/50 rounded-2xl p-4 mb-4 text-left border border-gray-700/50">
+                        <p class="text-xs text-gray-500 font-semibold mb-1 uppercase tracking-wider">Username</p>
+                        <p id="userUsername" class="text-gray-300 font-medium">Loading...</p>
+                    </div>
+
+                    <div class="w-full bg-gray-800/50 rounded-2xl p-4 mb-6 text-left border border-gray-700/50">
+                        <p class="text-xs text-gray-500 font-semibold mb-1 uppercase tracking-wider">Account Created</p>
+                        <p id="userCreatedAt" class="text-gray-300 font-medium">Loading...</p>
+                    </div>
+
+                    <div class="w-full bg-gradient-to-br from-emerald-600 to-green-700 rounded-2xl p-6 text-center shadow-lg shadow-emerald-500/20">
+                        <p class="text-emerald-100 text-xs font-semibold uppercase tracking-wider mb-2">Wallet Balance</p>
+                        <h3 class="text-3xl font-bold text-white">৳ <span id="userBalance">0.00</span></h3>
+                    </div>
                 </div>
-                <div class="form-group">
-                  <label for="editUsername">Username</label>
-                  <input
-                    type="text"
-                    id="editUsername"
-                    class="form-control"
-                    required
-                  />
-                  <div
-                    class="validation-error"
-                    id="usernameError"
-                    style="display: none"
-                  ></div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="editEmail">Email Address</label>
-                <input
-                  type="email"
-                  id="editEmail"
-                  class="form-control"
-                  required
-                />
-                <div
-                  class="validation-error"
-                  id="emailError"
-                  style="display: none"
-                ></div>
-              </div>
-
-              <div class="btn-group">
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  id="saveProfileBtn"
-                >
-                  <i class="fas fa-save"></i>
-                  <span id="saveProfileText">Save Changes</span>
-                  <div
-                    id="saveProfileLoading"
-                    class="loading"
-                    style="display: none"
-                  ></div>
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  onclick="resetProfileForm()"
-                >
-                  <i class="fas fa-undo"></i>
-                  Reset
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Change Password Tab -->
-          <div class="tab-content" id="change-password">
-            <h3>Change Password</h3>
-            <form id="changePasswordForm">
-              <div class="form-group">
-                <label for="currentPassword">Current Password</label>
-                <div class="password-wrapper">
-                  <input
-                    type="password"
-                    id="currentPassword"
-                    class="form-control"
-                    required
-                  />
-                  <button
-                    type="button"
-                    class="toggle-password"
-                    onclick="togglePassword('currentPassword', this)"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
-                <div
-                  class="validation-error"
-                  id="currentPasswordError"
-                  style="display: none"
-                ></div>
-              </div>
-
-              <div class="form-group">
-                <label for="newPassword">New Password</label>
-                <div class="password-wrapper">
-                  <input
-                    type="password"
-                    id="newPassword"
-                    class="form-control"
-                    required
-                    minlength="6"
-                  />
-                  <button
-                    type="button"
-                    class="toggle-password"
-                    onclick="togglePassword('newPassword', this)"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
-                <div
-                  class="validation-error"
-                  id="newPasswordError"
-                  style="display: none"
-                ></div>
-              </div>
-
-              <div class="form-group">
-                <label for="confirmPassword">Confirm New Password</label>
-                <div class="password-wrapper">
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    class="form-control"
-                    required
-                    minlength="6"
-                  />
-                  <button
-                    type="button"
-                    class="toggle-password"
-                    onclick="togglePassword('confirmPassword', this)"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
-                <div
-                  class="validation-error"
-                  id="confirmPasswordError"
-                  style="display: none"
-                ></div>
-              </div>
-
-              <div class="btn-group">
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  id="changePasswordBtn"
-                >
-                  <i class="fas fa-key"></i>
-                  <span id="changePasswordText">Change Password</span>
-                  <div
-                    id="changePasswordLoading"
-                    class="loading"
-                    style="display: none"
-                  ></div>
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Transaction History Tab -->
-          <div class="tab-content" id="transaction-history">
-            <h3>Recent Transactions</h3>
-
-            <!-- Filter -->
-            <div class="filter-row">
-              <select
-                id="transactionFilter"
-                class="filter-select"
-                onchange="filterTransactions()"
-              >
-                <option value="all">All Transactions</option>
-                <option value="credit">Deposits Only</option>
-                <option value="debit">Spents Only</option>
-              </select>
-              <button
-                class="refresh-btn"
-                onclick="loadTransactions()"
-                type="button"
-              >
-                <i class="fas fa-sync-alt"></i>
-                Refresh
-              </button>
             </div>
 
-            <!-- Transactions List -->
-            <div id="transactionsList">
-              <div class="loading-state">
-                <div class="loading-spinner"></div>
-                <div>Loading transactions...</div>
-              </div>
-            </div>
+            <!-- Right Forms Panel -->
+            <div class="w-full lg:w-2/3">
+                <div class="bg-gray-900 border border-gray-800 rounded-3xl shadow-xl overflow-hidden">
+                    
+                    <!-- Tabs Header -->
+                    <div class="flex border-b border-gray-800 overflow-x-auto">
+                        <button class="tab-btn active px-6 py-4 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 transition-colors whitespace-nowrap" data-tab="edit-profile">
+                            <i class="fas fa-user-edit mr-2"></i> Edit Identity
+                        </button>
+                        <button class="tab-btn px-6 py-4 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors whitespace-nowrap" data-tab="change-password">
+                            <i class="fas fa-key mr-2"></i> Security
+                        </button>
+                        <button class="tab-btn px-6 py-4 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors whitespace-nowrap" data-tab="transaction-history">
+                            <i class="fas fa-history mr-2"></i> Billing History
+                        </button>
+                    </div>
 
-            <!-- Summary -->
-            <div class="summary-card" id="transactionSummary">
-              <div class="summary-stats">
-                <div class="stat-item">
-                  <h4>Total Deposits</h4>
-                  <div class="stat-value text-success">
-                    ৳ <span id="totalCredit">0</span>
-                  </div>
+                    <div class="p-6 md:p-8">
+                        <!-- Edit Profile -->
+                        <div id="edit-profile" class="tab-content active">
+                            <h3 class="text-lg font-bold text-white mb-6">Update Information</h3>
+                            <form id="editProfileForm" class="space-y-5">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Full Name</label>
+                                        <input type="text" id="editName" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm">
+                                        <p id="nameError" class="validation-error hidden text-rose-400 text-xs mt-2"></p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Username</label>
+                                        <input type="text" id="editUsername" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm">
+                                        <p id="usernameError" class="validation-error hidden text-rose-400 text-xs mt-2"></p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
+                                    <input type="email" id="editEmail" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm">
+                                    <p id="emailError" class="validation-error hidden text-rose-400 text-xs mt-2"></p>
+                                </div>
+                                <div class="flex items-center gap-4 pt-4">
+                                    <button type="submit" id="saveProfileBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-save"></i> <span id="saveProfileText">Deploy Changes</span>
+                                    </button>
+                                    <button type="button" onclick="loadProfile()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 px-6 py-3 rounded-xl font-semibold transition-all text-sm">Reset</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Change Password -->
+                        <div id="change-password" class="tab-content">
+                            <h3 class="text-lg font-bold text-white mb-6">Authentication Settings</h3>
+                            <form id="changePasswordForm" class="space-y-5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Current Password</label>
+                                    <div class="relative">
+                                        <input type="password" id="currentPassword" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all text-sm">
+                                        <button type="button" onclick="togglePassword('currentPassword', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                    <p id="currentPasswordError" class="validation-error hidden text-rose-400 text-xs mt-2"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">New Password</label>
+                                    <div class="relative">
+                                        <input type="password" id="newPassword" required minlength="6" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all text-sm">
+                                        <button type="button" onclick="togglePassword('newPassword', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                    <p id="newPasswordError" class="validation-error hidden text-rose-400 text-xs mt-2"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Confirm Identity</label>
+                                    <div class="relative">
+                                        <input type="password" id="confirmPassword" required minlength="6" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all text-sm">
+                                        <button type="button" onclick="togglePassword('confirmPassword', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                    <p id="confirmPasswordError" class="validation-error hidden text-rose-400 text-xs mt-2"></p>
+                                </div>
+                                <div class="pt-4">
+                                    <button type="submit" id="changePasswordBtn" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2 text-sm">
+                                        <i class="fas fa-key"></i> <span id="changePasswordText">Enforce Password</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Billing History -->
+                        <div id="transaction-history" class="tab-content">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-bold text-white">Recent Ledgers</h3>
+                                <div class="flex gap-3 items-center">
+                                    <select id="transactionFilter" onchange="filterTransactions()" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-xl px-3 py-2 outline-none">
+                                        <option value="all">All Ledgers</option>
+                                        <option value="credit">Deposits In</option>
+                                        <option value="debit">Allocated Out</option>
+                                    </select>
+                                    <button onclick="loadTransactions()" class="bg-gray-800 border border-gray-700 p-2 rounded-xl text-gray-400 hover:text-white transition-colors"><i class="fas fa-sync-alt"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div id="transactionsList" class="max-h-96 overflow-y-auto bg-gray-800/30 rounded-2xl border border-gray-800">
+                                <div class="flex flex-col items-center justify-center py-12">
+                                    <i class="fas fa-circle-notch fa-spin text-2xl text-emerald-500 mb-3"></i>
+                                    <p class="text-gray-400 text-sm">Decrypting ledgers...</p>
+                                </div>
+                            </div>
+
+                            <div id="transactionSummary" class="hidden mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                                    <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Total Loaded</p>
+                                    <p class="text-xl font-bold text-emerald-400">৳ <span id="totalCredit">0.00</span></p>
+                                </div>
+                                <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                                    <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Total Spent</p>
+                                    <p class="text-xl font-bold text-rose-400">৳ <span id="totalDebit">0.00</span></p>
+                                </div>
+                                <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                                    <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Net Flow</p>
+                                    <p class="text-xl font-bold text-blue-400">৳ <span id="netChange">0.00</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <div class="stat-item">
-                  <h4>Total Spents</h4>
-                  <div class="stat-value text-danger">
-                    ৳ <span id="totalDebit">0</span>
-                  </div>
-                </div>
-                <div class="stat-item">
-                  <h4>Net Change</h4>
-                  <div class="stat-value text-primary">
-                    ৳ <span id="netChange">0</span>
-                  </div>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
 
     <script>
-      // Data
-      let allTransactions = [];
-      let filteredTransactions = [];
+        let allTransactions = [];
+        let filteredTransactions = [];
 
-      // Mobile menu toggle
-      const mobileMenuToggle = document.getElementById("mobileMenuToggle");
-      const navLinks = document.getElementById("navLinks");
-
-      if (mobileMenuToggle) {
-        mobileMenuToggle.addEventListener("click", () => {
-          navLinks.classList.toggle("active");
-          mobileMenuToggle.innerHTML = navLinks.classList.contains("active")
-            ? '<i class="fas fa-times"></i>'
-            : '<i class="fas fa-bars"></i>';
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener("click", (e) => {
-          if (
-            !navLinks.contains(e.target) &&
-            !mobileMenuToggle.contains(e.target)
-          ) {
-            navLinks.classList.remove("active");
-            mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-          }
-        });
-      }
-
-      // logout
-      async function logout() {
-        try {
-          const res = await fetch("/api/auth/logout");
-          if (res.ok) {
-            window.location.href = "/login";
-          }
-        } catch (error) {
-          showAlert(
-            "Network error. Please check your connection and try again.",
-            "error",
-            "Connection Error",
-          );
-        }
-      }
-
-      // Show alert function
-      function showAlert(message, type = "info", title = "", duration = 5000) {
-        const container = document.getElementById("alertContainer");
-        const alertId = "alert-" + Date.now();
-
-        const alertDiv = document.createElement("div");
-        alertDiv.className = `alert alert-${type}`;
-        alertDiv.id = alertId;
-
-        // Determine icon based on type
-        let icon = "info-circle";
-        switch (type) {
-          case "success":
-            icon = "check-circle";
-            break;
-          case "error":
-            icon = "exclamation-circle";
-            break;
-          case "warning":
-            icon = "exclamation-triangle";
-            break;
-          default:
-            icon = "info-circle";
+        // UI Helpers
+        function showAlert(message, type = "info") {
+            const container = document.getElementById("alertContainer");
+            const alertId = "alert-" + Date.now();
+            const alertDiv = document.createElement("div");
+            let icon = type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle";
+            alertDiv.className = `alert ${type === "error" ? "alert-error" : "alert-success"}`;
+            alertDiv.id = alertId;
+            alertDiv.innerHTML = `<i class="fas fa-${icon} mt-1"></i><div class="flex-1 text-sm font-medium pr-8">${message}</div>`;
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 4000);
         }
 
-        alertDiv.innerHTML = `
-                <i class="fas fa-${icon} alert-icon"></i>
-                <div class="alert-content">
-                    ${title ? `<div class="alert-title">${title}</div>` : ""}
-                    <div class="alert-message">${message}</div>
-                </div>
-                <button class="alert-close" onclick="removeAlert('${alertId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
+        function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+        function togglePassword(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector("i");
+            input.type = input.type === "password" ? "text" : "password";
+            icon.className = input.type === "password" ? "fas fa-eye" : "fas fa-eye-slash";
+        }
 
-        container.appendChild(alertDiv);
+        // Tab Switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active', 'border-emerald-500', 'text-emerald-400');
+                    b.classList.add('border-transparent', 'text-gray-500');
+                });
+                btn.classList.add('active', 'border-emerald-500', 'text-emerald-400');
+                btn.classList.remove('border-transparent', 'text-gray-500');
 
-        // Auto remove after duration
-        setTimeout(() => {
-          removeAlert(alertId);
-        }, duration);
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                const target = document.getElementById(btn.dataset.tab);
+                target.classList.add('active');
 
-        return alertId;
-      }
+                if (btn.dataset.tab === "transaction-history") loadTransactions();
+            });
+        });
 
-      // Remove alert function
-      function removeAlert(alertId) {
-        const alert = document.getElementById(alertId);
-        if (alert) {
-          alert.classList.add("hiding");
-          setTimeout(() => {
-            if (alert.parentNode) {
-              alert.parentNode.removeChild(alert);
+        // Load & Save Logic
+        async function loadProfile() {
+            try {
+                const res = await fetch("/api/auth/profile");
+                if (res.ok) {
+                    const { user } = await res.json();
+                    document.getElementById("userName").textContent = user.name;
+                    document.getElementById("userEmail").textContent = user.email;
+                    document.getElementById("userUsername").textContent = user.username;
+                    document.getElementById("userBalance").textContent = user.balance.toFixed(2);
+                    document.getElementById("userAvatar").textContent = user.name.charAt(0).toUpperCase();
+                    
+                    document.getElementById("userCreatedAt").textContent = new Date(user.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+                    
+                    document.getElementById("editName").value = user.name;
+                    document.getElementById("editUsername").value = user.username;
+                    document.getElementById("editEmail").value = user.email;
+                }
+            } catch (error) { showAlert("Network error.", "error"); }
+        }
+
+        async function logout() {
+            try { if ((await fetch("/api/auth/logout")).ok) window.location.href = "/login"; } 
+            catch (error) {}
+        }
+
+        document.getElementById("editProfileForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("saveProfileBtn");
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing';
+            btn.disabled = true;
+
+            const name = document.getElementById("editName").value;
+            const username = document.getElementById("editUsername").value;
+            const email = document.getElementById("editEmail").value;
+
+            try {
+                const res = await fetch("/api/profile/update", {
+                    method: "PUT", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, username, email })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    showAlert("Identity updated successfully", "success");
+                    loadProfile();
+                } else {
+                    showAlert(result.message || "Update failed", "error");
+                }
+            } catch (err) { showAlert("Network error.", "error"); }
+            finally { btn.disabled = false; btn.innerHTML = original; }
+        });
+
+        document.getElementById("changePasswordForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const currentPassword = document.getElementById("currentPassword").value;
+            const newPassword = document.getElementById("newPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            
+            if(newPassword !== confirmPassword) {
+                showAlert("Passwords do not match.", "error"); return;
             }
-          }, 300);
+
+            const btn = document.getElementById("changePasswordBtn");
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch("/api/profile/update/password", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                if (res.ok) {
+                    showAlert("Password enforced successfully", "success");
+                    document.getElementById("changePasswordForm").reset();
+                } else {
+                    const result = await res.json();
+                    showAlert(result.message || result.error || "Password change failed", "error");
+                }
+            } catch (err) { showAlert("Network error.", "error"); }
+            finally { btn.disabled = false; btn.innerHTML = original; }
+        });
+
+        // Transactions
+        function renderTransactions() {
+            const container = document.getElementById("transactionsList");
+            if (!filteredTransactions.length) {
+                container.innerHTML = '<div class="py-12 text-center text-gray-500 text-sm">No ledger entries found.</div>';
+                return;
+            }
+            container.innerHTML = filteredTransactions.map(t => {
+                const isCredit = t.type === "credit";
+                return `
+                <div class="flex items-center gap-4 p-4 border-b border-gray-800 last:border-0 hover:bg-gray-800/50 transition-colors">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isCredit ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+                        <i class="fas ${isCredit ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold tracking-tight ${isCredit ? 'text-emerald-400' : 'text-rose-400'}">${isCredit ? '+' : '-'}৳ ${t.amount.toFixed(2)}</p>
+                        <p class="text-xs text-gray-400 truncate">${isCredit ? 'Deposit' : 'Spent'} via ${t.by || "System"}</p>
+                    </div>
+                    <div class="text-xs font-semibold text-gray-600 tracking-wider">
+                        ${new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </div>
+                </div>`;
+            }).join('');
         }
-      }
 
-      // Toggle password visibility
-      function togglePassword(inputId, button) {
-        const input = document.getElementById(inputId);
-        const icon = button.querySelector("i");
-
-        if (input.type === "password") {
-          input.type = "text";
-          icon.classList.remove("fa-eye");
-          icon.classList.add("fa-eye-slash");
-        } else {
-          input.type = "password";
-          icon.classList.remove("fa-eye-slash");
-          icon.classList.add("fa-eye");
+        async function loadTransactions() {
+            try {
+                const res = await fetch("/api/recharge/transactions?limit=50");
+                if (res.ok) {
+                    const data = await res.json();
+                    allTransactions = data.transactions || [];
+                    filteredTransactions = [...allTransactions];
+                    renderTransactions();
+                    
+                    if(allTransactions.length > 0) {
+                        document.getElementById("transactionSummary").classList.remove("hidden");
+                        let cr = 0, db = 0;
+                        allTransactions.forEach(t => t.type === 'credit' ? cr += t.amount : db += t.amount);
+                        document.getElementById("totalCredit").textContent = cr.toFixed(2);
+                        document.getElementById("totalDebit").textContent = db.toFixed(2);
+                        document.getElementById("netChange").textContent = (cr - db).toFixed(2);
+                    }
+                }
+            } catch(e) {}
         }
-      }
 
-      // Load user profile
-      async function loadProfile() {
-        try {
-          const response = await fetch("/api/auth/profile");
-
-          if (response.ok) {
-            const { user } = await response.json();
-
-            // Update profile display
-            document.getElementById("userName").textContent = user.name;
-            document.getElementById("userEmail").textContent = user.email;
-            document.getElementById("userUsername").textContent = user.username;
-            document.getElementById("userBalance").textContent =
-              user.balance.toFixed(2);
-
-            // Set avatar initial
-            const initial = user.name.charAt(0).toUpperCase();
-            document.getElementById("userAvatar").textContent = initial;
-
-            // Format date
-            const createdAt = new Date(user.createdAt);
-            document.getElementById("userCreatedAt").textContent =
-              createdAt.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              });
-
-            // Fill edit form
-            document.getElementById("editName").value = user.name;
-            document.getElementById("editUsername").value = user.username;
-            document.getElementById("editEmail").value = user.email;
-
-            // Clear any validation errors
-            clearValidationErrors();
-          } else {
-            showAlert("Failed to load profile information", "error", "Error");
-          }
-        } catch (error) {
-          console.error("Failed to load profile:", error);
-          showAlert(
-            "Network error. Please check your connection and try again.",
-            "error",
-            "Connection Error",
-          );
-        }
-      }
-
-      // Load transactions
-      async function loadTransactions() {
-        const container = document.getElementById("transactionsList");
-        container.innerHTML = `
-                <div class="loading-state">
-                    <div class="loading-spinner"></div>
-                    <div>Loading transactions...</div>
-                </div>
-            `;
-
-        try {
-          const response = await fetch("/api/recharge/transactions?limit=20");
-
-          if (response.ok) {
-            const data = await response.json();
-            allTransactions = data.transactions || [];
-            filteredTransactions = [...allTransactions];
+        function filterTransactions() {
+            const f = document.getElementById("transactionFilter").value;
+            filteredTransactions = f === "all" ? [...allTransactions] : allTransactions.filter(t => t.type === f);
             renderTransactions();
-            updateTransactionSummary();
-
-            // Show summary if there are transactions
-            if (allTransactions.length > 0) {
-              document.getElementById("transactionSummary").style.display =
-                "block";
-            } else {
-              document.getElementById("transactionSummary").style.display =
-                "none";
-            }
-          } else {
-            container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-exchange-alt"></i>
-                            <h4>No Transactions Found</h4>
-                            <p>You haven't made any transactions yet.</p>
-                        </div>
-                    `;
-            showAlert("Failed to load transaction history", "error", "Error");
-          }
-        } catch (error) {
-          console.error("Failed to load transactions:", error);
-          container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h4>Connection Error</h4>
-                        <p>Unable to load transactions. Please try again.</p>
-                    </div>
-                `;
-          showAlert(
-            "Network error. Please check your connection.",
-            "error",
-            "Connection Error",
-          );
-        }
-      }
-
-      // Filter transactions
-      function filterTransactions() {
-        const filter = document.getElementById("transactionFilter").value;
-
-        if (filter === "all") {
-          filteredTransactions = [...allTransactions];
-        } else {
-          filteredTransactions = allTransactions.filter(
-            (t) => t.type === filter,
-          );
         }
 
-        renderTransactions();
-      }
-
-      // Render transactions list
-      function renderTransactions() {
-        const container = document.getElementById("transactionsList");
-
-        if (filteredTransactions.length === 0) {
-          container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-search"></i>
-                        <h4>No Transactions</h4>
-                        <p>Try changing after make a transaction.</p>
-                    </div>
-                `;
-          return;
-        }
-
-        let html = "";
-
-        filteredTransactions.forEach((transaction) => {
-          const date = new Date(transaction.createdAt);
-          const isCredit = transaction.type === "credit";
-          const iconClass = isCredit ? "icon-credit" : "icon-debit";
-          const icon = isCredit
-            ? '<i class="fas fa-arrow-down"></i>'
-            : '<i class="fas fa-arrow-up"></i>';
-          const typeText = isCredit ? "Deposit" : "Spent";
-          const amountColor = isCredit
-            ? "color: var(--success);"
-            : "color: var(--danger);";
-          const amountSign = isCredit ? "+" : "-";
-
-          html += `
-                    <div class="transaction-item">
-                        <div class="transaction-icon ${iconClass}">
-                            ${icon}
-                        </div>
-                        <div class="transaction-details">
-                            <div class="transaction-amount" style="${amountColor}">
-                                ${amountSign}৳ ${transaction.amount.toFixed(2)}
-                            </div>
-                            <div class="transaction-meta">
-                                ${typeText} via ${transaction.by || "Unknown"}
-                            </div>
-                        </div>
-                        <div class="transaction-date">
-                            ${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                        </div>
-                    </div>
-                `;
-        });
-
-        container.innerHTML = html;
-      }
-
-      // Update transaction summary
-      function updateTransactionSummary() {
-        let totalCredit = 0;
-        let totalDebit = 0;
-
-        allTransactions.forEach((transaction) => {
-          if (transaction.type === "credit") {
-            totalCredit += transaction.amount;
-          } else {
-            totalDebit += transaction.amount;
-          }
-        });
-
-        const netChange = totalCredit - totalDebit;
-
-        document.getElementById("totalCredit").textContent =
-          totalCredit.toFixed(2);
-        document.getElementById("totalDebit").textContent =
-          totalDebit.toFixed(2);
-        document.getElementById("netChange").textContent = netChange.toFixed(2);
-      }
-
-      // Tab switching
-      document.querySelectorAll(".tab").forEach((tab) => {
-        tab.addEventListener("click", function () {
-          const tabId = this.dataset.tab;
-
-          // Update active tab
-          document.querySelectorAll(".tab").forEach((t) => {
-            t.classList.remove("active");
-          });
-          this.classList.add("active");
-
-          // Show active content
-          document.querySelectorAll(".tab-content").forEach((content) => {
-            content.classList.remove("active");
-          });
-          document.getElementById(tabId).classList.add("active");
-
-          // Load transactions when tab is opened
-          if (tabId === "transaction-history") {
-            loadTransactions();
-          }
-
-          // Close mobile menu if open
-          if (navLinks.classList.contains("active")) {
-            navLinks.classList.remove("active");
-            mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-          }
-
-          // Clear validation errors
-          clearValidationErrors();
-        });
-      });
-
-      // Clear validation errors
-      function clearValidationErrors() {
-        document.querySelectorAll(".validation-error").forEach((el) => {
-          el.style.display = "none";
-          el.textContent = "";
-        });
-
-        document.querySelectorAll(".form-control").forEach((input) => {
-          input.classList.remove("error", "success");
-        });
-      }
-
-      // Show validation error
-      function showValidationError(fieldId, message) {
-        const errorElement = document.getElementById(fieldId + "Error");
-        const inputElement = document.getElementById(fieldId);
-
-        if (errorElement && inputElement) {
-          errorElement.textContent = message;
-          errorElement.style.display = "flex";
-          inputElement.classList.add("error");
-          inputElement.classList.remove("success");
-
-          // Focus on the field with error
-          inputElement.focus();
-        }
-      }
-
-      // Clear validation error
-      function clearValidationError(fieldId) {
-        const errorElement = document.getElementById(fieldId + "Error");
-        const inputElement = document.getElementById(fieldId);
-
-        if (errorElement && inputElement) {
-          errorElement.style.display = "none";
-          inputElement.classList.remove("error");
-          inputElement.classList.add("success");
-        }
-      }
-
-      // Validate email
-      function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-      }
-
-      // Edit profile form
-      document
-        .getElementById("editProfileForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-
-          clearValidationErrors();
-
-          const name = document.getElementById("editName").value.trim();
-          const username = document.getElementById("editUsername").value.trim();
-          const email = document.getElementById("editEmail").value.trim();
-
-          let isValid = true;
-
-          // Validation
-          if (!name) {
-            showValidationError("editName", "Name is required");
-            isValid = false;
-          }
-
-          if (!username) {
-            showValidationError("editUsername", "Username is required");
-            isValid = false;
-          } else if (username.length < 3) {
-            showValidationError(
-              "editUsername",
-              "Username must be at least 3 characters",
-            );
-            isValid = false;
-          }
-
-          if (!email) {
-            showValidationError("editEmail", "Email is required");
-            isValid = false;
-          } else if (!validateEmail(email)) {
-            showValidationError(
-              "editEmail",
-              "Please enter a valid email address",
-            );
-            isValid = false;
-          }
-
-          if (!isValid) {
-            showAlert(
-              "Please fix the errors in the form",
-              "error",
-              "Validation Error",
-            );
-            return;
-          }
-
-          const btn = document.getElementById("saveProfileBtn");
-          const btnText = document.getElementById("saveProfileText");
-          const btnLoading = document.getElementById("saveProfileLoading");
-
-          btn.disabled = true;
-          btnText.style.display = "none";
-          btnLoading.style.display = "inline-block";
-
-          try {
-            const response = await fetch("/api/profile/update", {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ name, username, email }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-              showAlert(
-                "Your profile has been updated successfully!",
-                "success",
-                "Success",
-              );
-              loadProfile();
-
-              // Clear validation errors on success
-              clearValidationErrors();
-            } else {
-              const errorMessage =
-                result.message || "Update failed. Please try again.";
-
-              // Handle specific error cases
-              if (result.message && result.message.includes("email")) {
-                showValidationError(
-                  "editEmail",
-                  "This email is already in use",
-                );
-              } else if (
-                result.message &&
-                result.message.includes("username")
-              ) {
-                showValidationError(
-                  "editUsername",
-                  "This username is already taken",
-                );
-              }
-
-              showAlert(errorMessage, "error", "Update Failed");
-            }
-          } catch (error) {
-            console.error("Update error:", error);
-            showAlert(
-              "Network error. Please check your connection and try again.",
-              "error",
-              "Connection Error",
-            );
-          } finally {
-            btn.disabled = false;
-            btnText.style.display = "inline";
-            btnLoading.style.display = "none";
-          }
-        });
-
-      // Change password form
-      document
-        .getElementById("changePasswordForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-
-          clearValidationErrors();
-
-          const currentPassword =
-            document.getElementById("currentPassword").value;
-          const newPassword = document.getElementById("newPassword").value;
-          const confirmPassword =
-            document.getElementById("confirmPassword").value;
-
-          let isValid = true;
-
-          // Validation
-          if (!currentPassword) {
-            showValidationError(
-              "currentPassword",
-              "Current password is required",
-            );
-            isValid = false;
-          }
-
-          if (!newPassword) {
-            showValidationError("newPassword", "New password is required");
-            isValid = false;
-          } else if (newPassword.length < 6) {
-            showValidationError(
-              "newPassword",
-              "Password must be at least 6 characters",
-            );
-            isValid = false;
-          }
-
-          if (!confirmPassword) {
-            showValidationError(
-              "confirmPassword",
-              "Please confirm your new password",
-            );
-            isValid = false;
-          } else if (newPassword !== confirmPassword) {
-            showValidationError("confirmPassword", "Passwords do not match");
-            isValid = false;
-          }
-
-          if (!isValid) {
-            showAlert(
-              "Please fix the errors in the form",
-              "error",
-              "Validation Error",
-            );
-            return;
-          }
-
-          const btn = document.getElementById("changePasswordBtn");
-          const btnText = document.getElementById("changePasswordText");
-          const btnLoading = document.getElementById("changePasswordLoading");
-
-          btn.disabled = true;
-          btnText.style.display = "none";
-          btnLoading.style.display = "inline-block";
-
-          try {
-            const response = await fetch("/api/profile/update/password", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ currentPassword, newPassword }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-              showAlert(
-                "Your password has been changed successfully!",
-                "success",
-                "Success",
-              );
-              document.getElementById("changePasswordForm").reset();
-
-              // Clear validation errors on success
-              clearValidationErrors();
-
-              // Hide password
-              document
-                .querySelectorAll(".toggle-password i")
-                .forEach((icon) => {
-                  icon.classList.remove("fa-eye-slash");
-                  icon.classList.add("fa-eye");
-                });
-              document
-                .querySelectorAll('#changePasswordForm input[type="text"]')
-                .forEach((input) => {
-                  input.type = "password";
-                });
-            } else {
-              const errorMessage =
-                result.error ||
-                result.message ||
-                "Password change failed. Please try again.";
-
-              // Handle specific error cases
-              if (
-                errorMessage.includes("current password") ||
-                errorMessage.includes("Current password")
-              ) {
-                showValidationError(
-                  "currentPassword",
-                  "Incorrect current password",
-                );
-              }
-
-              showAlert(errorMessage, "error", "Password Change Failed");
-            }
-          } catch (error) {
-            console.error("Password change error:", error);
-            showAlert(
-              "Network error. Please check your connection and try again.",
-              "error",
-              "Connection Error",
-            );
-          } finally {
-            btn.disabled = false;
-            btnText.style.display = "inline";
-            btnLoading.style.display = "none";
-          }
-        });
-
-      // Real-time validation for form fields
-      document.querySelectorAll("#editProfileForm input").forEach((input) => {
-        input.addEventListener("input", function () {
-          const fieldId = this.id;
-          const value = this.value.trim();
-
-          clearValidationError(fieldId);
-
-          // Field-specific validation
-          if (fieldId === "editEmail" && value && !validateEmail(value)) {
-            showValidationError(fieldId, "Please enter a valid email address");
-          } else if (fieldId === "editUsername" && value && value.length < 3) {
-            showValidationError(
-              fieldId,
-              "Username must be at least 3 characters",
-            );
-          }
-        });
-
-        input.addEventListener("blur", function () {
-          const fieldId = this.id;
-          const value = this.value.trim();
-
-          if (value) {
-            if (!this.classList.contains("error")) {
-              this.classList.add("success");
-            }
-          }
-        });
-      });
-
-      // Password validation on blur
-      document
-        .querySelectorAll("#changePasswordForm input")
-        .forEach((input) => {
-          input.addEventListener("blur", function () {
-            const fieldId = this.id;
-            const value = this.value;
-
-            if (fieldId === "newPassword" && value && value.length < 6) {
-              showValidationError(
-                fieldId,
-                "Password must be at least 6 characters",
-              );
-            } else if (fieldId === "confirmPassword" && value) {
-              const newPassword = document.getElementById("newPassword").value;
-              if (value !== newPassword) {
-                showValidationError(fieldId, "Passwords do not match");
-              }
-            }
-          });
-        });
-
-      // Reset profile form
-      function resetProfileForm() {
-        clearValidationErrors();
+        // Init
         loadProfile();
-        showAlert(
-          "Form has been reset to original values",
-          "info",
-          "Form Reset",
-        );
-      }
-
-      // Handle page visibility
-      document.addEventListener("visibilitychange", function () {
-        if (!document.hidden) {
-          // Reload data when page becomes visible again
-          loadProfile();
-        }
-      });
+        document.addEventListener("visibilitychange", () => { if (!document.hidden) loadProfile(); });
     </script>
-  </body>
+</body>
 </html>

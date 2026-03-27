@@ -33,10 +33,9 @@ export async function register(req, res) {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    const user = User.create({ name, username, email, password });
+    const user = await User.create({ name, username, email, password });
 
     //create jwt token and send as cookie
-
     const token = generateToken(user._id);
     return res
       .cookie("token", token, {
@@ -102,11 +101,6 @@ export async function me(req, res) {
 }
 
 export async function logout(req, res) {
-  if (!req.user) {
-    return res.status(400).json({ error: "Not logged in" });
-  }
-  return res
-    .clearCookie("token")
-    .status(200)
-    .json({ message: "User logged out successfully" });
+  res.clearCookie("token");
+  return res.redirect("/");
 }

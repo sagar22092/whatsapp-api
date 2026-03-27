@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaFastApi | Message Inbox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #030712; color: #f3f4f6; }
+        .glass-panel { background: rgba(17,24,39,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); }
+        .msg-bubble-in  { background: #1f2937; border: 1px solid #374151; border-radius: 0 16px 16px 16px; }
+        .msg-bubble-out { background: #1e3a5f; border: 1px solid #1d4ed8; border-radius: 16px 0 16px 16px; }
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #374151; border-radius: 9999px; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #1f2937; color: white; padding: 14px 18px; border-radius: 12px; z-index: 1000; transition: transform 0.3s; transform: translateY(150%); border: 1px solid rgba(255,255,255,0.1); }
+        .toast.show { transform: translateY(0); }
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation injected by /js/nav.js -->
+    <script src="/js/nav.js"></script>
+
+    <div class="pb-8 max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <script>injectNav('inbox');</script>
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                    <i class="fas fa-inbox text-emerald-400"></i> Message Inbox
+                    <span id="unreadBadge" class="hidden bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"></span>
+                </h1>
+                <p class="text-gray-400 text-sm mt-1">All incoming WhatsApp messages across your sessions.</p>
+            </div>
+            <div class="flex gap-3 items-center">
+                <select id="sessionFilter" class="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <option value="">All Sessions</option>
+                </select>
+                <select id="typeFilter" class="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <option value="">All Types</option>
+                    <option value="text">Text</option>
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                    <option value="audio">Audio</option>
+                    <option value="document">Document</option>
+                </select>
+                <button onclick="loadInbox()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="glass-panel rounded-xl p-4">
+                <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Total Received</p>
+                <p class="text-2xl font-bold text-white" id="statTotal">–</p>
+            </div>
+            <div class="glass-panel rounded-xl p-4">
+                <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Today</p>
+                <p class="text-2xl font-bold text-emerald-400" id="statToday">–</p>
+            </div>
+            <div class="glass-panel rounded-xl p-4">
+                <p class="text-xs text-gray-500 uppercase font-semibold mb-1">With Media</p>
+                <p class="text-2xl font-bold text-indigo-400" id="statMedia">–</p>
+            </div>
+            <div class="glass-panel rounded-xl p-4">
+                <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Auto Replied</p>
+                <p class="text-2xl font-bold text-amber-400">–</p>
+            </div>
+        </div>
+
+        <!-- Messages List -->
+        <div class="glass-panel rounded-2xl overflow-hidden">
+            <div class="p-4 border-b border-gray-800 flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></div>
+                <span class="text-sm font-semibold text-gray-300">Live Inbox</span>
+                <span class="text-xs text-gray-500 ml-auto" id="lastRefresh">–</span>
+            </div>
+            
+            <div id="inboxList" class="divide-y divide-gray-800/50 max-h-[640px] overflow-y-auto scrollbar-thin">
+                <div class="py-20 text-center text-gray-500">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-4"></i>
+                    <p>Loading messages...</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="p-4 border-t border-gray-800 flex justify-between items-center">
+                <span class="text-xs text-gray-500" id="paginationInfo">–</span>
+                <div class="flex gap-2">
+                    <button id="prevBtn" onclick="changePage(-1)" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-sm text-white rounded-lg border border-gray-700 transition disabled:opacity-40">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button id="nextBtn" onclick="changePage(1)" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-sm text-white rounded-lg border border-gray-700 transition disabled:opacity-40">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast min-w-[220px]">
+        <strong id="toastTitle" class="text-sm text-emerald-400">Notification</strong>
+        <p id="toastMsg" class="text-xs text-gray-300 mt-0.5"></p>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        const LIMIT = 30;
+
+        function showToast(title, msg, err=false) {
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastTitle').className = `text-sm ${err ? 'text-rose-400' : 'text-emerald-400'}`;
+            document.getElementById('toastMsg').textContent = msg;
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function getTypeIcon(type) {
+            const map = { image:'fa-image text-indigo-400', video:'fa-video text-purple-400', audio:'fa-microphone text-amber-400', document:'fa-file text-blue-400', sticker:'fa-sticky-note text-pink-400' };
+            return map[type] ? `<i class="fas ${map[type]}"></i>` : `<i class="fas fa-comment text-gray-400"></i>`;
+        }
+
+        function timeAgo(dateStr) {
+            const diff = Date.now() - new Date(dateStr).getTime();
+            const s = Math.floor(diff / 1000);
+            if (s < 60) return `${s}s ago`;
+            const m = Math.floor(s / 60);
+            if (m < 60) return `${m}m ago`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `${h}h ago`;
+            return new Date(dateStr).toLocaleDateString();
+        }
+
+        async function loadSessions() {
+            try {
+                const res = await fetch('/api/session/list');
+                const data = await res.json();
+                const sel = document.getElementById('sessionFilter');
+                if (data.sessions) {
+                    data.sessions.forEach(s => {
+                        sel.innerHTML += `<option value="${s._id}">${s._id.slice(-6)} (${s.status})</option>`;
+                    });
+                }
+            } catch(e) {}
+        }
+
+        async function loadInbox() {
+            const sessionId = document.getElementById('sessionFilter').value;
+            const msgType   = document.getElementById('typeFilter').value;
+
+            let url = `/api/session/inbox?page=${currentPage}&limit=${LIMIT}`;
+            if (sessionId) url += `&session=${sessionId}`;
+            if (msgType)   url += `&msgType=${msgType}`;
+
+            try {
+                const res  = await fetch(url);
+                const data = await res.json();
+                
+                document.getElementById('lastRefresh').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+
+                if (!data.success) {
+                    document.getElementById('inboxList').innerHTML = `<div class="py-16 text-center text-rose-400"><i class="fas fa-exclamation-circle text-2xl mb-3"></i><p>${data.error || 'Failed to load'}</p></div>`;
+                    return;
+                }
+
+                const msgs = data.messages;
+                totalPages = Math.ceil(data.total / LIMIT);
+
+                document.getElementById('statTotal').textContent = data.total;
+                document.getElementById('paginationInfo').textContent = `Page ${currentPage} of ${totalPages} · ${data.total} total messages`;
+
+                // Count today
+                const today = msgs.filter(m => new Date(m.createdAt).toDateString() === new Date().toDateString()).length;
+                document.getElementById('statToday').textContent = today;
+                
+                // Count with media
+                const withMedia = msgs.filter(m => m.mediaUrl).length;
+                document.getElementById('statMedia').textContent = withMedia;
+
+                if (msgs.length === 0) {
+                    document.getElementById('inboxList').innerHTML = `
+                        <div class="py-20 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-4"></i>
+                            <p class="font-medium">No messages yet</p>
+                            <p class="text-xs mt-1">Incoming WhatsApp messages will appear here automatically.</p>
+                        </div>`;
+                    return;
+                }
+
+                document.getElementById('inboxList').innerHTML = msgs.map(m => `
+                    <div class="p-4 hover:bg-gray-800/30 transition flex items-start gap-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-400 font-bold text-sm">
+                            ${m.fromNumber ? m.fromNumber.slice(-2) : '?'}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-sm font-semibold text-white">+${m.fromNumber || 'Unknown'}</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700">${getTypeIcon(m.msgType)} ${m.msgType}</span>
+                                <span class="text-xs text-gray-500 ml-auto flex-shrink-0">${timeAgo(m.createdAt)}</span>
+                            </div>
+                            <p class="text-sm text-gray-300 truncate">${m.body || '<span class="text-gray-500 italic">Media message</span>'}</p>
+                            ${m.mediaUrl ? `
+                            <div class="mt-2">
+                                ${m.msgType === 'image' 
+                                    ? `<img src="${m.mediaUrl}" alt="media" class="h-24 rounded-lg object-cover border border-gray-700 cursor-pointer" onclick="window.open('${m.mediaUrl}','_blank')">`
+                                    : `<a href="${m.mediaUrl}" target="_blank" class="text-xs text-indigo-400 hover:underline"><i class="fas fa-paperclip mr-1"></i>View attachment</a>`
+                                }
+                            </div>` : ''}
+                            <p class="text-[11px] text-gray-600 mt-1">Session: ${m.session?._id?.slice(-6) || '–'}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch(err) {
+                document.getElementById('inboxList').innerHTML = `<div class="py-16 text-center text-rose-400"><p>Network error: ${err.message}</p></div>`;
+            }
+        }
+
+        function changePage(dir) {
+            const newPage = currentPage + dir;
+            if (newPage < 1 || newPage > totalPages) return;
+            currentPage = newPage;
+            loadInbox();
+            document.getElementById('inboxList').scrollTop = 0;
+        }
+
+        loadSessions();
+        loadInbox();
+        setInterval(loadInbox, 10000); // auto-refresh every 10s
+    </script>
+</body>
+</html>

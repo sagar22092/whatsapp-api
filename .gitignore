@@ -42,3 +42,18 @@ next-env.d.ts
 
 
 /sessions
+
+# temp utility scripts
+users_data.json
+DB_USERS.txt
+user_list_utf8.txt
+user_list_output.txt
+temp.log
+
+# utility/admin scripts (not for production)
+compact_users.js
+show_users.js
+list_and_reset_users.js
+manage_users.js
+seed_plans.js
+find_admin.js
