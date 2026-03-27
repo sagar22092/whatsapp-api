@@ -100,9 +100,19 @@ app.use("/api/admin", authenticate, isAdmin, adminRouter);
 import { getActiveAnnouncements } from "./controllers/adminController.js";
 app.get("/api/announcements", authenticate, getActiveAnnouncements);
 
-app.get("/", authenticate, (req, res) => {
-  if (!req.user) return res.redirect("/login");
-  if (req.user.role === "admin") return res.redirect("/admin");
+app.get("/", async (req, res) => {
+  // If logged in → redirect to dashboard; guests → show landing page
+  const token = req.cookies?.token;
+  if (token) {
+    try {
+      const { default: jwt } = await import("jsonwebtoken");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded?.role === "admin") return res.redirect("/admin");
+      return res.redirect("/sessions");
+    } catch (_) {
+      // Invalid/expired token — show landing page
+    }
+  }
   res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 app.get("/doc", (req, res) =>
