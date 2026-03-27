@@ -25,7 +25,7 @@ const rechargeSchema = new mongoose.Schema(
     number: {
       type: String,
       required: true,
-      match: /^01[3-9]\d{8}$/, // Bangladeshi mobile number validation
+      // Accepts BD mobile numbers OR bKash-PGW (automated gateway)
     },
     method: {
       type: String,
@@ -41,7 +41,7 @@ const rechargeSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "approved", "rejected", "completed", "failed"],
       default: "pending",
       index: true,
     },

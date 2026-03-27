@@ -106,6 +106,8 @@ export async function me(req, res) {
       bKash: {
         isActive: settings?.paymentGateway?.bKash?.isActive || false,
         username: settings?.paymentGateway?.bKash?.username || "",
+        // isAutomated = true when full API credentials are present
+        isAutomated: !!(settings?.paymentGateway?.bKash?.appKey && settings?.paymentGateway?.bKash?.appSecret),
       }
     }
   };

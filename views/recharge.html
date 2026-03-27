@@ -114,25 +114,36 @@
                             </div>
                         </div>
 
-                        <div class="space-y-2">
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Sender bKash No.</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500"><i class="fas fa-phone-alt"></i></div>
-                                <input type="tel" id="bKashNumber" required pattern="01[3-9]\d{8}" placeholder="01XXXXXXXXX" class="w-full bg-gray-800 border-2 border-gray-700 text-white font-mono rounded-xl pl-12 pr-4 py-3 focus:ring-0 focus:border-pink-500 outline-none transition-all placeholder-gray-600">
+                        <!-- MANUAL fields – shown only when automated gateway NOT configured -->
+                        <div id="manualFields" class="space-y-4 hidden">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Sender bKash No.</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500"><i class="fas fa-phone-alt"></i></div>
+                                    <input type="tel" id="bKashNumber" pattern="01[3-9]\d{8}" placeholder="01XXXXXXXXX" class="w-full bg-gray-800 border-2 border-gray-700 text-white font-mono rounded-xl pl-12 pr-4 py-3 focus:ring-0 focus:border-pink-500 outline-none transition-all placeholder-gray-600">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Transaction ID (TrxID)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500"><i class="fas fa-barcode"></i></div>
+                                    <input type="text" id="transactionId" placeholder="Ex: 9B2XXXXXXX" class="w-full bg-gray-800 border-2 border-gray-700 text-white font-mono uppercase rounded-xl pl-12 pr-4 py-3 focus:ring-0 focus:border-pink-500 outline-none transition-all placeholder-gray-600 tracking-widest">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="space-y-2">
-                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Transaction ID (TrxID)</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500"><i class="fas fa-barcode"></i></div>
-                                <input type="text" id="transactionId" required placeholder="Ex: 9B2XXXXXXX" class="w-full bg-gray-800 border-2 border-gray-700 text-white font-mono uppercase rounded-xl pl-12 pr-4 py-3 focus:ring-0 focus:border-pink-500 outline-none transition-all placeholder-gray-600 tracking-widest">
+                        <!-- AUTOMATED bKash PGW info badge -->
+                        <div id="automatedBadge" class="hidden bg-pink-500/10 border border-pink-500/30 rounded-xl px-4 py-3 flex items-center gap-3">
+                            <i class="fas fa-bolt text-pink-400 text-lg"></i>
+                            <div>
+                                <p class="text-white text-sm font-bold">Automated bKash Gateway</p>
+                                <p class="text-gray-400 text-xs">You will be redirected to bKash secure page to complete payment.</p>
                             </div>
                         </div>
 
                         <div class="pt-4 space-y-3">
                             <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white px-6 py-4 rounded-xl font-bold transition-all shadow-lg shadow-pink-500/25 flex justify-center items-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                                <i class="fas fa-paper-plane"></i> <span id="btnText">Verify & Submit</span>
+                                <i class="fas fa-paper-plane" id="btnIcon"></i> <span id="btnText">Verify & Submit</span>
                                 <i id="btnLoading" class="fas fa-circle-notch fa-spin hidden"></i>
                             </button>
                             <button type="button" onclick="window.location.href='/recharge/history'" class="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white px-6 py-3 rounded-xl font-semibold transition-all flex justify-center items-center gap-2 text-sm">
@@ -177,14 +188,17 @@
       </div>
     </div>
 
-    <!-- Script matching exactly original logic -->
+    <!-- Script -->
     <script>
+      // Global state: is bKash Automated PGW active?
+      let IS_AUTOMATED = false;
+
       function showAlert(message, type) {
         const ad = document.getElementById("alertMessage");
         const icon = type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle";
         ad.className = `alert-container block`;
-        ad.innerHTML = `<div class="alert ${type === "error" ? 'alert-error' : 'alert-success'} mx-auto max-w-sm shadow-2xl relative"><i class="fas fa-${icon}"></i><span class="font-medium text-sm flex-1">${message}</span></div>`;
-        setTimeout(() => { ad.classList.remove('block'); ad.classList.add('hidden'); }, 4000);
+        ad.innerHTML = `<div class="alert ${type === "error" ? 'alert-error' : type === 'info' ? 'alert-info' : 'alert-success'} mx-auto max-w-sm shadow-2xl relative"><i class="fas fa-${icon}"></i><span class="font-medium text-sm flex-1">${message}</span></div>`;
+        setTimeout(() => { ad.classList.remove('block'); ad.classList.add('hidden'); }, 5000);
       }
 
       async function loadUserInfo() {
@@ -206,28 +220,41 @@
             const bal = data.user.balance?.toFixed(2) || "0.00";
             document.getElementById("currentBalance").textContent = bal;
             if(document.getElementById("currentBalanceMobile")) document.getElementById("currentBalanceMobile").textContent = bal;
-            
             document.getElementById("balanceTimestamp").textContent = `Sync: ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-            
             const balNode = document.getElementById("currentBalance");
             balNode.parentElement.classList.add("success-pulse");
             setTimeout(() => balNode.parentElement.classList.remove("success-pulse"), 500);
 
-            // Fetch settings for bKash gateway
+            // Configure the bKash UI based on settings
             if (data.settings && data.settings.paymentGateway && data.settings.paymentGateway.bKash) {
                 const bkash = data.settings.paymentGateway.bKash;
                 const bkashNum = bkash.username || "Not Configured";
-                document.getElementById('bkashNumberDisplay1').textContent = bkashNum;
-                document.getElementById('bkashNumberDisplay2').textContent = bkashNum;
-                document.getElementById('bkashNumberDisplay3').textContent = bkashNum;
+                if(document.getElementById('bkashNumberDisplay1')) document.getElementById('bkashNumberDisplay1').textContent = bkashNum;
+                if(document.getElementById('bkashNumberDisplay2')) document.getElementById('bkashNumberDisplay2').textContent = bkashNum;
+                if(document.getElementById('bkashNumberDisplay3')) document.getElementById('bkashNumberDisplay3').textContent = bkashNum;
 
                 if (!bkash.isActive) {
+                    // Gateway disabled
                     const sb = document.getElementById('submitBtn');
                     sb.disabled = true;
                     document.getElementById('btnText').textContent = "bKash Gateway Disabled";
+                    document.getElementById('btnIcon').className = "fas fa-ban";
                     sb.classList.replace('from-pink-600', 'from-gray-600');
                     sb.classList.replace('to-rose-600', 'to-gray-700');
                     showAlert("bKash payment gateway is currently disabled by administrators.", "info");
+                } else if (bkash.isAutomated) {
+                    // Automated PGW mode
+                    IS_AUTOMATED = true;
+                    document.getElementById('manualFields').classList.add('hidden');
+                    document.getElementById('automatedBadge').classList.remove('hidden');
+                    document.getElementById('automatedBadge').classList.add('flex');
+                    document.getElementById('btnText').textContent = "Pay with bKash";
+                    document.getElementById('btnIcon').className = "fas fa-bolt";
+                } else {
+                    // Manual mode (gateway active but no API key)
+                    IS_AUTOMATED = false;
+                    document.getElementById('manualFields').classList.remove('hidden');
+                    document.getElementById('automatedBadge').classList.add('hidden');
                 }
             }
 
@@ -251,46 +278,59 @@
           else this.classList.remove("border-rose-500");
       });
 
-      document.getElementById("bKashNumber").addEventListener("input", function() {
-          if (!/^01[3-9]\d{0,8}$/.test(this.value)) this.classList.add("border-rose-500");
-          else this.classList.remove("border-rose-500");
-      });
-
       document.getElementById("rechargeForm").addEventListener("submit", async function(e) {
           e.preventDefault();
           const amount = document.getElementById("amount").value;
-          const bKashNumber = document.getElementById("bKashNumber").value;
-          const transactionId = document.getElementById("transactionId").value.trim().toUpperCase();
 
           document.querySelectorAll("input").forEach(i => i.classList.remove("border-rose-500"));
-          let isValid = true;
 
           if (!amount || amount < 10 || amount > 100000) {
               document.getElementById("amount").classList.add("border-rose-500");
-              showAlert("Amount must be between ৳10 and ৳100,000", "error"); isValid = false;
+              showAlert("Amount must be between ৳10 and ৳100,000", "error"); return;
           }
-          if (!/^01[3-9]\d{8}$/.test(bKashNumber)) {
-              document.getElementById("bKashNumber").classList.add("border-rose-500");
-              showAlert("Enter a valid 11-digit bKash number", "error"); isValid = false;
-          }
-          if (!transactionId || transactionId.length < 5) {
-              document.getElementById("transactionId").classList.add("border-rose-500");
-              showAlert("Enter a valid TrxID", "error"); isValid = false;
-          }
-
-          if (!isValid) return;
 
           const submitBtn = document.getElementById("submitBtn");
           const btnText = document.getElementById("btnText");
           const btnLoading = document.getElementById("btnLoading");
-          const btnIcon = submitBtn.querySelector("i.fa-paper-plane");
-          
+          const btnIcon = document.getElementById("btnIcon");
           submitBtn.disabled = true;
           btnText.style.display = "none";
           btnIcon.style.display = "none";
           btnLoading.style.display = "inline-block";
 
           try {
+            if (IS_AUTOMATED) {
+              // ── AUTOMATED bKash PGW ───────────────────────────────────────
+              const res = await fetch("/api/recharge/bkash/create", {
+                  method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
+                  body: JSON.stringify({ amount: parseFloat(amount) })
+              });
+              const result = await res.json();
+              if (res.ok && result.bkashURL) {
+                  // Redirect user to bKash checkout page
+                  window.location.href = result.bkashURL;
+              } else {
+                  showAlert(result.error || "Could not initiate bKash payment", "error");
+                  submitBtn.disabled = false;
+                  btnText.style.display = "inline";
+                  btnIcon.style.display = "inline-block";
+                  btnLoading.style.display = "none";
+              }
+            } else {
+              // ── MANUAL bKash TrxID ────────────────────────────────────────
+              const bKashNumber = document.getElementById("bKashNumber").value;
+              const transactionId = document.getElementById("transactionId").value.trim().toUpperCase();
+              let isValid = true;
+              if (!/^01[3-9]\d{8}$/.test(bKashNumber)) {
+                  document.getElementById("bKashNumber").classList.add("border-rose-500");
+                  showAlert("Enter a valid 11-digit bKash number", "error"); isValid = false;
+              }
+              if (!transactionId || transactionId.length < 5) {
+                  document.getElementById("transactionId").classList.add("border-rose-500");
+                  showAlert("Enter a valid TrxID", "error"); isValid = false;
+              }
+              if (!isValid) { submitBtn.disabled = false; btnText.style.display = "inline"; btnIcon.style.display = "inline-block"; btnLoading.style.display = "none"; return; }
+
               const res = await fetch("/api/recharge/submit", {
                   method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
                   body: JSON.stringify({ amount: parseFloat(amount), bKashNumber, transactionId })
@@ -298,7 +338,7 @@
               const result = await res.json();
 
               if (res.ok) {
-                  showAlert(result.message || "Recharge successfully routed!", "success");
+                  showAlert(result.message || "Recharge submitted for approval!", "success");
                   document.getElementById("receiptTransId").textContent = transactionId;
                   document.getElementById("receiptAmount").textContent = `৳ ${parseFloat(amount).toFixed(2)}`;
                   document.getElementById("receiptBkash").textContent = bKashNumber;
@@ -306,36 +346,60 @@
                   document.getElementById("receiptRef").textContent = result.data?.recharge?.id || "N/A";
                   document.getElementById("receiptModal").classList.remove("hidden");
                   document.getElementById("receiptModal").classList.add("flex");
-                  
                   document.getElementById("rechargeForm").reset();
                   await loadUserInfo();
               } else {
                   let err = "Submission failed";
                   if (result.error) err = result.error;
-                  else if (res.status === 401) { err = "Please login"; setTimeout(()=>window.location.href="/login", 2000); }
-                  else if (res.status === 400) err = "Invalid data inputs.";
+                  else if (res.status === 401) { err = "Please login"; setTimeout(() => window.location.href = "/login", 2000); }
                   showAlert(err, "error");
               }
-          } catch (error) { showAlert("Network error.", "error"); }
-          finally {
+
               submitBtn.disabled = false;
               btnText.style.display = "inline";
               btnIcon.style.display = "inline-block";
               btnLoading.style.display = "none";
+            }
+          } catch (error) { 
+            showAlert("Network error.", "error");
+            submitBtn.disabled = false;
+            btnText.style.display = "inline";
+            btnIcon.style.display = "inline-block";
+            btnLoading.style.display = "none";
           }
       });
+
+      // Handle bKash redirect callback on page load (?bkash_status=success/failed)
+      function handleBkashCallback() {
+        const params = new URLSearchParams(window.location.search);
+        const status = params.get("bkash_status");
+        if (!status) return;
+
+        // Clean URL
+        history.replaceState({}, document.title, window.location.pathname);
+
+        if (status === "success") {
+          const trxID = params.get("trxID") || "N/A";
+          const amount = params.get("amount") || "?";
+          document.getElementById("receiptTransId").textContent = trxID;
+          document.getElementById("receiptAmount").textContent = `৳ ${parseFloat(amount).toFixed(2)}`;
+          document.getElementById("receiptBkash").textContent = "bKash (Automated)";
+          document.getElementById("receiptDate").textContent = new Date().toLocaleString();
+          document.getElementById("receiptRef").textContent = trxID;
+          document.getElementById("receiptModal").classList.remove("hidden");
+          document.getElementById("receiptModal").classList.add("flex");
+          showAlert("Payment successful! Balance updated.", "success");
+        } else {
+          const msg = params.get("msg") || "Payment failed or cancelled.";
+          showAlert(decodeURIComponent(msg), "error");
+        }
+      }
 
       document.addEventListener("DOMContentLoaded", async function () {
           await loadUserInfo();
           document.getElementById("amount").value = 100;
           document.querySelector('[data-amount="100"]').classList.add("bg-pink-600", "border-pink-500", "text-white");
-          
-          document.getElementById("amount").addEventListener("focus", function() {
-              if(!this.value) {
-                  this.value="100";
-                  document.querySelector('[data-amount="100"]').click();
-              }
-          });
+          handleBkashCallback();
           setInterval(loadUserInfo, 30000);
       });
     </script>
